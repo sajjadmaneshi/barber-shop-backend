@@ -11,7 +11,7 @@ import {
 import { AddUserDto } from './dto/add-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
-import { User } from './dto/user.entity';
+import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Controller('/user')
