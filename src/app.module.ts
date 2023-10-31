@@ -1,22 +1,26 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './controllers/user/user.entity';
+
+import ormConfig from './config/orm.config';
+
+import { UserModule } from './controllers/user/user.module';
+import ormConfigProd from './config/orm.config.prod';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: '127.0.0.1',
-      port: 5400,
-      username: 'postgres',
-      password: 'sajjad1234',
-      database: 'postgres',
-      entities: [User],
-      synchronize: true, // Be careful with this in production!
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [ormConfig],
+      expandVariables: true,
     }),
-    TypeOrmModule.forFeature([Event]),
+    TypeOrmModule.forRootAsync({
+      useFactory:
+        process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
+    }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,7 +3,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
@@ -18,7 +17,10 @@ export class User {
   @Column()
   isRegistered: boolean;
 
-  @ManyToOne(() => UserRole, { eager: true })
+  @ManyToOne(() => UserRole, (userRole) => userRole.users, {
+    nullable: false,
+    eager: true,
+  })
   @JoinColumn()
   role: UserRole;
 }

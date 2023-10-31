@@ -4,6 +4,8 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -16,6 +18,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Controller('/user')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
+
   constructor(
     @InjectRepository(User)
     private readonly repository: Repository<User>,
@@ -23,16 +27,23 @@ export class UserController {
 
   @Get()
   async findAll() {
-    return this.repository.find();
+    this.logger.log('hit the find All route');
+    const users = await this.repository.find();
+    this.logger.debug(`found ${users.length}`);
+    return users;
   }
 
   @Get(':id')
   async findOne(@Param('id') id: number) {
-    return this.repository.findOne({
+    const user = this.repository.findOne({
       where: {
         id: id,
       },
     });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user;
   }
 
   @Post()
