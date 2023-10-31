@@ -15,6 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserService } from './user.service';
 
 @Controller('/user')
 export class UserController {
@@ -23,6 +24,7 @@ export class UserController {
   constructor(
     @InjectRepository(User)
     private readonly repository: Repository<User>,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
@@ -35,11 +37,7 @@ export class UserController {
 
   @Get(':id')
   async findOne(@Param('id') id: number) {
-    const user = this.repository.findOne({
-      where: {
-        id: id,
-      },
-    });
+    const user = this.userService.getUser(id);
     if (!user) {
       throw new NotFoundException();
     }
