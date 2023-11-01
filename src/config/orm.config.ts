@@ -2,6 +2,8 @@ import { User } from '../controllers/user/user.entity';
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UserRole } from '../controllers/user/user-role.entity';
+import { Profile } from '../controllers/user/profile.entity';
+import { Document } from '../controllers/file/document.entity';
 
 export default registerAs(
   'orm.config',
@@ -12,7 +14,7 @@ export default registerAs(
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    entities: [User, UserRole],
+    entities: [User, UserRole, Profile, Document],
     synchronize: true, // Be careful with this in production!
   }),
 );

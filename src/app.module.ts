@@ -8,6 +8,7 @@ import ormConfig from './config/orm.config';
 
 import { UserModule } from './controllers/user/user.module';
 import ormConfigProd from './config/orm.config.prod';
+import { DocumentModule } from './controllers/file/document.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import ormConfigProd from './config/orm.config.prod';
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     }),
     UserModule,
+    DocumentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

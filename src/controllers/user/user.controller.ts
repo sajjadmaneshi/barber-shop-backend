@@ -52,7 +52,7 @@ export class UserController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() input: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() input: UpdateUserDto) {
     const user = await this.repository.findOne({ where: { id: id } });
     return await this.repository.save({
       ...user,
@@ -62,7 +62,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id: number) {
+  async remove(@Param('id') id: string) {
     const user = await this.repository.findOne({ where: { id: id } });
     await this.repository.remove(user);
   }

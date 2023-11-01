@@ -1,11 +1,15 @@
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
-  constructor(private readonly _userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly _userRepository: Repository<User>,
+  ) {}
 
   private getUsersBaseQuery() {
     return this._userRepository.createQueryBuilder('e').orderBy('e.id', 'DESC');

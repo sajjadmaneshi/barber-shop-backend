@@ -1,18 +1,23 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserRole } from './user-role.entity';
+import { Profile } from './profile.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn('uuid', { generated: true })
+  id: string;
+
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
   @Column({ length: 11 })
   mobileNumber: string;
+
+  @Column(() => Profile)
+  profile: Profile;
 
   @Column()
   isRegistered: boolean;
