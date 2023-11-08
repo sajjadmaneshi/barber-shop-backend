@@ -5,13 +5,9 @@ import { User } from './user.entity';
 import { UserRole } from './user-role.entity';
 import { UserService } from './user.service';
 import { Profile } from './profile.entity';
-import { DocumentModule } from '../file/document.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserRole, User, Profile]),
-    DocumentModule,
-  ],
+  imports: [TypeOrmModule.forFeature([UserRole, User, Profile])],
   providers: [UserService],
   controllers: [UserController],
 })

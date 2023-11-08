@@ -10,8 +10,8 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { AddUserDto } from './dto/add-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { AddUserDto } from '../../auth/input/dto/add-user.dto';
+import { UpdateUserDto } from '../../auth/input/dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -36,7 +36,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: string) {
     const user = this.userService.getUser(id);
     if (!user) {
       throw new NotFoundException();

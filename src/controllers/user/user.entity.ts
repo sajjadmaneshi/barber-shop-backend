@@ -1,25 +1,30 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserRole } from './user-role.entity';
 import { Profile } from './profile.entity';
 
 @Entity()
 export class User {
-  @PrimaryColumn('uuid', { generated: true })
+  @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
 
   @Column({ length: 11 })
   mobileNumber: string;
 
-  @Column(() => Profile)
+  @OneToOne(() => Profile, { nullable: true })
+  @JoinColumn()
   profile: Profile;
 
   @Column()
+  otp: string;
+
+  @Column({ default: false })
   isRegistered: boolean;
 
   @ManyToOne(() => UserRole, (userRole) => userRole.users, {

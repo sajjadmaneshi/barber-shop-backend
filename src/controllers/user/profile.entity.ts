@@ -1,11 +1,11 @@
-import { Column, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Document } from '../file/document.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Gender {
   male,
   female,
 }
 
+@Entity()
 export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,10 +15,6 @@ export class Profile {
 
   @Column()
   lastname: string;
-
-  @OneToOne(() => Document)
-  @JoinColumn()
-  avatar: Document;
 
   @Column()
   gender: Gender;
