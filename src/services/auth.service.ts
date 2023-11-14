@@ -1,12 +1,18 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../controllers/user/user.entity';
-import { UserService } from '../controllers/user/user.service';
-import { AddUserDto } from '../controllers/user/dto/add-user.dto';
-import { UpdateUserDto } from '../controllers/user/dto/update-user.dto';
+import { User } from '../users/entities/user.entity';
+import { UserService } from '../users/user.service';
+import { UpdateUserDto } from '../auth/input/dto/update-user.dto';
+import { VerifyOtpDto } from '../auth/input/dto/verify-otp.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly _userService: UserService,
     private readonly jwtService: JwtService,
@@ -36,19 +42,42 @@ export class AuthService {
       const otp = this.generateOTP();
 
       if (existingUser) {
-        await this._userService.updateUser(existingUser, {
+        await this._userService.updateUser(existingUser.id, {
           otp,
         } as UpdateUserDto);
       } else {
         const user = {
           mobileNumber,
           otp,
-        } as AddUserDto;
+          role: 'CUSTOMER',
+        };
         await this._userService.createUser(user);
       }
       return otp;
-    } catch (error) {
-      throw new BadRequestException(error);
+    } catch (error: any) {
+      throw new BadRequestException({ error: error.message });
     }
+  }
+
+  async validateOtp(validateOtpDto: VerifyOtpDto): Promise<User> {
+    const user = await this._userService.getUserByMobileNumber(
+      validateOtpDto.mobileNumber,
+    );
+
+    if (!user) {
+      this.logger.debug(
+        `User with number ${validateOtpDto.mobileNumber} not found`,
+      );
+      throw new UnauthorizedException({
+        message: `User with number ${validateOtpDto.mobileNumber} not found`,
+      });
+    }
+
+    if (validateOtpDto.verificationCode !== user.otp) {
+      this.logger.debug('Verification code is incorrect');
+      throw new UnauthorizedException('Verification code is incorrect');
+    }
+
+    return user;
   }
 }

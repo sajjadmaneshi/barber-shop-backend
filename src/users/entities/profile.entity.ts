@@ -16,6 +16,6 @@ export class Profile {
   @Column()
   lastname: string;
 
-  @Column()
+  @Column('enum', { enum: Gender, default: Gender.male })
   gender: Gender;
 }

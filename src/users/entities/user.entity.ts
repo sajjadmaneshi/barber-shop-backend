@@ -17,8 +17,8 @@ export class User {
   @Column({ length: 11 })
   mobileNumber: string;
 
-  @OneToOne(() => Profile, { nullable: true })
-  @JoinColumn()
+  @OneToOne(() => Profile, { nullable: true, eager: true, cascade: true })
+  @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @Column()
@@ -31,6 +31,6 @@ export class User {
     nullable: false,
     eager: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'role_id' })
   role: UserRole;
 }
