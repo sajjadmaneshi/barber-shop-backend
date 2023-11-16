@@ -4,11 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import ormConfig from './config/orm.config';
 
-import { UserModule } from './users/user.module';
+import { UserModule } from './modules/user.module';
 import ormConfigProd from './config/orm.config.prod';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth.module';
 import { InitializeService } from './common/initial-app.service';
-import { UserRole } from './users/entities/user-role.entity';
+import { UserRole } from './data/entities/user-role.entity';
+import { DocumentModule } from './modules/document.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserRole } from './users/entities/user-role.entity';
     TypeOrmModule.forFeature([UserRole]),
     UserModule,
     AuthModule,
+    DocumentModule,
   ],
   controllers: [],
   providers: [InitializeService],

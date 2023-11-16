@@ -1,20 +1,21 @@
-import { User } from '../users/entities/user.entity';
+import { User } from '../data/entities/user.entity';
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { UserRole } from '../users/entities/user-role.entity';
-import { Profile } from '../users/entities/profile.entity';
+import { UserRole } from '../data/entities/user-role.entity';
+import { Profile } from '../data/entities/profile.entity';
+import { DocumentEntity } from '../data/entities/document.entity';
 
 export default registerAs(
   'orm.config',
   (): TypeOrmModuleOptions => ({
     type: 'postgres',
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    entities: [User, UserRole, Profile],
+    host: process.env.DB_HOST_PRODUCTION,
+    port: Number(process.env.DB_PORT_PRODUCTION),
+    username: process.env.DB_USER_PRODUCTION,
+    password: process.env.DB_PASS_PRODUCTION,
+    database: process.env.DB_NAME_PRODUCTION,
+    entities: [User, UserRole, Profile, DocumentEntity],
     synchronize: true, // Be careful with this in production!
-    dropSchema: true,
+    dropSchema: false,
   }),
 );

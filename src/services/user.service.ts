@@ -1,10 +1,10 @@
 import { Repository, UpdateResult } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from '../data/entities/user.entity';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AddUserDto } from '../auth/input/dto/add-user.dto';
-import { UpdateUserDto } from '../auth/input/dto/update-user.dto';
-import { RoleService } from '../services/role.service';
+import { AddUserDto } from '../data/DTO/user/add-user.dto';
+import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
+import { RoleService } from './role.service';
 
 @Injectable()
 export class UserService {
@@ -25,6 +25,7 @@ export class UserService {
     return await this._userRepository
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.profile', 'profile')
+      .leftJoinAndSelect('profile.avatar', 'avatar')
       .where('u.id = :id', { id })
       .getOne();
   }

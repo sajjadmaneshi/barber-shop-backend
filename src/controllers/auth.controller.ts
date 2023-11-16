@@ -1,11 +1,12 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { SendOtpDto } from './input/dto/send-otp.dto';
-import { VerifyOtpDto } from './input/dto/verify-otp.dto';
+import { SendOtpDto } from '../data/DTO/user/send-otp.dto';
+import { VerifyOtpDto } from '../data/DTO/user/verify-otp.dto';
+import { Auth } from '../common/controller-names';
 
-@ApiTags('authentication')
-@Controller('auth')
+@ApiTags(Auth)
+@Controller(Auth)
 export class AuthController {
   constructor(private readonly _authService: AuthService) {}
 

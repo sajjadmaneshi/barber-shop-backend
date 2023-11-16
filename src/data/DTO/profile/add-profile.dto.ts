@@ -1,8 +1,8 @@
-import { Gender } from '../entities/profile.entity';
+import { Gender } from '../../entities/profile.entity';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CompleteProfileDto {
+export class AddProfileDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })
@@ -12,6 +12,10 @@ export class CompleteProfileDto {
   @IsString()
   @ApiProperty({ type: String })
   lastname: string;
+
+  @IsString()
+  @ApiProperty({ type: String })
+  avatarId: string;
 
   @IsNotEmpty()
   @IsEnum(Gender)
