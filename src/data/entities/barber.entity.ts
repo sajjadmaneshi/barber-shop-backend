@@ -2,10 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Address } from './address.entity';
 
 @Entity()
 export class Barber {
@@ -16,6 +18,9 @@ export class Barber {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
+  @Column({ nullable: true })
   bio: string;
+
+  @OneToMany(() => Address, (address) => address.barber)
+  addresses: Address[];
 }

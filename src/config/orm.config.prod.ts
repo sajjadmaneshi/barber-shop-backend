@@ -4,6 +4,10 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UserRole } from '../data/entities/user-role.entity';
 import { Profile } from '../data/entities/profile.entity';
 import { DocumentEntity } from '../data/entities/document.entity';
+import { City } from '../data/entities/city.entity';
+import { Province } from '../data/entities/province.entity';
+import { Barber } from '../data/entities/barber.entity';
+import { Address } from '../data/entities/address.entity';
 
 export default registerAs(
   'orm.config',
@@ -14,7 +18,16 @@ export default registerAs(
     username: process.env.DB_USER_PRODUCTION,
     password: process.env.DB_PASS_PRODUCTION,
     database: process.env.DB_NAME_PRODUCTION,
-    entities: [User, UserRole, Profile, DocumentEntity],
+    entities: [
+      User,
+      UserRole,
+      Profile,
+      DocumentEntity,
+      City,
+      Province,
+      Barber,
+      Address,
+    ],
     synchronize: true, // Be careful with this in production!
     dropSchema: false,
   }),
