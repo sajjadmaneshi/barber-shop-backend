@@ -5,10 +5,10 @@ export class AddUserDto {
   @IsString()
   @Length(11)
   mobileNumber: string;
-  @IsNotEmpty()
+
   @IsString()
   @Length(6)
-  otp: string;
+  otp?: string;
 
   @IsString()
   role: string;

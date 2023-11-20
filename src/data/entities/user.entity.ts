@@ -17,12 +17,17 @@ export class User {
   @Column({ length: 11 })
   mobileNumber: string;
 
-  @OneToOne(() => Profile, { nullable: true, eager: true, cascade: true })
+  @OneToOne(() => Profile, {
+    nullable: true,
+    eager: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
-  @Column()
-  otp: string;
+  @Column({ nullable: true })
+  otp?: string;
 
   @Column({ default: false })
   isRegistered: boolean;

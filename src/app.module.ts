@@ -10,6 +10,8 @@ import { AuthModule } from './modules/auth.module';
 import { InitializeService } from './common/initial-app.service';
 import { UserRole } from './data/entities/user-role.entity';
 import { DocumentModule } from './modules/document.module';
+import { GeoLocationModule } from './modules/geo-location.module';
+import { BarberModule } from './modules/barber.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { DocumentModule } from './modules/document.module';
     UserModule,
     AuthModule,
     DocumentModule,
+    GeoLocationModule,
+    BarberModule,
   ],
   controllers: [],
   providers: [InitializeService],

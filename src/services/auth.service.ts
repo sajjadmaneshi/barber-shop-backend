@@ -65,9 +65,6 @@ export class AuthService {
     );
 
     if (!user) {
-      this.logger.debug(
-        `User with number ${validateOtpDto.mobileNumber} not found`,
-      );
       throw new UnauthorizedException({
         message: `User with number ${validateOtpDto.mobileNumber} not found`,
       });
@@ -75,7 +72,7 @@ export class AuthService {
 
     if (validateOtpDto.verificationCode !== user.otp) {
       this.logger.debug('Verification code is incorrect');
-      throw new UnauthorizedException('Verification code is incorrect');
+      throw new BadRequestException('Verification code is incorrect');
     }
 
     return user;

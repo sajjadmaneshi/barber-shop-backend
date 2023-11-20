@@ -21,6 +21,9 @@ export class Barber {
   @Column({ nullable: true })
   bio: string;
 
-  @OneToMany(() => Address, (address) => address.barber)
+  @Column({ nullable: true })
+  phoneNumber: string;
+
+  @OneToMany(() => Address, (address) => address.barber, { cascade: true })
   addresses: Address[];
 }
