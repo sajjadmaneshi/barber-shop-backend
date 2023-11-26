@@ -25,6 +25,7 @@ export class UserService {
     return await this._userRepository
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.profile', 'profile')
+      .leftJoinAndSelect('u.role', 'role')
       .leftJoinAndSelect('profile.avatar', 'avatar')
       .where('u.id = :id', { id })
       .getOne();

@@ -36,6 +36,7 @@ export class AuthService {
   }
 
   async registerUser(mobileNumber: string): Promise<string> {
+
     try {
       const existingUser =
         await this._userService.getUserByMobileNumber(mobileNumber);
@@ -55,7 +56,7 @@ export class AuthService {
       }
       return otp;
     } catch (error: any) {
-      throw new BadRequestException({ error: error.message });
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -65,9 +66,9 @@ export class AuthService {
     );
 
     if (!user) {
-      throw new UnauthorizedException({
-        message: `User with number ${validateOtpDto.mobileNumber} not found`,
-      });
+      throw new UnauthorizedException(
+       `User with number ${validateOtpDto.mobileNumber} not found`,
+      );
     }
 
     if (validateOtpDto.verificationCode !== user.otp) {
