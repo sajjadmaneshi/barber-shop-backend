@@ -24,6 +24,7 @@ import { Profile } from '../data/entities/profile.entity';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 import { Users } from '../common/controller-names';
 import { DocumentService } from '../services/document.service';
+import { DocumentEntity } from '../data/entities/document.entity';
 
 @ApiTags(Users)
 @Controller(Users)
@@ -73,27 +74,40 @@ export class UserController {
   @ApiBody({ type: AddProfileDto })
   @HttpCode(201)
   async completeProfile(@CurrentUser() user: User, @Body() dto: AddProfileDto) {
+    let resultId!: string;
+
     await this.queryRunner.connect();
     await this.queryRunner.startTransaction();
+
     try {
+      if (user.profile) {
+        throw new BadRequestException('this user has profile');
+      }
       const profile = new Profile();
       profile.firstname = dto.firstname;
       profile.lastname = dto.lastname;
       profile.gender = dto.gender;
-      const document = await this.documentService.findOne(dto.avatarId);
-      if (!document) throw new BadRequestException('avatar not found');
+      let document: DocumentEntity | null = null;
+      if (dto.avatarId) {
+        document = await this.documentService.findOne(dto.avatarId);
+        if (!document) throw new BadRequestException('avatar not found');
+      }
+
       profile.avatar = document;
       await this._profileRepository.save(profile);
       user.profile = profile;
       user.isRegistered = true;
-      await this._userRepository.save(user);
+      const result = await this._userRepository.save(user);
+      resultId = result.id;
       await this.queryRunner.commitTransaction();
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
+
       throw new BadRequestException(err.message);
     } finally {
       await this.queryRunner.release();
     }
+    return resultId;
   }
 
   @Patch('updateProfile')
@@ -111,7 +125,7 @@ export class UserController {
       if (!document) throw new BadRequestException('avatar not found');
       user.profile.avatar = document;
       await this._userRepository.save(user);
-      return user;
+      return user.id;
     } else {
       throw new BadRequestException('user profile NotFound');
     }

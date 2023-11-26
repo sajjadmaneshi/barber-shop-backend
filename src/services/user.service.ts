@@ -21,7 +21,7 @@ export class UserService {
       .orderBy('user.id', 'DESC');
   }
 
-  public async getUser(id: string): Promise<User | null> {
+  public async getUser(id: string): Promise<User | undefined> {
     return await this._userRepository
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.profile', 'profile')

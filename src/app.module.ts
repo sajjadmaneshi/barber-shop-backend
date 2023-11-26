@@ -12,6 +12,7 @@ import { UserRole } from './data/entities/user-role.entity';
 import { DocumentModule } from './modules/document.module';
 import { GeoLocationModule } from './modules/geo-location.module';
 import { BarberModule } from './modules/barber.module';
+import { ServiceModule } from './modules/service.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BarberModule } from './modules/barber.module';
     DocumentModule,
     GeoLocationModule,
     BarberModule,
+    ServiceModule,
   ],
   controllers: [],
   providers: [InitializeService],
