@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Gender } from './profile.entity';
 import { IsInt, Max, Min } from 'class-validator';
 import { DocumentEntity } from './document.entity';
@@ -24,10 +30,16 @@ export class Service {
   @Min(0, { message: 'Value must be greater than or equal to 0' })
   @Max(100, { message: 'Value must be less than or equal to 100' })
   feeDiscount: number;
+
   @ApiProperty()
   @Column({ nullable: true })
   description: string;
   @ApiProperty()
-  @OneToOne(() => DocumentEntity, { nullable: true, eager: true })
+  @OneToOne(() => DocumentEntity, {
+    nullable: true,
+    eager: true,
+    cascade: true,
+  })
+  @JoinColumn({ name: 'image_id' })
   image: DocumentEntity;
 }

@@ -1,7 +1,20 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Barber } from '../common/controller-names';
 import { Barber as BarberEntity } from '../data/entities/barber.entity';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { BarberService } from '../services/barber.service';
 
 import { RegisterBarberDto } from '../data/DTO/profile/register-barber.dto';
@@ -12,7 +25,7 @@ import { RoleEnum } from '../common/enums/roleEnum';
 import { RoleGuard } from '../common/guards/role.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../data/entities/user.entity';
-import { UpdateBarberBaseInfoDto } from "../data/DTO/barber/update-barber-base-info.dto";
+import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
 
 @Controller(Barber)
 @ApiTags(Barber)

@@ -17,6 +17,7 @@ import {
   PaginateOptions,
   PaginationResult,
 } from '../common/pagination/paginator';
+import { ServiceViewModel } from '../data/models/service.view-model';
 
 @Injectable()
 export class BarberServiceService {
@@ -44,12 +45,14 @@ export class BarberServiceService {
     return result;
   }
 
-  public async getService(id: number): Promise<Service | undefined> {
+  public async getService(id: number): Promise<ServiceViewModel | undefined> {
     const result = await this.getServicesBaseQuery()
       .andWhere('service.id = :id', { id })
+      .leftJoinAndSelect('service.image', 'image')
       .getOne();
-    this.logger.log(`service ${result.id}`);
-    return result;
+    this.logger.debug(`service ${result.id}`);
+    const { image, ...serviceData } = result;
+    return { ...serviceData, imageId: image.id } as ServiceViewModel;
   }
 
   public async createService(dto: AddServiceDto): Promise<Service> {
@@ -73,24 +76,24 @@ export class BarberServiceService {
   public async updateService(
     id: number,
     dto: UpdateServiceDto,
-  ): Promise<Service> {
+  ): Promise<number> {
     const { imageId, ...updateData } = dto;
 
     let document: DocumentEntity | null = null;
 
     if (imageId) {
-      document = await this._documentService.findOne(dto.imageId);
+      document = await this._documentService.findOne(imageId);
       if (!document) throw new BadRequestException('avatar not found');
     }
     const result = await this._repository.update(id, {
       ...updateData,
       image: document,
-    });
+    } as Service);
     if (result.affected === 0) {
       throw new NotFoundException(`Barber Service with ID ${id} not found`);
     }
     this.logger.log(`service with id ${id} updated`);
-    return await this.getService(id);
+    return id;
   }
 
   public async removeService(id: number): Promise<DeleteResult> {

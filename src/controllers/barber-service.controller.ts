@@ -26,10 +26,10 @@ import { BarberServiceService } from '../services/barber-service.service';
 import { PaginationResult } from '../common/pagination/paginator';
 import { AddServiceDto } from '../data/DTO/barber-service/add-service.dto';
 import { UpdateServiceDto } from '../data/DTO/barber-service/update-service.dto';
+import { ServiceViewModel } from '../data/models/service.view-model';
 
 @ApiTags(Service)
 @Controller(Service)
-@Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
 @UseGuards(AuthGuardJwt, RoleGuard)
 @ApiBearerAuth()
 export class BarberServiceController {
@@ -42,8 +42,9 @@ export class BarberServiceController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: ServiceEntity })
-  async findOne(@Param() id: number) {
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  @ApiOkResponse({ type: ServiceViewModel })
+  async findOne(@Param('id') id: number): Promise<ServiceViewModel> {
     return await this._barberServiceService.getService(id);
   }
 
@@ -56,9 +57,13 @@ export class BarberServiceController {
   }
 
   @Patch(':id')
+  @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: UpdateServiceDto })
   @ApiOkResponse({ type: String })
-  async update(@Param() id: number, @Body() dto: UpdateServiceDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateServiceDto,
+  ): Promise<number> {
     return await this._barberServiceService.updateService(id, dto);
   }
 
