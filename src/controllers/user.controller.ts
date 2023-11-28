@@ -12,7 +12,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { QueryRunner, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../data/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from '../services/user.service';
@@ -30,7 +30,6 @@ import { DocumentEntity } from '../data/entities/document.entity';
 @Controller(Users)
 export class UserController {
   private readonly logger = new Logger(UserController.name);
-  private readonly queryRunner: QueryRunner;
 
   constructor(
     @InjectRepository(User)
@@ -39,10 +38,7 @@ export class UserController {
     private readonly _profileRepository: Repository<Profile>,
     private readonly userService: UserService,
     private readonly documentService: DocumentService,
-  ) {
-    this.queryRunner =
-      this._userRepository.manager.connection.createQueryRunner();
-  }
+  ) {}
 
   @Get()
   async findAll() {
@@ -57,7 +53,7 @@ export class UserController {
     if (user.profile) {
       const { avatar, ...rest } = user.profile;
       return { ...rest, avatarId: user.profile.avatar ? avatar.id : null };
-    } else throw new BadRequestException({ message: 'user profile not found' });
+    } else throw new BadRequestException( 'user profile not found' );
   }
 
   @Get(':id')
@@ -74,15 +70,12 @@ export class UserController {
   @ApiBody({ type: AddProfileDto })
   @HttpCode(201)
   async completeProfile(@CurrentUser() user: User, @Body() dto: AddProfileDto) {
-    let resultId!: string;
-
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
-
+    let resultId: string;
+    const queryRunner =
+      this._userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
-      if (user.profile) {
-        throw new BadRequestException('this user has profile');
-      }
       const profile = new Profile();
       profile.firstname = dto.firstname;
       profile.lastname = dto.lastname;
@@ -92,20 +85,18 @@ export class UserController {
         document = await this.documentService.findOne(dto.avatarId);
         if (!document) throw new BadRequestException('avatar not found');
       }
-
       profile.avatar = document;
       await this._profileRepository.save(profile);
       user.profile = profile;
       user.isRegistered = true;
       const result = await this._userRepository.save(user);
       resultId = result.id;
-      await this.queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
     } catch (err) {
-      await this.queryRunner.rollbackTransaction();
-
+      await queryRunner.rollbackTransaction();
       throw new BadRequestException(err.message);
     } finally {
-      await this.queryRunner.release();
+      await queryRunner.release();
     }
     return resultId;
   }
@@ -125,7 +116,7 @@ export class UserController {
       if (!document) throw new BadRequestException('avatar not found');
       user.profile.avatar = document;
       await this._userRepository.save(user);
-      return user.id;
+      return user.profile.id;
     } else {
       throw new BadRequestException('user profile NotFound');
     }

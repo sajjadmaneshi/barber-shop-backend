@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -71,7 +72,8 @@ export class DocumentController {
   @Delete(':id')
   @ApiCreatedResponse()
   @UseGuards(AuthGuardJwt)
-  async delete(@Param('id') id: string): Promise<DeleteResult> {
-    return await this.documentService.removeOne(id);
+  async delete(@Param('id') id: string): Promise<void> {
+    const result = await this.documentService.removeOne(id);
+    if (result.affected == 0) throw new BadRequestException('no item removed');
   }
 }

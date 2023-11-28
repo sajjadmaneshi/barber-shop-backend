@@ -20,10 +20,10 @@ export class Address {
   @JoinColumn({ name: 'city_id' })
   city: City;
 
-  @Column()
+  @Column({ type: 'decimal' })
   latitude: number;
 
-  @Column()
+  @Column({ type: 'decimal' })
   longitude: number;
 
   @ManyToOne(() => Barber, (barber) => barber.addresses)

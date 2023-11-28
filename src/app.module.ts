@@ -12,6 +12,8 @@ import { UserRole } from './data/entities/user-role.entity';
 import { DocumentModule } from './modules/document.module';
 import { GeoLocationModule } from './modules/geo-location.module';
 import { BarberModule } from './modules/barber.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './common/filters/error.filter';
 import { ServiceModule } from './modules/service.module';
 
 @Module({
@@ -34,7 +36,13 @@ import { ServiceModule } from './modules/service.module';
     ServiceModule,
   ],
   controllers: [],
-  providers: [InitializeService],
+  providers: [
+    InitializeService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
 })
 export class AppModule implements OnApplicationBootstrap {
   logger = new Logger();

@@ -22,8 +22,7 @@ export class RoleService {
       })
       .getOne();
 
-    if (!role)
-      throw new BadRequestException({ message: `role ${name} not found` });
+    if (!role) throw new BadRequestException(`role ${name} not found`);
     return role;
   }
 

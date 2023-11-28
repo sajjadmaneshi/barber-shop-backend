@@ -14,6 +14,7 @@ export class AuthController {
   @ApiBody({ type: SendOtpDto })
   @Post('sendOtp')
   async sendOtp(@Body() sendOtpInput: SendOtpDto) {
+
     return await this._authService.registerUser(sendOtpInput.mobileNumber);
   }
 

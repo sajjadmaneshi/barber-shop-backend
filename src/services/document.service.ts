@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from "@nestjs/common";
 import { DeleteResult, Repository } from 'typeorm';
 import { DocumentEntity } from '../data/entities/document.entity';
 
@@ -38,25 +38,20 @@ export class DocumentService {
   }
 
   public async removeOne(id: string): Promise<DeleteResult> {
-    const queryRunner = this._repository.manager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+
     try {
       const document = await this.findOne(id);
-      removeFile(`${document.destination}/${document.fileName}`);
+      if(!document)  throw  new BadRequestException(`document with ${id} id not found`)
+
       const deleteResult = await this._repository
         .createQueryBuilder('d')
         .delete()
         .where('id = :id', { id })
         .execute();
-
-      await queryRunner.commitTransaction();
+      if(deleteResult.affected>0) removeFile(`${document.destination}/${document.fileName}`);
       return deleteResult;
     } catch (err) {
-      await queryRunner.rollbackTransaction();
       throw new BadRequestException(err);
-    } finally {
-      await queryRunner.release();
     }
   }
 }
