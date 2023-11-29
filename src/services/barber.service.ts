@@ -14,6 +14,7 @@ import { AddBarberBaseInfoDto } from '../data/DTO/barber/add-barber-base-info.dt
 import { Address } from '../data/entities/address.entity';
 import { GeolocationService } from './geolocation.service';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
+import { City } from '../data/entities/city.entity';
 
 @Injectable()
 export class BarberService {
@@ -37,10 +38,6 @@ export class BarberService {
 
   public async getAllBarbers() {
     return await this.getBarberBaseQuery().getMany();
-  }
-
-  async getBarberByUserId(userId: string): Promise<Barber | null> {
-    return this._repository.findOne({ where: { user: { id: userId } } });
   }
 
   async completeBarberInfo(
@@ -76,16 +73,49 @@ export class BarberService {
     user: User,
     dto: UpdateBarberBaseInfoDto,
   ): Promise<number> {
+    const queryRunner = this._repository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       const existingBarber = await this._repository.findOne({
         where: { user },
       });
       if (!existingBarber) throw new NotFoundException('barber not found');
-      await this._repository.update(existingBarber, dto);
+      if (this._shouldChangeAddress(dto)) {
+        const address = await this._addressRepository.findOne({
+          where: { barber: existingBarber },
+        });
+
+        if (address) {
+          let city: City | undefined;
+          if (dto.cityId)
+            city = await this._geoLocationService.getCityById(dto.cityId);
+          const partialAddress = {
+            latitude: dto.latitude!,
+            longitude: dto.longitude!,
+            shopAddress: dto.address!,
+            city,
+          };
+          await this._addressRepository.update(address.id, partialAddress);
+        }
+      }
+
+      await this._repository.update(existingBarber.id, {
+        bio: dto.bio ?? existingBarber.bio,
+      });
+
+      await queryRunner.commitTransaction();
       return existingBarber.id;
     } catch (err) {
+      await queryRunner.rollbackTransaction();
       throw new BadRequestException(err.message);
+    } finally {
+      await queryRunner.release();
     }
+  }
+
+  private _shouldChangeAddress(dto: UpdateBarberBaseInfoDto) {
+    return dto.cityId || dto.latitude || dto.address || dto.longitude;
   }
 
   public async getBarber(id: number) {

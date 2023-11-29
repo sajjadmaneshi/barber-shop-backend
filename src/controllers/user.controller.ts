@@ -18,16 +18,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from '../services/user.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AddProfileDto } from '../data/DTO/profile/add-profile.dto';
 import { Profile } from '../data/entities/profile.entity';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 import { Users } from '../common/controller-names';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
+import { ProfileResponseViewModel } from '../data/models/profile-response.view-model';
 
 @ApiTags(Users)
 @Controller(Users)
+@ApiBearerAuth()
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
@@ -49,11 +56,14 @@ export class UserController {
   }
   @Get('getProfile')
   @UseGuards(AuthGuardJwt)
+  @ApiOkResponse({
+    type: ProfileResponseViewModel,
+  })
   async getProfile(@CurrentUser() user: User) {
     if (user.profile) {
       const { avatar, ...rest } = user.profile;
       return { ...rest, avatarId: user.profile.avatar ? avatar.id : null };
-    } else throw new BadRequestException( 'user profile not found' );
+    } else throw new BadRequestException('user profile not found');
   }
 
   @Get(':id')

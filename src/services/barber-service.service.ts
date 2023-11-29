@@ -78,7 +78,6 @@ export class BarberServiceService {
     dto: UpdateServiceDto,
   ): Promise<number> {
     const { imageId, ...updateData } = dto;
-
     let document: DocumentEntity | null = null;
 
     if (imageId) {

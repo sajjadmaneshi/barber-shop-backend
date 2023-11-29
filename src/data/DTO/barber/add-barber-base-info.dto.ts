@@ -5,7 +5,7 @@ export class AddBarberBaseInfoDto {
   @IsOptional()
   @IsString()
   @ApiProperty({ type: String })
-  bio?: string;
+  bio: string;
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })
