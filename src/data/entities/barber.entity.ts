@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Address } from './address.entity';
+import { BarberServiceEntity } from './barber-service.entity';
 
 @Entity()
 export class Barber {
@@ -21,7 +22,9 @@ export class Barber {
   @Column({ nullable: true })
   bio: string;
 
-
   @OneToMany(() => Address, (address) => address.barber, { cascade: true })
   addresses: Address[];
+
+  @OneToMany(() => BarberServiceEntity, (barberService) => barberService.barber)
+  barberServices: BarberServiceEntity[];
 }

@@ -1,75 +1,48 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { Service } from '../common/controller-names';
-import { Service as ServiceEntity } from '../data/entities/service';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { BarberServiceService } from '../services/barber-service.service';
+import { BarberService } from '../common/controller-names';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { BarberServiceViewModel } from '../data/models/barber-service.view-model';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
-import { RoleEnum } from '../common/enums/roleEnum';
 import { Roles } from '../common/decorators/role.decorator';
-import { BarberServiceService } from '../services/barber-service.service';
+import { RoleEnum } from '../common/enums/roleEnum';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../data/entities/user.entity';
+import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';
 
-import { PaginationResult } from '../common/pagination/paginator';
-import { AddServiceDto } from '../data/DTO/barber-service/add-service.dto';
-import { UpdateServiceDto } from '../data/DTO/barber-service/update-service.dto';
-import { ServiceViewModel } from '../data/models/service.view-model';
-
-@ApiTags(Service)
-@Controller(Service)
-@UseGuards(AuthGuardJwt, RoleGuard)
+@Controller(BarberService)
+@ApiTags(BarberService)
 @ApiBearerAuth()
+@UseGuards(AuthGuardJwt, RoleGuard)
 export class BarberServiceController {
   constructor(private readonly _barberServiceService: BarberServiceService) {}
 
   @Get()
-  @ApiOkResponse({ type: PaginationResult<ServiceEntity> })
-  async findAll() {
-    return await this._barberServiceService.getServices();
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  @ApiOkResponse({ type: BarberServiceViewModel })
+  async findAll(@CurrentUser() user: User) {
+    return await this._barberServiceService.getServices(user.id);
   }
-
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: ServiceViewModel })
-  async findOne(@Param('id') id: number): Promise<ServiceViewModel> {
+  @ApiOkResponse({ type: BarberServiceViewModel })
+  async findOne(@Param('id') id: number) {
     return await this._barberServiceService.getService(id);
   }
-
   @Post()
-  @ApiBody({ type: AddServiceDto })
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: String })
-  @HttpCode(201)
-  async create(@Body() dto: AddServiceDto) {
-    return await this._barberServiceService.createService(dto);
-  }
-
-  @Patch(':id')
-  @Roles(RoleEnum.SUPER_ADMIN)
-  @ApiBody({ type: UpdateServiceDto })
-  @ApiOkResponse({ type: String })
-  async update(
-    @Param('id') id: number,
-    @Body() dto: UpdateServiceDto,
-  ): Promise<number> {
-    return await this._barberServiceService.updateService(id, dto);
-  }
-
-  @Delete(':id')
-  @ApiOkResponse({ type: String })
-  async delete(@Param() id: number) {
-    return await this._barberServiceService.removeService(id);
+  @ApiBody({ type: AddBarberServiceDto })
+  async addNewService(
+    @Body() dto: AddBarberServiceDto,
+    @CurrentUser() user: User,
+  ) {
+    return await this._barberServiceService.addService(dto, user.id);
   }
 }

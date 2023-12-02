@@ -15,6 +15,7 @@ import { BarberModule } from './modules/barber.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/error.filter';
 import { ServiceModule } from './modules/service.module';
+import { BarberServiceModule } from './modules/barber-service.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ServiceModule } from './modules/service.module';
     GeoLocationModule,
     BarberModule,
     ServiceModule,
+    BarberServiceModule,
   ],
   controllers: [],
   providers: [

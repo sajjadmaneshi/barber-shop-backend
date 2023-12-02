@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -9,9 +10,10 @@ import { Gender } from './profile.entity';
 import { IsInt, Max, Min } from 'class-validator';
 import { DocumentEntity } from './document.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { BarberServiceEntity } from './barber-service.entity';
 
-@Entity()
-export class Service {
+@Entity({ name: 'service' })
+export class ServiceEntity {
   @ApiProperty()
   @PrimaryGeneratedColumn()
   id: number;
@@ -42,4 +44,10 @@ export class Service {
   })
   @JoinColumn({ name: 'image_id' })
   image: DocumentEntity;
+
+  @OneToMany(
+    () => BarberServiceEntity,
+    (barberService) => barberService.service,
+  )
+  barberServices: BarberServiceEntity[];
 }

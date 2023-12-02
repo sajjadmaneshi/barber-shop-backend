@@ -1,107 +1,131 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { DeleteResult, Repository } from 'typeorm';
-import { Service } from '../data/entities/service';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
-import { AddServiceDto } from '../data/DTO/barber-service/add-service.dto';
-import { DocumentEntity } from '../data/entities/document.entity';
-import { DocumentService } from './document.service';
-import { UpdateServiceDto } from '../data/DTO/barber-service/update-service.dto';
-import {
-  paginate,
-  PaginateOptions,
-  PaginationResult,
-} from '../common/pagination/paginator';
-import { ServiceViewModel } from '../data/models/service.view-model';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BarberServiceEntity } from '../data/entities/barber-service.entity';
+import { BarberServiceViewModel } from '../data/models/barber-service.view-model';
+import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';
+
+import { ServiceEntity } from '../data/entities/service.entity';
+
+import { Barber } from '../data/entities/barber.entity';
 
 @Injectable()
 export class BarberServiceService {
   private readonly logger = new Logger(BarberServiceService.name);
 
   constructor(
-    @InjectRepository(Service)
-    private readonly _repository: Repository<Service>,
-    private readonly _documentService: DocumentService,
+    @InjectRepository(BarberServiceEntity)
+    private readonly _repository: Repository<BarberServiceEntity>,
+
+    @InjectRepository(ServiceEntity)
+    private readonly _serviceRepository: Repository<ServiceEntity>,
+
+    @InjectRepository(Barber)
+    private readonly _barberRepository: Repository<Barber>,
   ) {}
   private getServicesBaseQuery() {
     return this._repository
-      .createQueryBuilder('service')
-      .orderBy('service.id', 'DESC');
+      .createQueryBuilder('barberService')
+      .orderBy('barberService.id', 'DESC');
   }
 
-  public async getServices(
-    paginateOptions?: PaginateOptions,
-  ): Promise<PaginationResult<Service>> {
-    const result = await paginate<Service>(
-      this.getServicesBaseQuery(),
-      paginateOptions,
-    );
-    this.logger.log(`returned ${result.total} services`);
-    return result;
-  }
-
-  public async getService(id: number): Promise<ServiceViewModel | undefined> {
-    const result = await this.getServicesBaseQuery()
-      .andWhere('service.id = :id', { id })
+  public async getServices(userId: string): Promise<BarberServiceViewModel[]> {
+    const barberServices = await this.getServicesBaseQuery()
+      .leftJoinAndSelect('barberService.barber', 'barber')
+      .leftJoinAndSelect('barber.user', 'user')
+      .leftJoinAndSelect('barberService.service', 'service')
       .leftJoinAndSelect('service.image', 'image')
+      .where('barber.user.id = :userId', { userId })
+      .getMany();
+    return barberServices.map(
+      (service) =>
+        ({
+          id: service.id,
+          barberDescription: service.description,
+          gender: service.service.gender,
+          serviceDescription: service.service.description,
+          imageId: service.service.image?.id,
+          title: service.service.title,
+        }) as BarberServiceViewModel,
+    );
+  }
+
+  public async getService(id: number): Promise<BarberServiceViewModel> {
+    const barberService = await this.getServicesBaseQuery()
+      .leftJoinAndSelect('barberService.barber', 'barber')
+      .leftJoin('barber.user', 'user')
+      .leftJoinAndSelect('barberService.service', 'service')
+      .leftJoinAndSelect('service.image', 'image')
+      .where('barberService.id = :id', { id })
       .getOne();
-    this.logger.debug(`service ${result.id}`);
-    const { image, ...serviceData } = result;
-    return { ...serviceData, imageId: image.id } as ServiceViewModel;
+
+    if (!barberService)
+      throw new NotFoundException('service with this id not found');
+
+    return {
+      id: barberService.id,
+      barberDescription: barberService.description,
+      gender: barberService.service.gender,
+      serviceDescription: barberService.service.description,
+      imageId: barberService.service.image.id,
+      title: barberService.service.title,
+    } as BarberServiceViewModel;
   }
 
-  public async createService(dto: AddServiceDto): Promise<Service> {
-    const service = new Service();
-    service.title = dto.title;
-    service.price = dto.price;
-    service.feeDiscount = dto.feeDiscount;
-    service.description = dto.description;
-    service.gender = dto.gender;
-    let document: DocumentEntity | null = null;
-
-    if (dto.imageId) {
-      document = await this._documentService.findOne(dto.imageId);
-      if (!document) throw new BadRequestException('avatar not found');
-    }
-    const result = await this._repository.save(service);
-    this.logger.log(`service with id ${result.id} create`);
-    return result;
-  }
-
-  public async updateService(
-    id: number,
-    dto: UpdateServiceDto,
+  public async addService(
+    dto: AddBarberServiceDto,
+    userId: string,
   ): Promise<number> {
-    const { imageId, ...updateData } = dto;
-    let document: DocumentEntity | null = null;
+    const barber = await this._barberRepository
+      .createQueryBuilder('b')
+      .leftJoin('b.user', 'user')
+      .where('user.id=:userId', { userId })
+      .getOne();
+    if (!barber) throw new NotFoundException('Barber not found');
+    const service = await this._serviceRepository.findOne({
+      where: { id: dto.serviceId },
+    });
+    if (!service) throw new NotFoundException('Service not found');
+    const barberService = new BarberServiceEntity();
 
-    if (imageId) {
-      document = await this._documentService.findOne(imageId);
-      if (!document) throw new BadRequestException('avatar not found');
-    }
-    const result = await this._repository.update(id, {
-      ...updateData,
-      image: document,
-    } as Service);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Barber Service with ID ${id} not found`);
-    }
-    this.logger.log(`service with id ${id} updated`);
-    return id;
+    barberService.barber = barber;
+    barberService.service = service;
+    barberService.description = dto.description;
+    const result = await this._repository.save(barberService);
+    this.logger.log(`service with id ${result.id} create`);
+    return result.id;
   }
 
-  public async removeService(id: number): Promise<DeleteResult> {
-    const deleteResult = await this._repository
-      .createQueryBuilder('service')
-      .delete()
-      .where('id = :id', { id })
-      .execute();
-    this.logger.log(deleteResult);
-    return deleteResult;
-  }
+  // public async updateService(
+  //   id: number,
+  //   dto: UpdateServiceDto,
+  // ): Promise<number> {
+  //   const { imageId, ...updateData } = dto;
+  //   let document: DocumentEntity | null = null;
+  //
+  //   if (imageId) {
+  //     document = await this._documentService.findOne(imageId);
+  //     if (!document) throw new BadRequestException('avatar not found');
+  //   }
+  //   const result = await this._repository.update(id, {
+  //     ...updateData,
+  //     image: document,
+  //   } as ServiceEntity);
+  //   if (result.affected === 0) {
+  //     throw new NotFoundException(`Barber Service with ID ${id} not found`);
+  //   }
+  //   this.logger.log(`service with id ${id} updated`);
+  //   return id;
+  // }
+  //
+  // public async removeService(id: number): Promise<DeleteResult> {
+  //   const deleteResult = await this._repository
+  //     .createQueryBuilder('service')
+  //     .delete()
+  //     .where('id = :id', { id })
+  //     .execute();
+  //   this.logger.log(deleteResult);
+  //   return deleteResult;
+  // }
 }

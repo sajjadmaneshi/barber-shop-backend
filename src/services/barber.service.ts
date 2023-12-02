@@ -128,6 +128,15 @@ export class BarberService {
     return barber;
   }
 
+  public async getBarberWithUserId(id: string) {
+    const barber = await this.getBarberBaseQuery()
+      .leftJoin('b.user', 'user')
+      .where('user.id=:id', { id })
+      .getOne();
+    if (!barber) throw new NotFoundException('barber with this id not Found');
+    return barber;
+  }
+
   public async createBarber(dto: RegisterBarberDto) {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
     await queryRunner.connect();

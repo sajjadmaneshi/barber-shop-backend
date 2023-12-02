@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { BarberServiceController } from '../controllers/barber-service.controller';
-import { BarberServiceService } from '../services/barber-service.service';
+import { ServiceController } from '../controllers/service.controller';
+import { ProvidedServiceService } from '../services/provided-service.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Service } from '../data/entities/service';
+import { ServiceEntity } from '../data/entities/service.entity';
 import { DocumentEntity } from '../data/entities/document.entity';
 import { DocumentService } from '../services/document.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Service, DocumentEntity])],
-  controllers: [BarberServiceController],
-  providers: [DocumentService, BarberServiceService],
+  imports: [TypeOrmModule.forFeature([ServiceEntity, DocumentEntity])],
+  controllers: [ServiceController],
+  providers: [DocumentService, ProvidedServiceService],
 })
 export class ServiceModule {}

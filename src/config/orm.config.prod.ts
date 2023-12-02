@@ -8,7 +8,8 @@ import { City } from '../data/entities/city.entity';
 import { Province } from '../data/entities/province.entity';
 import { Barber } from '../data/entities/barber.entity';
 import { Address } from '../data/entities/address.entity';
-import { Service } from '../data/entities/service';
+import { ServiceEntity } from '../data/entities/service.entity';
+import { BarberServiceEntity } from '../data/entities/barber-service.entity';
 
 export default registerAs(
   'orm.config',
@@ -28,7 +29,8 @@ export default registerAs(
       Province,
       Barber,
       Address,
-      Service,
+      ServiceEntity,
+      BarberServiceEntity,
     ],
     synchronize: true, // Be careful with this in production!
     dropSchema: false,
