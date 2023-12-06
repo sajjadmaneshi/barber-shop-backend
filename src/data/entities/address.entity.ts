@@ -16,7 +16,7 @@ export class Address {
   @Column({ length: 255 })
   shopAddress: string;
 
-  @ManyToOne(() => City, (city) => city.addresses)
+  @ManyToOne(() => City, (city) => city.addresses, { eager: true })
   @JoinColumn({ name: 'city_id' })
   city: City;
 

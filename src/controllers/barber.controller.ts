@@ -26,6 +26,7 @@ import { RoleGuard } from '../common/guards/role.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../data/entities/user.entity';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
+import { Address } from '../data/entities/address.entity';
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -38,6 +39,12 @@ export class BarberController {
   @ApiOkResponse({ type: Array<BarberEntity> })
   async getAll() {
     return await this._barberService.getAllBarbers();
+  }
+  @Get('address')
+  @UseGuards(AuthGuardJwt)
+  @ApiOkResponse({ type: Address })
+  async getBarberAddress(@CurrentUser() user: User) {
+    return await this._barberService.getBarberAddress(user.id);
   }
 
   @Get(':id')

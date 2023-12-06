@@ -19,6 +19,7 @@ export class City {
   name: string;
 
   @ManyToOne(() => Province, (province) => province.cities, {
+    eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'province_id' })

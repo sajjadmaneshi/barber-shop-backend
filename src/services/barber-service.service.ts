@@ -1,5 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { In, Repository } from 'typeorm';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
@@ -9,6 +14,7 @@ import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-servi
 import { ServiceEntity } from '../data/entities/service.entity';
 
 import { Barber } from '../data/entities/barber.entity';
+import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
 
 @Injectable()
 export class BarberServiceService {
@@ -76,56 +82,84 @@ export class BarberServiceService {
   public async addService(
     dto: AddBarberServiceDto,
     userId: string,
-  ): Promise<number> {
-    const barber = await this._barberRepository
-      .createQueryBuilder('b')
-      .leftJoin('b.user', 'user')
-      .where('user.id=:userId', { userId })
-      .getOne();
-    if (!barber) throw new NotFoundException('Barber not found');
-    const service = await this._serviceRepository.findOne({
-      where: { id: dto.serviceId },
-    });
-    if (!service) throw new NotFoundException('Service not found');
-    const barberService = new BarberServiceEntity();
+  ): Promise<void> {
+    const queryRunner = this._repository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    barberService.barber = barber;
-    barberService.service = service;
-    barberService.description = dto.description;
-    const result = await this._repository.save(barberService);
-    this.logger.log(`service with id ${result.id} create`);
-    return result.id;
+    try {
+      const barber = await this._barberRepository
+        .createQueryBuilder('b')
+        .leftJoinAndSelect('b.user', 'user')
+        .where('user.id = :userId', { userId })
+        .getOne();
+
+      if (!barber) {
+        throw new NotFoundException('Barber not found');
+      }
+      if (dto.add.length) await this._addServices(dto.add, barber);
+      if (dto.delete.length) await this._removeServices(dto.delete);
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(error.message);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  // public async updateService(
-  //   id: number,
-  //   dto: UpdateServiceDto,
-  // ): Promise<number> {
-  //   const { imageId, ...updateData } = dto;
-  //   let document: DocumentEntity | null = null;
-  //
-  //   if (imageId) {
-  //     document = await this._documentService.findOne(imageId);
-  //     if (!document) throw new BadRequestException('avatar not found');
-  //   }
-  //   const result = await this._repository.update(id, {
-  //     ...updateData,
-  //     image: document,
-  //   } as ServiceEntity);
-  //   if (result.affected === 0) {
-  //     throw new NotFoundException(`Barber Service with ID ${id} not found`);
-  //   }
-  //   this.logger.log(`service with id ${id} updated`);
-  //   return id;
-  // }
-  //
-  // public async removeService(id: number): Promise<DeleteResult> {
-  //   const deleteResult = await this._repository
-  //     .createQueryBuilder('service')
-  //     .delete()
-  //     .where('id = :id', { id })
-  //     .execute();
-  //   this.logger.log(deleteResult);
-  //   return deleteResult;
-  // }
+  private async _addServices(addIds: number[], barber: Barber) {
+    const services = await this._serviceRepository.find({
+      where: { id: In(addIds) },
+    });
+
+    if (!services.length) {
+      throw new NotFoundException('Service not found');
+    }
+    const barberServices = services.map((service) => {
+      const barberService = new BarberServiceEntity();
+      barberService.barber = barber;
+      barberService.service = service;
+      return barberService;
+    });
+
+    await this._repository.save(barberServices);
+  }
+  private async _removeServices(deleteIds: number[]) {
+    const servicesToDelete = await this._repository
+      .createQueryBuilder('bs')
+      .leftJoin('bs.service', 'service')
+      .where('service.id IN (:...deletedIds)', { deleteIds })
+      .getMany();
+
+    if (!servicesToDelete.length) {
+      throw new NotFoundException('Service not found');
+    }
+
+    await this._repository.remove(servicesToDelete);
+  }
+  public async updateService(
+    id: number,
+    dto: UpdateBarberServiceDescriptionDto,
+  ): Promise<number> {
+    const result = await this._repository.update(id, dto);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Barber Service with ID ${id} not found`);
+    }
+    this.logger.log(`service with id ${id} updated`);
+    return id;
+  }
+
+  public async removeService(id: number): Promise<void> {
+    const deleteResult = await this._repository
+      .createQueryBuilder('bs')
+      .delete()
+      .where('id = :id', { id })
+      .execute();
+    this.logger.log(deleteResult);
+    if (deleteResult.affected < 1)
+      throw new BadRequestException('cannot remove item');
+    return;
+  }
 }

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { BarberServiceService } from '../services/barber-service.service';
 import { BarberService } from '../common/controller-names';
 import {
@@ -15,6 +24,7 @@ import { RoleEnum } from '../common/enums/roleEnum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../data/entities/user.entity';
 import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';
+import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
 
 @Controller(BarberService)
 @ApiTags(BarberService)
@@ -37,12 +47,27 @@ export class BarberServiceController {
   }
   @Post()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: Number })
   @ApiBody({ type: AddBarberServiceDto })
   async addNewService(
     @Body() dto: AddBarberServiceDto,
     @CurrentUser() user: User,
   ) {
     return await this._barberServiceService.addService(dto, user.id);
+  }
+  @Patch(':id')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  @ApiOkResponse({ type: Number })
+  @ApiBody({ type: UpdateBarberServiceDescriptionDto })
+  async updateService(
+    @Param('id') id: number,
+    @Body() dto: UpdateBarberServiceDescriptionDto,
+  ) {
+    return await this._barberServiceService.updateService(id, dto);
+  }
+  @Delete(':id')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  async removeService(@Param('id') id: number) {
+    return await this._barberServiceService.removeService(id);
   }
 }

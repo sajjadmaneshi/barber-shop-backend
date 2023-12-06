@@ -128,6 +128,17 @@ export class BarberService {
     return barber;
   }
 
+  public async getBarberAddress(userId: string): Promise<Address[]> {
+    const barber = await this.getBarberBaseQuery()
+      .leftJoin('b.user', 'user')
+      .leftJoinAndSelect('b.addresses', 'address')
+      .leftJoinAndSelect('address.city', 'city')
+      .where('user.id=:userId', { userId })
+      .getOne();
+
+    return barber.addresses;
+  }
+
   public async getBarberWithUserId(id: string) {
     const barber = await this.getBarberBaseQuery()
       .leftJoin('b.user', 'user')
