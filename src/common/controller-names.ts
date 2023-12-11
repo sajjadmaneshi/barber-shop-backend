@@ -7,3 +7,4 @@ export const Geolocation = 'geo-location';
 export const Barber = 'barber';
 export const Service = 'service';
 export const BarberService = 'barber-service';
+export const Calendar = 'calendar';

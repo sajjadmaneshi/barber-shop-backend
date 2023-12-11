@@ -128,6 +128,17 @@ export class BarberService {
     return barber;
   }
 
+  public async getBarberBio(userId: string) {
+    const barberBio = await this.getBarberBaseQuery()
+      .leftJoin('b.user', 'user')
+      .where('user.id=:userId', { userId })
+      .select('b.bio')
+      .getOne();
+    if (!barberBio)
+      throw new NotFoundException('barber with this id not Found');
+    return barberBio;
+  }
+
   public async getBarberAddress(userId: string): Promise<Address[]> {
     const barber = await this.getBarberBaseQuery()
       .leftJoin('b.user', 'user')

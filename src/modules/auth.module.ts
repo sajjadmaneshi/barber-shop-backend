@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { RoleService } from '../services/role.service';
+import { CalendarModule } from './calendar.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RoleService } from '../services/role.service';
         },
       }),
     }),
+    CalendarModule,
   ],
 
   controllers: [AuthController],

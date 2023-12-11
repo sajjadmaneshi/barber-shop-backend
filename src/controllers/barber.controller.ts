@@ -36,7 +36,7 @@ export class BarberController {
 
   @Get()
   @UseGuards(AuthGuardJwt)
-  @ApiOkResponse({ type: Array<BarberEntity> })
+  @ApiOkResponse({ type: BarberEntity })
   async getAll() {
     return await this._barberService.getAllBarbers();
   }
@@ -45,6 +45,13 @@ export class BarberController {
   @ApiOkResponse({ type: Address })
   async getBarberAddress(@CurrentUser() user: User) {
     return await this._barberService.getBarberAddress(user.id);
+  }
+
+  @Get('bio')
+  @UseGuards(AuthGuardJwt)
+  @ApiOkResponse({ type: String })
+  async getBarberBio(@CurrentUser() user: User) {
+    return await this._barberService.getBarberBio(user.id);
   }
 
   @Get(':id')

@@ -9,10 +9,13 @@ import {
 import { User } from './user.entity';
 import { Address } from './address.entity';
 import { BarberServiceEntity } from './barber-service.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { CalendarEntity } from './calendar.entity';
 
 @Entity()
 export class Barber {
   @PrimaryGeneratedColumn()
+  @ApiProperty({ type: Number })
   id: number;
 
   @OneToOne(() => User, { eager: true })
@@ -24,6 +27,11 @@ export class Barber {
 
   @OneToMany(() => Address, (address) => address.barber, { cascade: true })
   addresses: Address[];
+
+  @OneToMany(() => CalendarEntity, (calendar) => calendar.barber, {
+    cascade: true,
+  })
+  calendars: CalendarEntity[];
 
   @OneToMany(() => BarberServiceEntity, (barberService) => barberService.barber)
   barberServices: BarberServiceEntity[];

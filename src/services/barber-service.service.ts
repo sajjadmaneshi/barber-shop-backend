@@ -110,13 +110,15 @@ export class BarberServiceService {
   }
 
   private async _addServices(addIds: number[], barber: Barber) {
+    const filteredId = await this._filterBarberServices(addIds, barber);
     const services = await this._serviceRepository.find({
-      where: { id: In(addIds) },
+      where: { id: In(filteredId) },
     });
 
     if (!services.length) {
-      throw new NotFoundException('Service not found');
+      throw new NotFoundException('Service not found or maybe exist before');
     }
+
     const barberServices = services.map((service) => {
       const barberService = new BarberServiceEntity();
       barberService.barber = barber;
@@ -126,11 +128,31 @@ export class BarberServiceService {
 
     await this._repository.save(barberServices);
   }
+
+  private async _filterBarberServices(
+    addIds: number[],
+    barber: Barber,
+  ): Promise<number[]> {
+    const existingBarberServices = await this._repository
+      .createQueryBuilder('bs')
+      .leftJoin('bs.barber', 'barber')
+      .where('barber=:barber', { barber })
+      .leftJoinAndSelect('bs.service', 'service')
+      .where('service.id IN (:...addIds)', { addIds })
+      .getMany();
+
+    return addIds.filter(
+      (serviceId) =>
+        !existingBarberServices.some(
+          (barberService) => barberService.service.id === serviceId,
+        ),
+    );
+  }
   private async _removeServices(deleteIds: number[]) {
     const servicesToDelete = await this._repository
       .createQueryBuilder('bs')
       .leftJoin('bs.service', 'service')
-      .where('service.id IN (:...deletedIds)', { deleteIds })
+      .where('service.id IN (:...deleteIds)', { deleteIds })
       .getMany();
 
     if (!servicesToDelete.length) {
