@@ -1,17 +1,32 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { Service } from "../common/controller-names";
-import { ServiceEntity } from "../data/entities/service.entity";
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiTags } from "@nestjs/swagger";
-import { AuthGuardJwt } from "../common/guards/auth-guard.jwt";
-import { RoleGuard } from "../common/guards/role.guard";
-import { RoleEnum } from "../common/enums/roleEnum";
-import { Roles } from "../common/decorators/role.decorator";
-import { ProvidedServiceService } from "../services/provided-service.service";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { Service } from '../common/controller-names';
+import { ServiceEntity } from '../data/entities/service.entity';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
+import { RoleGuard } from '../common/guards/role.guard';
+import { RoleEnum } from '../common/enums/roleEnum';
+import { Roles } from '../common/decorators/role.decorator';
+import { ProvidedServiceService } from '../services/provided-service.service';
 
-import { PaginationResult } from "../common/pagination/paginator";
-import { AddServiceDto } from "../data/DTO/provided-service/add-service.dto";
-import { UpdateServiceDto } from "../data/DTO/provided-service/update-service.dto";
-import { ServiceViewModel } from "../data/models/service.view-model";
+import { PaginationResult } from '../common/pagination/paginator';
+import { AddServiceDto } from '../data/DTO/provided-service/add-service.dto';
+import { UpdateServiceDto } from '../data/DTO/provided-service/update-service.dto';
+import { ServiceViewModel } from '../data/models/service.view-model';
 
 @ApiTags(Service)
 @Controller(Service)
@@ -21,7 +36,7 @@ export class ServiceController {
   constructor(private readonly _barberServiceService: ProvidedServiceService) {}
 
   @Get()
-  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER,RoleEnum.CUSTOMER)
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER, RoleEnum.CUSTOMER)
   @ApiOkResponse({ type: PaginationResult<ServiceEntity> })
   async findAll() {
     return await this._barberServiceService.getServices();
