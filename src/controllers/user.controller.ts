@@ -10,6 +10,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -31,6 +32,10 @@ import { Users } from '../common/controller-names';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
 import { ProfileResponseViewModel } from '../data/models/profile-response.view-model';
+import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
+import { RoleGuard } from '../common/guards/role.guard';
+import { Roles } from '../common/decorators/role.decorator';
+import { RoleEnum } from '../common/enums/roleEnum';
 
 @ApiTags(Users)
 @Controller(Users)
@@ -130,6 +135,14 @@ export class UserController {
     } else {
       throw new BadRequestException('user profile NotFound');
     }
+  }
+
+  @Put('changeRole')
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiBody({ type: ChangeRoleDto })
+  async changeRole(@Body() dto: ChangeRoleDto) {
+    await this.userService.changeRole(dto);
   }
 
   @Delete(':id')
