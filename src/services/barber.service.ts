@@ -15,6 +15,7 @@ import { Address } from '../data/entities/address.entity';
 import { GeolocationService } from './geolocation.service';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
 import { City } from '../data/entities/city.entity';
+import { DocumentService } from './document.service';
 
 @Injectable()
 export class BarberService {
@@ -29,6 +30,7 @@ export class BarberService {
     @InjectRepository(Address)
     private readonly _addressRepository: Repository<Address>,
     private readonly _roleService: RoleService,
+    private readonly _documentService: DocumentService,
     private readonly _geoLocationService: GeolocationService,
   ) {}
 
@@ -50,6 +52,7 @@ export class BarberService {
     try {
       const barber = new Barber();
       barber.user = user;
+
       barber.bio = dto.bio;
       await this._repository.save(barber);
       const address = new Address();
@@ -58,6 +61,12 @@ export class BarberService {
       address.longitude = dto.longitude;
       address.latitude = dto.latitude;
       address.barber = barber;
+      const document = await this._documentService.findOne(dto.avatarId);
+      if (!document) throw new BadRequestException('avatar not found');
+      user.profile.avatar = document;
+      user.isRegistered = true;
+      await this._userRepository.save(user);
+      await this._profileRepository.save(user.profile);
       await this._addressRepository.save(address);
       await queryRunner.commitTransaction();
       return barber.id;

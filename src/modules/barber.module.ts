@@ -11,6 +11,8 @@ import { GeolocationService } from '../services/geolocation.service';
 import { City } from '../data/entities/city.entity';
 import { Province } from '../data/entities/province.entity';
 import { Address } from '../data/entities/address.entity';
+import { DocumentService } from '../services/document.service';
+import { DocumentEntity } from '../data/entities/document.entity';
 
 @Module({
   imports: [
@@ -22,10 +24,11 @@ import { Address } from '../data/entities/address.entity';
       Address,
       Province,
       Barber,
+      DocumentEntity,
     ]),
   ],
 
   controllers: [BarberController],
-  providers: [RoleService, GeolocationService, BarberService],
+  providers: [DocumentService, RoleService, GeolocationService, BarberService],
 })
 export class BarberModule {}
