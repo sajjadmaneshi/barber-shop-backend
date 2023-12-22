@@ -9,9 +9,9 @@ import {
   NotFoundException,
   Param,
   Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+  Post, Put,
+  UseGuards
+} from "@nestjs/common";
 import { Repository } from 'typeorm';
 import { User } from '../data/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,6 +31,10 @@ import { Users } from '../common/controller-names';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
 import { ProfileResponseViewModel } from '../data/models/profile-response.view-model';
+import { RoleGuard } from "../common/guards/role.guard";
+import { Roles } from "../common/decorators/role.decorator";
+import { RoleEnum } from "../common/enums/roleEnum";
+import { ChangeRoleDto } from "../data/DTO/user/change-role.dto";
 
 @ApiTags(Users)
 @Controller(Users)
@@ -131,6 +135,15 @@ export class UserController {
       throw new BadRequestException('user profile NotFound');
     }
   }
+
+  @Put('changeRole')
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiBody({ type: ChangeRoleDto })
+  async changeRole(@Body() dto: ChangeRoleDto) {
+    await this.userService.changeRole(dto);
+  }
+
 
   @Delete(':id')
   @HttpCode(204)

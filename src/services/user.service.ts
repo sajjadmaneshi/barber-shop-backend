@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AddUserDto } from '../data/DTO/user/add-user.dto';
 import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { RoleService } from './role.service';
+import { ChangeRoleDto } from "../data/DTO/user/change-role.dto";
 
 @Injectable()
 export class UserService {
@@ -37,6 +38,18 @@ export class UserService {
     user.otp = input.otp;
     user.role = await this._roleService.getRole(input.role);
     return await this._userRepository.save(user);
+  }
+
+  async changeRole(changeRoleDto: ChangeRoleDto): Promise<boolean> {
+    const id = changeRoleDto.userId;
+    const result = await this._userRepository
+      .createQueryBuilder('u')
+      .update()
+      .where('id = :id', { id })
+      .set({ role: await this._roleService.getRole(changeRoleDto.role) })
+      .execute();
+
+    return result.affected > 0;
   }
 
   async updateUser(id: string, input: UpdateUserDto): Promise<UpdateResult> {
