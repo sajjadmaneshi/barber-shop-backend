@@ -32,10 +32,10 @@ import { Users } from '../common/controller-names';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
 import { ProfileResponseViewModel } from '../data/models/profile-response.view-model';
-import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/role.decorator';
 import { RoleEnum } from '../common/enums/roleEnum';
+import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
 
 @ApiTags(Users)
 @Controller(Users)

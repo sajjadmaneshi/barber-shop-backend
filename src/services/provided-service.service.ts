@@ -36,13 +36,25 @@ export class ProvidedServiceService {
 
   public async getServices(
     paginateOptions?: PaginateOptions,
-  ): Promise<PaginationResult<ServiceEntity>> {
+  ): Promise<PaginationResult<ServiceViewModel>> {
     const result = await paginate<ServiceEntity>(
-      this.getServicesBaseQuery(),
+      this.getServicesBaseQuery().leftJoinAndSelect('service.image', 'image'),
       paginateOptions,
     );
     this.logger.log(`returned ${result.total} services`);
-    return result;
+
+    return {
+      total: result.total,
+      data: result.data.map((x) => ({
+        id: x.id,
+        title: x.title,
+        gender: x.gender,
+        price: x.price,
+        feeDiscount: x.feeDiscount,
+        description: x.description,
+        imageId: x.image?.id,
+      })),
+    };
   }
 
   public async getService(id: number): Promise<ServiceViewModel | undefined> {
@@ -69,6 +81,7 @@ export class ProvidedServiceService {
       document = await this._documentService.findOne(dto.imageId);
       if (!document) throw new BadRequestException('avatar not found');
     }
+    service.image = document;
     const result = await this._repository.save(service);
     this.logger.log(`service with id ${result.id} create`);
     return result.id;

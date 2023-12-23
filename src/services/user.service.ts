@@ -40,15 +40,6 @@ export class UserService {
     return await this._userRepository.save(user);
   }
 
-  async updateUser(id: string, input: UpdateUserDto): Promise<UpdateResult> {
-    return await this._userRepository
-      .createQueryBuilder('u')
-      .update()
-      .where('id = :id', { id })
-      .set({ otp: input.otp })
-      .execute();
-  }
-
   async changeRole(changeRoleDto: ChangeRoleDto): Promise<boolean> {
     const id = changeRoleDto.userId;
     const result = await this._userRepository
@@ -59,6 +50,15 @@ export class UserService {
       .execute();
 
     return result.affected > 0;
+  }
+
+  async updateUser(id: string, input: UpdateUserDto): Promise<UpdateResult> {
+    return await this._userRepository
+      .createQueryBuilder('u')
+      .update()
+      .where('id = :id', { id })
+      .set({ otp: input.otp })
+      .execute();
   }
 
   public async getUserByMobileNumber(
