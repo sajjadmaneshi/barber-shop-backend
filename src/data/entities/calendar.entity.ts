@@ -20,40 +20,36 @@ export class CalendarEntity {
     type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  startDateTime: Date;
+  startDate: Date;
+  @Column()
+  startTime: string;
   @CreateDateColumn({
     type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  endDateTime: Date;
+  endDate: Date;
+  @Column()
+  endTime: string;
 
   @Column()
   period: number;
 
-  @CreateDateColumn({
-    type: 'timestamp with time zone',
-    default: () => 'CURRENT_TIMESTAMP',
+  @Column({
     nullable: true,
   })
-  startRestTime: Date;
-  @CreateDateColumn({
-    type: 'timestamp with time zone',
-    default: () => 'CURRENT_TIMESTAMP',
+  startRestTime: string;
+  @Column({
     nullable: true,
   })
-  endRestTime: Date;
-  @CreateDateColumn({
-    type: 'timestamp with time zone',
-    default: () => 'CURRENT_TIMESTAMP',
+  endRestTime: string;
+  @Column({
     nullable: true,
   })
-  startExtraTime: Date;
-  @CreateDateColumn({
-    type: 'timestamp with time zone',
-    default: () => 'CURRENT_TIMESTAMP',
+  startExtraTime: string;
+  @Column({
     nullable: true,
   })
-  endExtraTime: Date;
+  endExtraTime: string;
 
   @ManyToOne(() => Barber, (barber) => barber.calendars, { eager: true })
   @JoinColumn({ name: 'barber_id' })

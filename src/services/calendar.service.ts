@@ -56,7 +56,7 @@ export class CalendarService {
       .where('user.id=:userId', { userId })
       .getOne();
     if (!barber) throw new BadRequestException('user with this id not found');
-    this._checkDateValid(dto);
+    // this._checkDateValid(dto);
     calendar.barber = barber;
     const result = await this._repository.save(calendar);
     return result.id;
@@ -64,13 +64,19 @@ export class CalendarService {
 
   private _checkDateValid(dto: AddCalendarDto) {
     const {
-      startDateTime,
-      endDateTime,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
       startRestTime,
       endRestTime,
       startExtraTime,
       endExtraTime,
     } = dto;
+
+    const isAfterDateOrSame = (start: string, end: string) =>
+      this._dateTimeService.isAfter(start, end) ||
+      this._dateTimeService.isSame(start, end);
     const isAfterOrSame = (start: string, end: string) =>
       this._dateTimeService.isAfter(start, end) ||
       this._dateTimeService.isSame(start, end);
@@ -78,8 +84,10 @@ export class CalendarService {
       this._dateTimeService.isAfter(date, start) &&
       this._dateTimeService.isBefore(date, end);
 
-    if (isAfterOrSame(startDateTime.toString(), endDateTime.toString()))
+    if (isAfterDateOrSame(startDate.toString(), endDate.toString()))
       throw new BadRequestException('start date should be before end date');
+    if (isAfterOrSame(startTime.toString(), endTime.toString()))
+      throw new BadRequestException('start time should be before end date');
 
     if (isAfterOrSame(startRestTime.toString(), endRestTime.toString()))
       throw new BadRequestException(
@@ -94,13 +102,13 @@ export class CalendarService {
     if (
       !isBetween(
         startRestTime.toString(),
-        startDateTime.toString(),
-        endDateTime.toString(),
+        startTime.toString(),
+        endTime.toString(),
       ) ||
       !isBetween(
         endRestTime.toString(),
-        startDateTime.toString(),
-        endDateTime.toString(),
+        startTime.toString(),
+        endTime.toString(),
       )
     )
       throw new BadRequestException(
@@ -110,13 +118,13 @@ export class CalendarService {
     if (
       !isBetween(
         startExtraTime.toString(),
-        startDateTime.toString(),
-        endDateTime.toString(),
+        startTime.toString(),
+        endTime.toString(),
       ) ||
       !isBetween(
         endExtraTime.toString(),
-        startDateTime.toString(),
-        endDateTime.toString(),
+        startTime.toString(),
+        endTime.toString(),
       )
     )
       throw new BadRequestException(
