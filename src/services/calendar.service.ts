@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CalendarEntity } from '../data/entities/calendar.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { Barber } from '../data/entities/barber.entity';
 import { DateTimeService } from '../common/services/date-time.service';
+import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
 
 @Injectable()
 export class CalendarService {
@@ -49,7 +50,13 @@ export class CalendarService {
     dto: AddCalendarDto,
     userId: string,
   ): Promise<number> {
-    await this.isCalendarInThisPeriod(dto.startDate, dto.endDate);
+    const existingCalendar = await this.isCalendarInThisPeriod(
+      dto.startDate,
+      dto.endDate,
+    );
+    if (existingCalendar) {
+      throw new BadRequestException('calendar with this date exist before');
+    }
     const calendar = new CalendarEntity({ ...dto });
     const barber = await this._barberRepository
       .createQueryBuilder('b')
@@ -63,7 +70,7 @@ export class CalendarService {
     return result.id;
   }
 
-  private _checkDateValid(dto: AddCalendarDto) {
+  private _checkDateValid(dto: AddCalendarDto | UpdateCalendarDto) {
     const {
       startDate,
       startTime,
@@ -126,22 +133,42 @@ export class CalendarService {
   }
 
   private async isCalendarInThisPeriod(startDate: Date, endDate: Date) {
-    const calendar = await this.getCalendarsBaseQuery()
+    return await this.getCalendarsBaseQuery()
       .where('calendar.startDate >= :startDate', { startDate })
       .andWhere('calendar.endDate <= :endDate', { endDate })
       .getOne();
-    if (calendar) {
-      throw new BadRequestException('a calendar exist between this date');
-    }
-    return false;
   }
 
-  public async removeCalendar() {}
+  public async removeCalendar(id: number) {
+    const deleteResult = await this.getCalendarsBaseQuery()
+      .delete()
+      .where('id = :id', { id })
+      .execute();
 
-  // public async updateCalendar(
-  //   dto: UpdateCalendarDto,
-  //   id: number,
-  // ): Promise<UpdateResult> {
-  //   const result = await this._repository.update(id, { id: undefined, ...dto });
-  // }
+    if (deleteResult.affected < 1)
+      throw new BadRequestException('cannot remove item');
+    return;
+  }
+
+  public async updateCalendar(
+    dto: UpdateCalendarDto,
+    id: number,
+  ): Promise<UpdateResult> {
+    let existingCalendar = await this.getSpecificCalendar(id);
+    if (existingCalendar) {
+      existingCalendar = { ...existingCalendar, ...dto };
+      const existingCalendarInThisDate = await this.isCalendarInThisPeriod(
+        existingCalendar.startDate,
+        existingCalendar.endDate,
+      );
+      if (existingCalendarInThisDate?.id !== id) {
+        throw new BadRequestException('calendar with this date exist before');
+      }
+
+      this._checkDateValid(existingCalendar);
+      return await this._repository.update(id, { ...existingCalendar });
+    } else {
+      throw new BadRequestException('calendar with this id Not Found');
+    }
+  }
 }

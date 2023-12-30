@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Calendar } from '../common/controller-names';
 import {
   ApiBearerAuth,
@@ -43,5 +51,11 @@ export class CalendarController {
   @ApiBody({ type: AddCalendarDto })
   async addNewCalendar(@Body() dto: AddCalendarDto, @CurrentUser() user: User) {
     return await this._calendarService.createCalendar(dto, user.id);
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  async remove(@Param('id') id: number) {
+    return await this._calendarService.removeCalendar(id);
   }
 }
