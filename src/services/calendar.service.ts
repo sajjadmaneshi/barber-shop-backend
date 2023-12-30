@@ -49,6 +49,7 @@ export class CalendarService {
     dto: AddCalendarDto,
     userId: string,
   ): Promise<number> {
+    await this.isCalendarInThisPeriod(dto.startDate, dto.endDate);
     const calendar = new CalendarEntity({ ...dto });
     const barber = await this._barberRepository
       .createQueryBuilder('b')
@@ -56,7 +57,7 @@ export class CalendarService {
       .where('user.id=:userId', { userId })
       .getOne();
     if (!barber) throw new BadRequestException('user with this id not found');
-    // this._checkDateValid(dto);
+    this._checkDateValid(dto);
     calendar.barber = barber;
     const result = await this._repository.save(calendar);
     return result.id;
@@ -75,78 +76,67 @@ export class CalendarService {
     } = dto;
 
     const isAfterDateOrSame = (start: string, end: string) =>
+      this._dateTimeService.isAfterDate(start, end) ||
+      this._dateTimeService.isSameDate(start, end);
+    const isAfterOrSame = (start: number, end: number) =>
       this._dateTimeService.isAfter(start, end) ||
       this._dateTimeService.isSame(start, end);
-    const isAfterOrSame = (start: string, end: string) =>
-      this._dateTimeService.isAfter(start, end) ||
-      this._dateTimeService.isSame(start, end);
-    const isBetween = (date: string, start: string, end: string) =>
-      this._dateTimeService.isAfter(date, start) &&
-      this._dateTimeService.isBefore(date, end);
+    const isBetween = (time: number, start: number, end: number) =>
+      this._dateTimeService.isAfter(time, start) &&
+      this._dateTimeService.isBefore(time, end);
 
     if (isAfterDateOrSame(startDate.toString(), endDate.toString()))
       throw new BadRequestException('start date should be before end date');
-    if (isAfterOrSame(startTime.toString(), endTime.toString()))
+    if (isAfterOrSame(startTime, endTime))
       throw new BadRequestException('start time should be before end date');
 
-    if (isAfterOrSame(startRestTime.toString(), endRestTime.toString()))
+    if (isAfterOrSame(startRestTime, endRestTime))
       throw new BadRequestException(
         'start rest date should be before end rest date',
       );
 
-    if (isAfterOrSame(startExtraTime.toString(), endExtraTime.toString()))
+    if (isAfterOrSame(startExtraTime, endExtraTime))
       throw new BadRequestException(
         'start extra should be before end extra date',
       );
 
     if (
-      !isBetween(
-        startRestTime.toString(),
-        startTime.toString(),
-        endTime.toString(),
-      ) ||
-      !isBetween(
-        endRestTime.toString(),
-        startTime.toString(),
-        endTime.toString(),
-      )
+      !isBetween(startRestTime, startTime, endTime) ||
+      !isBetween(endRestTime, startTime, endTime)
     )
       throw new BadRequestException(
         'rest time should be between start and end date',
       );
 
     if (
-      !isBetween(
-        startExtraTime.toString(),
-        startTime.toString(),
-        endTime.toString(),
-      ) ||
-      !isBetween(
-        endExtraTime.toString(),
-        startTime.toString(),
-        endTime.toString(),
-      )
+      !isBetween(startExtraTime, startTime, endTime) ||
+      !isBetween(endExtraTime, startTime, endTime)
     )
       throw new BadRequestException(
         'extra dateTime should be between start and end date',
       );
 
     if (
-      isBetween(
-        startRestTime.toString(),
-        startExtraTime.toString(),
-        endExtraTime.toString(),
-      ) ||
-      isBetween(
-        endRestTime.toString(),
-        startExtraTime.toString(),
-        endExtraTime.toString(),
-      )
+      isBetween(startRestTime, startExtraTime, endExtraTime) ||
+      isBetween(endRestTime, startExtraTime, endExtraTime)
     )
       throw new BadRequestException(
         'rest time should not conflict with extra dateTime',
       );
   }
+
+  private async isCalendarInThisPeriod(startDate: Date, endDate: Date) {
+    const calendar = await this.getCalendarsBaseQuery()
+      .where('calendar.startDate >= :startDate', { startDate })
+      .andWhere('calendar.endDate <= :endDate', { endDate })
+      .getOne();
+    if (calendar) {
+      throw new BadRequestException('a calendar exist between this date');
+    }
+    return false;
+  }
+
+  public async removeCalendar() {}
 
   // public async updateCalendar(
   //   dto: UpdateCalendarDto,

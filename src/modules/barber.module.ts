@@ -13,6 +13,9 @@ import { Province } from '../data/entities/province.entity';
 import { Address } from '../data/entities/address.entity';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
+import { CalendarService } from '../services/calendar.service';
+import { CalendarEntity } from '../data/entities/calendar.entity';
+import { DateTimeService } from '../common/services/date-time.service';
 
 @Module({
   imports: [
@@ -24,11 +27,19 @@ import { DocumentEntity } from '../data/entities/document.entity';
       Address,
       Province,
       Barber,
+      CalendarEntity,
       DocumentEntity,
     ]),
   ],
 
   controllers: [BarberController],
-  providers: [DocumentService, RoleService, GeolocationService, BarberService],
+  providers: [
+    DocumentService,
+    RoleService,
+    GeolocationService,
+    DateTimeService,
+    CalendarService,
+    BarberService,
+  ],
 })
 export class BarberModule {}

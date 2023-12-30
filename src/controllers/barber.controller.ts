@@ -27,12 +27,17 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../data/entities/user.entity';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
 import { Address } from '../data/entities/address.entity';
+import { CalendarEntity } from '../data/entities/calendar.entity';
+import { CalendarService } from '../services/calendar.service';
 
 @Controller(Barber)
 @ApiTags(Barber)
 @ApiBearerAuth()
 export class BarberController {
-  constructor(private readonly _barberService: BarberService) {}
+  constructor(
+    private readonly _barberService: BarberService,
+    private readonly _calendarService: CalendarService,
+  ) {}
 
   @Get()
   @UseGuards(AuthGuardJwt)
@@ -45,6 +50,13 @@ export class BarberController {
   @ApiOkResponse({ type: Address })
   async getBarberAddress(@CurrentUser() user: User) {
     return await this._barberService.getBarberAddress(user.id);
+  }
+
+  @Get('calendars')
+  @UseGuards(AuthGuardJwt)
+  @ApiOkResponse({ type: [CalendarEntity] })
+  async getBarberCalendars(@CurrentUser() user: User) {
+    return await this._calendarService.getBarberCalendars(user.id);
   }
 
   @Get('bio')

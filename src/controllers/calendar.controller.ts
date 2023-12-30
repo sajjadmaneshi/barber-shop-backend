@@ -41,7 +41,7 @@ export class CalendarController {
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: Number })
   @ApiBody({ type: AddCalendarDto })
-  async addNewService(@Body() dto: AddCalendarDto, @CurrentUser() user: User) {
+  async addNewCalendar(@Body() dto: AddCalendarDto, @CurrentUser() user: User) {
     return await this._calendarService.createCalendar(dto, user.id);
   }
 }
