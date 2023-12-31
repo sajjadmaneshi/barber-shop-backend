@@ -18,6 +18,11 @@ export class DateTimeService {
     const endDate = this.parseISOStringToUtcDate(date2);
     return startDate.getTime() > endDate.getTime();
   }
+  isBeforeDate(date1: string, date2: string): boolean {
+    const startDate = this.parseISOStringToUtcDate(date1);
+    const endDate = this.parseISOStringToUtcDate(date2);
+    return startDate.getTime() < endDate.getTime();
+  }
   isSameDate(date1: string, date2: string): boolean {
     const startDate = this.parseISOStringToUtcDate(date1);
     const endDate = this.parseISOStringToUtcDate(date2);

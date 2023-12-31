@@ -4,6 +4,7 @@ import { ExceptionDayEntity } from '../data/entities/exception-day.entity';
 import { Repository } from 'typeorm';
 import { AddExceptionDayDto } from '../data/DTO/exception-day/add-exception-day.dto';
 import { CalendarEntity } from '../data/entities/calendar.entity';
+import { DateTimeService } from '../common/services/date-time.service';
 
 @Injectable()
 export class ExceptionDayService {
@@ -13,6 +14,7 @@ export class ExceptionDayService {
     private readonly _repository: Repository<ExceptionDayEntity>,
     @InjectRepository(CalendarEntity)
     private readonly _calendarRepository: Repository<CalendarEntity>,
+    private readonly _dateTimeService: DateTimeService,
   ) {}
 
   private getExceptionDaysBaseQuery() {
@@ -54,9 +56,23 @@ export class ExceptionDayService {
     });
     if (!calendar)
       throw new BadRequestException('calendar with this id NotFound');
+    this._checkDateValidation(date, calendar.startDate, calendar.endDate);
     const exceptionDay = new ExceptionDayEntity({ ...dto });
     exceptionDay.calendar = calendar;
     const result = await this._repository.save(exceptionDay);
     return result.id;
+  }
+
+  private _checkDateValidation(date: Date, startDate: Date, endDate: Date) {
+    const isBetween = (date: string, startDate: string, endDate: string) =>
+      (this._dateTimeService.isAfterDate(date, startDate) &&
+        this._dateTimeService.isBeforeDate(date, endDate)) ||
+      this._dateTimeService.isSameDate(date, startDate) ||
+      this._dateTimeService.isSameDate(date, endDate);
+
+    if (!isBetween(date.toString(), startDate.toString(), endDate.toString()))
+      throw new BadRequestException(
+        'exception day should be between start and end date',
+      );
   }
 }
