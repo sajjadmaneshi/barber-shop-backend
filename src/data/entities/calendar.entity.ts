@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Barber } from './barber.entity';
 import { MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ExceptionDay } from './exception-day.entity';
 
 @Entity({ name: 'calendar' })
 export class CalendarEntity {
@@ -68,4 +70,9 @@ export class CalendarEntity {
   @ManyToOne(() => Barber, (barber) => barber.calendars, { eager: true })
   @JoinColumn({ name: 'barber_id' })
   barber: Barber;
+
+  @OneToMany(() => ExceptionDay, (exceptionDay) => exceptionDay.calendar, {
+    nullable: true,
+  })
+  exceptionDays: ExceptionDay[];
 }

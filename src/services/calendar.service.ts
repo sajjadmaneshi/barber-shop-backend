@@ -1,7 +1,12 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CalendarEntity } from '../data/entities/calendar.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { Barber } from '../data/entities/barber.entity';
 import { DateTimeService } from '../common/services/date-time.service';
@@ -153,7 +158,7 @@ export class CalendarService {
   public async updateCalendar(
     dto: UpdateCalendarDto,
     id: number,
-  ): Promise<UpdateResult> {
+  ): Promise<number> {
     let existingCalendar = await this.getSpecificCalendar(id);
     if (existingCalendar) {
       existingCalendar = { ...existingCalendar, ...dto };
@@ -161,12 +166,21 @@ export class CalendarService {
         existingCalendar.startDate,
         existingCalendar.endDate,
       );
-      if (existingCalendarInThisDate?.id !== id) {
+
+      if (
+        existingCalendarInThisDate?.id != null &&
+        existingCalendarInThisDate?.id !== +id
+      ) {
         throw new BadRequestException('calendar with this date exist before');
       }
 
       this._checkDateValid(existingCalendar);
-      return await this._repository.update(id, { ...existingCalendar });
+      const result = await this._repository.update(id, { ...existingCalendar });
+      if (result.affected === 0) {
+        throw new NotFoundException(`Barber Service with ID ${id} not found`);
+      }
+      this.logger.log(`service with id ${id} updated`);
+      return id;
     } else {
       throw new BadRequestException('calendar with this id Not Found');
     }

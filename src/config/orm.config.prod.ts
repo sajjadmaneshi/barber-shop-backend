@@ -11,6 +11,7 @@ import { Address } from '../data/entities/address.entity';
 import { ServiceEntity } from '../data/entities/service.entity';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
 import { CalendarEntity } from '../data/entities/calendar.entity';
+import { ExceptionDay } from '../data/entities/exception-day.entity';
 
 export default registerAs(
   'orm.config',
@@ -34,6 +35,7 @@ export default registerAs(
       ServiceEntity,
       BarberServiceEntity,
       CalendarEntity,
+      ExceptionDay,
     ],
     synchronize: true, // Be careful with this in production!
     dropSchema: false,

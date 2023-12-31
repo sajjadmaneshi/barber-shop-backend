@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import { CalendarEntity } from '../data/entities/calendar.entity';
 import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
+import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
 
 @Controller(Calendar)
 @ApiTags(Calendar)
@@ -51,6 +53,16 @@ export class CalendarController {
   @ApiBody({ type: AddCalendarDto })
   async addNewCalendar(@Body() dto: AddCalendarDto, @CurrentUser() user: User) {
     return await this._calendarService.createCalendar(dto, user.id);
+  }
+
+  @Patch(':id')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  @ApiBody({ type: UpdateCalendarDto })
+  async updateCalendar(
+    @Body() dto: UpdateCalendarDto,
+    @Param('id') id: number,
+  ) {
+    return this._calendarService.updateCalendar(dto, id);
   }
 
   @Delete(':id')
