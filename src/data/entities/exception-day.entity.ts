@@ -10,9 +10,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CalendarEntity } from './calendar.entity';
 
 @Entity('exception_day')
-export class ExceptionDay {
-  constructor(partial?: Partial<ExceptionDay>) {
-    Object.assign(this as ExceptionDay, partial);
+export class ExceptionDayEntity {
+  constructor(partial?: Partial<ExceptionDayEntity>) {
+    Object.assign(this as ExceptionDayEntity, partial);
   }
 
   @PrimaryGeneratedColumn()

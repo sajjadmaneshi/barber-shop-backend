@@ -10,7 +10,7 @@ import {
 import { Barber } from './barber.entity';
 import { MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ExceptionDay } from './exception-day.entity';
+import { ExceptionDayEntity } from './exception-day.entity';
 
 @Entity({ name: 'calendar' })
 export class CalendarEntity {
@@ -71,8 +71,12 @@ export class CalendarEntity {
   @JoinColumn({ name: 'barber_id' })
   barber: Barber;
 
-  @OneToMany(() => ExceptionDay, (exceptionDay) => exceptionDay.calendar, {
-    nullable: true,
-  })
-  exceptionDays: ExceptionDay[];
+  @OneToMany(
+    () => ExceptionDayEntity,
+    (exceptionDay) => exceptionDay.calendar,
+    {
+      nullable: true,
+    },
+  )
+  exceptionDays: ExceptionDayEntity[];
 }

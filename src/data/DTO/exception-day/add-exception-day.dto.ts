@@ -7,7 +7,6 @@ export class AddExceptionDayDto {
   @IsNotEmpty()
   date: Date;
   @ApiProperty({ type: Number })
-  @IsNotEmpty()
   period: number;
 
   @ApiProperty({ type: Number })

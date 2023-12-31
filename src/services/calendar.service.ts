@@ -32,7 +32,7 @@ export class CalendarService {
   }
 
   public async getBarberCalendars(userId: string): Promise<CalendarEntity[]> {
-    let calendars = [];
+    let calendars: CalendarEntity[] = [];
     calendars = await this.getCalendarsBaseQuery()
       .leftJoin('calendar.barber', 'barber')
       .leftJoin('barber.user', 'user')

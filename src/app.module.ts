@@ -18,6 +18,7 @@ import { ServiceModule } from './modules/service.module';
 import { BarberServiceModule } from './modules/barber-service.module';
 
 import { CalendarModule } from './modules/calendar.module';
+import { ExceptionDayModule } from './modules/exception-day.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { CalendarModule } from './modules/calendar.module';
     ServiceModule,
     BarberServiceModule,
     CalendarModule,
+    ExceptionDayModule,
   ],
   controllers: [],
   providers: [
