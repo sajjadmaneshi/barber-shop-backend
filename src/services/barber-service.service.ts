@@ -116,7 +116,7 @@ export class BarberServiceService {
     });
 
     if (!services.length) {
-      throw new NotFoundException('Service not found or maybe exist before');
+      throw new NotFoundException('Service not found or exist before');
     }
 
     const barberServices = services.map((service) => {
@@ -136,9 +136,9 @@ export class BarberServiceService {
     const existingBarberServices = await this._repository
       .createQueryBuilder('bs')
       .leftJoin('bs.barber', 'barber')
-      .where('barber=:barber', { barber })
       .leftJoinAndSelect('bs.service', 'service')
-      .where('service.id IN (:...addIds)', { addIds })
+      .where('barber.id = :barberId', { barberId: barber.id })
+      .andWhere('service.id IN (:...addIds)', { addIds })
       .getMany();
 
     return addIds.filter(
