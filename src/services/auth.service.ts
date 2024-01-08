@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../data/entities/user.entity';
+import { UserEntity } from '../data/entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { VerifyOtpDto } from '../data/DTO/user/verify-otp.dto';
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  public getTokenForUser(user: User): string {
+  public getTokenForUser(user: UserEntity): string {
     return this.jwtService.sign({
       mobileNumber: user.mobileNumber,
       role: user.role.name.toUpperCase(),
@@ -36,7 +36,6 @@ export class AuthService {
   }
 
   async registerUser(mobileNumber: string): Promise<string> {
-
     try {
       const existingUser =
         await this._userService.getUserByMobileNumber(mobileNumber);
@@ -60,14 +59,14 @@ export class AuthService {
     }
   }
 
-  async validateOtp(validateOtpDto: VerifyOtpDto): Promise<User> {
+  async validateOtp(validateOtpDto: VerifyOtpDto): Promise<UserEntity> {
     const user = await this._userService.getUserByMobileNumber(
       validateOtpDto.mobileNumber,
     );
 
     if (!user) {
       throw new UnauthorizedException(
-       `User with number ${validateOtpDto.mobileNumber} not found`,
+        `User with number ${validateOtpDto.mobileNumber} not found`,
       );
     }
 

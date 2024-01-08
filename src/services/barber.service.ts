@@ -7,8 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Barber } from '../data/entities/barber.entity';
 import { RegisterBarberDto } from '../data/DTO/profile/register-barber.dto';
-import { User } from '../data/entities/user.entity';
-import { Profile } from '../data/entities/profile.entity';
+import { UserEntity } from '../data/entities/user.entity';
+import { ProfileEntity } from '../data/entities/profile.entity';
 import { RoleService } from './role.service';
 import { AddBarberBaseInfoDto } from '../data/DTO/barber/add-barber-base-info.dto';
 import { Address } from '../data/entities/address.entity';
@@ -22,11 +22,11 @@ export class BarberService {
   constructor(
     @InjectRepository(Barber)
     private readonly _repository: Repository<Barber>,
-    @InjectRepository(Profile)
-    private readonly _profileRepository: Repository<Profile>,
+    @InjectRepository(ProfileEntity)
+    private readonly _profileRepository: Repository<ProfileEntity>,
 
-    @InjectRepository(User)
-    private readonly _userRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private readonly _userRepository: Repository<UserEntity>,
     @InjectRepository(Address)
     private readonly _addressRepository: Repository<Address>,
     private readonly _roleService: RoleService,
@@ -43,7 +43,7 @@ export class BarberService {
   }
 
   async completeBarberInfo(
-    user: User,
+    user: UserEntity,
     dto: AddBarberBaseInfoDto,
   ): Promise<number> {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
@@ -79,7 +79,7 @@ export class BarberService {
   }
 
   async updateBarberInfo(
-    user: User,
+    user: UserEntity,
     dto: UpdateBarberBaseInfoDto,
   ): Promise<number> {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
@@ -181,10 +181,10 @@ export class BarberService {
     } else {
       await queryRunner.startTransaction();
       try {
-        const user = new User();
+        const user = new UserEntity();
         user.mobileNumber = dto.mobileNumber;
         user.role = await this._roleService.getRole('BARBER');
-        const profile = new Profile();
+        const profile = new ProfileEntity();
         profile.gender = dto.gender;
         profile.firstname = dto.firstName;
         profile.lastname = dto.lastName;

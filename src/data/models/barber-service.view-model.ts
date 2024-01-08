@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '../entities/profile.entity';
 
-export class BarberServiceViewModel {
+export class ServiceModel {
   @ApiProperty({ type: Number })
   id: number;
   @ApiProperty({ type: String })
@@ -12,6 +12,13 @@ export class BarberServiceViewModel {
   serviceDescription: string;
   @ApiProperty({ type: String, nullable: true })
   imageId?: string | null;
+}
+
+export class BarberServiceViewModel {
+  @ApiProperty({ type: Number })
+  id: number;
+  @ApiProperty({ type: ServiceModel })
+  service: ServiceModel;
   @ApiProperty({ type: String })
   barberDescription: string;
 }

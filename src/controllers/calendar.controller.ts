@@ -19,7 +19,7 @@ import { CalendarService } from '../services/calendar.service';
 import { Roles } from '../common/decorators/role.decorator';
 import { RoleEnum } from '../common/enums/roleEnum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from '../data/entities/user.entity';
+import { UserEntity } from '../data/entities/user.entity';
 import { CalendarEntity } from '../data/entities/calendar.entity';
 
 import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
@@ -37,7 +37,7 @@ export class CalendarController {
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: CalendarEntity })
-  async findAll(@CurrentUser() user: User) {
+  async findAll(@CurrentUser() user: UserEntity) {
     return await this._calendarService.getBarberCalendars(user.id);
   }
   @Get(':id')
@@ -51,7 +51,10 @@ export class CalendarController {
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: Number })
   @ApiBody({ type: AddCalendarDto })
-  async addNewCalendar(@Body() dto: AddCalendarDto, @CurrentUser() user: User) {
+  async addNewCalendar(
+    @Body() dto: AddCalendarDto,
+    @CurrentUser() user: UserEntity,
+  ) {
     return await this._calendarService.createCalendar(dto, user.id);
   }
 

@@ -7,24 +7,24 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
-import { Profile } from './profile.entity';
+import { ProfileEntity } from './profile.entity';
 
-@Entity()
-export class User {
+@Entity('user')
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ length: 11 })
   mobileNumber: string;
 
-  @OneToOne(() => Profile, {
+  @OneToOne(() => ProfileEntity, {
     nullable: true,
     eager: true,
     cascade: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'profile_id' })
-  profile: Profile;
+  profile: ProfileEntity;
 
   @Column({ nullable: true })
   otp?: string;

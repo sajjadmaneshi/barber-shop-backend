@@ -49,10 +49,13 @@ export class BarberServiceService {
         ({
           id: service.id,
           barberDescription: service.description,
-          gender: service.service.gender,
-          serviceDescription: service.service.description,
-          imageId: service.service.image?.id,
-          title: service.service.title,
+          service: {
+            id: service.service.id,
+            gender: service.service.gender,
+            serviceDescription: service.service.description,
+            imageId: service.service.image?.id,
+            title: service.service.title,
+          },
         }) as BarberServiceViewModel,
     );
   }
@@ -71,11 +74,14 @@ export class BarberServiceService {
 
     return {
       id: barberService.id,
+      service: {
+        id: barberService.service.id,
+        gender: barberService.service.gender,
+        serviceDescription: barberService.service.description,
+        imageId: barberService.service.image.id,
+        title: barberService.service.title,
+      },
       barberDescription: barberService.description,
-      gender: barberService.service.gender,
-      serviceDescription: barberService.service.description,
-      imageId: barberService.service.image.id,
-      title: barberService.service.title,
     } as BarberServiceViewModel;
   }
 

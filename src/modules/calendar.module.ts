@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../data/entities/user.entity';
+import { UserEntity } from '../data/entities/user.entity';
 
 import { Barber } from '../data/entities/barber.entity';
 
@@ -10,7 +10,7 @@ import { CalendarService } from '../services/calendar.service';
 import { DateTimeService } from '../common/services/date-time.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CalendarEntity, User, Barber])],
+  imports: [TypeOrmModule.forFeature([CalendarEntity, UserEntity, Barber])],
 
   controllers: [CalendarController],
   providers: [DateTimeService, CalendarService],

@@ -24,7 +24,7 @@ import { Roles } from '../common/decorators/role.decorator';
 import { RoleEnum } from '../common/enums/roleEnum';
 import { RoleGuard } from '../common/guards/role.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from '../data/entities/user.entity';
+import { UserEntity } from '../data/entities/user.entity';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
 import { Address } from '../data/entities/address.entity';
 import { CalendarEntity } from '../data/entities/calendar.entity';
@@ -48,21 +48,21 @@ export class BarberController {
   @Get('address')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({ type: Address })
-  async getBarberAddress(@CurrentUser() user: User) {
+  async getBarberAddress(@CurrentUser() user: UserEntity) {
     return await this._barberService.getBarberAddress(user.id);
   }
 
   @Get('calendars')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({ type: [CalendarEntity] })
-  async getBarberCalendars(@CurrentUser() user: User) {
+  async getBarberCalendars(@CurrentUser() user: UserEntity) {
     return await this._calendarService.getBarberCalendars(user.id);
   }
 
   @Get('bio')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({ type: String })
-  async getBarberBio(@CurrentUser() user: User) {
+  async getBarberBio(@CurrentUser() user: UserEntity) {
     return await this._barberService.getBarberBio(user.id);
   }
 
@@ -85,7 +85,7 @@ export class BarberController {
   @UseGuards(AuthGuardJwt, RoleGuard)
   async completeBarberInfo(
     @Body() dto: AddBarberBaseInfoDto,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
   ) {
     return await this._barberService.completeBarberInfo(user, dto);
   }
@@ -96,7 +96,7 @@ export class BarberController {
   @UseGuards(AuthGuardJwt, RoleGuard)
   async updateBarberInfo(
     @Body() dto: UpdateBarberBaseInfoDto,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
   ) {
     return await this._barberService.updateBarberInfo(user, dto);
   }

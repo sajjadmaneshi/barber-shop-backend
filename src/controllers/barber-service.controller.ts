@@ -22,7 +22,7 @@ import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/role.decorator';
 import { RoleEnum } from '../common/enums/roleEnum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from '../data/entities/user.entity';
+import { UserEntity } from '../data/entities/user.entity';
 import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';
 import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
 
@@ -36,7 +36,7 @@ export class BarberServiceController {
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: BarberServiceViewModel })
-  async findAll(@CurrentUser() user: User) {
+  async findAll(@CurrentUser() user: UserEntity) {
     return await this._barberServiceService.getServices(user.id);
   }
   @Get(':id')
@@ -51,7 +51,7 @@ export class BarberServiceController {
   @ApiBody({ type: AddBarberServiceDto })
   async addNewService(
     @Body() dto: AddBarberServiceDto,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
   ) {
     return await this._barberServiceService.addService(dto, user.id);
   }

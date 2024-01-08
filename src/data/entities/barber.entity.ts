@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { Address } from './address.entity';
 import { BarberServiceEntity } from './barber-service.entity';
 import { ApiProperty } from '@nestjs/swagger';
@@ -18,9 +18,9 @@ export class Barber {
   @ApiProperty({ type: Number })
   id: number;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne(() => UserEntity, { eager: true })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
   @Column({ nullable: true })
   bio: string;

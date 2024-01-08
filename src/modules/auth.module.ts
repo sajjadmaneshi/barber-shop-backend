@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthController } from '../controllers/auth.controller';
 import { UserRole } from '../data/entities/user-role.entity';
-import { User } from '../data/entities/user.entity';
-import { Profile } from '../data/entities/profile.entity';
+import { UserEntity } from '../data/entities/user.entity';
+import { ProfileEntity } from '../data/entities/profile.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
@@ -13,7 +13,7 @@ import { CalendarModule } from './calendar.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserRole, User, Profile]),
+    TypeOrmModule.forFeature([UserRole, UserEntity, ProfileEntity]),
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.AUTH_SECRET,

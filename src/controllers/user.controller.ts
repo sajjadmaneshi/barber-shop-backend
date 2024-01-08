@@ -6,7 +6,6 @@ import {
   Get,
   HttpCode,
   Logger,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -14,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { User } from '../data/entities/user.entity';
+import { UserEntity } from '../data/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from '../services/user.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -26,7 +25,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AddProfileDto } from '../data/DTO/profile/add-profile.dto';
-import { Profile } from '../data/entities/profile.entity';
+import { ProfileEntity } from '../data/entities/profile.entity';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 import { Users } from '../common/controller-names';
 import { DocumentService } from '../services/document.service';
@@ -44,10 +43,10 @@ export class UserController {
   private readonly logger = new Logger(UserController.name);
 
   constructor(
-    @InjectRepository(User)
-    private readonly _userRepository: Repository<User>,
-    @InjectRepository(Profile)
-    private readonly _profileRepository: Repository<Profile>,
+    @InjectRepository(UserEntity)
+    private readonly _userRepository: Repository<UserEntity>,
+    @InjectRepository(ProfileEntity)
+    private readonly _profileRepository: Repository<ProfileEntity>,
     private readonly userService: UserService,
     private readonly documentService: DocumentService,
   ) {}
@@ -59,12 +58,13 @@ export class UserController {
     this.logger.debug(`found ${users.length}`);
     return users;
   }
-  @Get('getProfile')
+  @Get('profile')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({
     type: ProfileResponseViewModel,
   })
-  async getProfile(@CurrentUser() user: User) {
+  async getProfile(@CurrentUser() user: UserEntity) {
+    this.logger.log('hit the get profile');
     if (user.profile) {
       const { avatar, ...rest } = user.profile;
       return { ...rest, avatarId: user.profile.avatar ? avatar.id : null };
@@ -73,25 +73,24 @@ export class UserController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const user = await this.userService.getUser(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-    return user;
+    return await this.userService.getUser(id);
   }
 
-  @Post('completeProfile')
+  @Post('profile')
   @UseGuards(AuthGuardJwt)
   @ApiBody({ type: AddProfileDto })
   @HttpCode(201)
-  async completeProfile(@CurrentUser() user: User, @Body() dto: AddProfileDto) {
+  async completeProfile(
+    @CurrentUser() user: UserEntity,
+    @Body() dto: AddProfileDto,
+  ) {
     let resultId: string;
     const queryRunner =
       this._userRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const profile = new Profile();
+      const profile = new ProfileEntity();
       profile.firstname = dto.firstname;
       profile.lastname = dto.lastname;
       profile.gender = dto.gender;
@@ -120,7 +119,7 @@ export class UserController {
   @UseGuards(AuthGuardJwt)
   @ApiBody({ type: UpdateProfileDto })
   async updateProfile(
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
     @Body() dto: UpdateProfileDto,
   ) {
     if (user.profile) {
@@ -148,7 +147,6 @@ export class UserController {
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id: string) {
-    const user = await this._userRepository.findOne({ where: { id: id } });
-    await this._userRepository.remove(user);
+    return await this.userService.removeUser(id);
   }
 }
