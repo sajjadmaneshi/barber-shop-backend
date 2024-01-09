@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -23,7 +24,7 @@ export class ProfileEntity {
   @Column()
   lastname: string;
 
-  @OneToOne(() => DocumentEntity, {
+  @ManyToOne(() => DocumentEntity, (avatar) => avatar.profiles, {
     nullable: true,
     eager: true,
     cascade: true,

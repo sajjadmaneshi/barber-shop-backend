@@ -2,8 +2,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Gender } from './profile.entity';
@@ -37,7 +37,7 @@ export class ServiceEntity {
   @Column({ nullable: true })
   description: string;
   @ApiProperty()
-  @OneToOne(() => DocumentEntity, {
+  @ManyToOne(() => DocumentEntity, (image) => image.services, {
     nullable: true,
     eager: true,
     cascade: true,

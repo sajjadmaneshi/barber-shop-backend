@@ -61,9 +61,12 @@ export class BarberService {
       address.longitude = dto.longitude;
       address.latitude = dto.latitude;
       address.barber = barber;
-      const document = await this._documentService.findOne(dto.avatarId);
-      if (!document) throw new BadRequestException('avatar not found');
-      user.profile.avatar = document;
+      if (dto.avatarId) {
+        const document = await this._documentService.findOne(dto.avatarId);
+        if (!document) throw new BadRequestException('avatar not found');
+        user.profile.avatar = document;
+      }
+
       user.isRegistered = true;
       await this._userRepository.save(user);
       await this._profileRepository.save(user.profile);
@@ -90,6 +93,13 @@ export class BarberService {
         where: { user },
       });
       if (!existingBarber) throw new NotFoundException('barber not found');
+
+      if (dto.avatarId) {
+        const document = await this._documentService.findOne(dto.avatarId);
+        if (!document) throw new BadRequestException('file not found');
+        user.profile.avatar = document;
+        await this._profileRepository.save(user.profile);
+      }
       if (this._shouldChangeAddress(dto)) {
         const address = await this._addressRepository.findOne({
           where: { barber: existingBarber },
@@ -133,7 +143,7 @@ export class BarberService {
       .leftJoinAndSelect('b.addresses', 'address')
       .where('b.id=:id', { id })
       .getOne();
-    if (!barber) throw new NotFoundException('barber with this id not Found');
+    if (!barber) throw new BadRequestException('barber with this id not Found');
     return barber;
   }
 

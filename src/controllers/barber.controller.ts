@@ -41,7 +41,7 @@ export class BarberController {
 
   @Get()
   @UseGuards(AuthGuardJwt)
-  @ApiOkResponse({ type: BarberEntity })
+  @ApiOkResponse({ type: [BarberEntity] })
   async getAll() {
     return await this._barberService.getAllBarbers();
   }

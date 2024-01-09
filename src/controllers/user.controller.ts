@@ -145,7 +145,9 @@ export class UserController {
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @HttpCode(200)
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  @Roles(RoleEnum.SUPER_ADMIN)
   async remove(@Param('id') id: string) {
     return await this.userService.removeUser(id);
   }

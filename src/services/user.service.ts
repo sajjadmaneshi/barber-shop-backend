@@ -36,7 +36,7 @@ export class UserService {
       .where('u.id = :id', { id })
       .getOne();
     if (!user) {
-      throw new NotFoundException();
+      throw new BadRequestException('user with this id not found');
     }
     return user;
 

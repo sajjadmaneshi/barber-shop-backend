@@ -72,7 +72,7 @@ export class ServiceController {
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiOkResponse({ type: String })
-  async delete(@Param() id: number) {
+  async delete(@Param('id') id: number) {
     return await this._barberServiceService.removeService(id);
   }
 }

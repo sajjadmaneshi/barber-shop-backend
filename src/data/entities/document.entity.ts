@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ProfileEntity } from './profile.entity';
+import { ServiceEntity } from './service.entity';
 
 @Entity('document')
 export class DocumentEntity {
@@ -16,4 +18,9 @@ export class DocumentEntity {
 
   @Column()
   createdAt: string;
+
+  @OneToMany(() => ProfileEntity, (profile) => profile.avatar)
+  profiles: ProfileEntity[];
+  @OneToMany(() => ServiceEntity, (service) => service.image)
+  services: ServiceEntity[];
 }

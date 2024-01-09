@@ -116,6 +116,8 @@ export class ProvidedServiceService {
       .where('id = :id', { id })
       .execute();
     this.logger.log(deleteResult);
-    return deleteResult;
+    if (deleteResult.affected < 1)
+      throw new BadRequestException('cannot remove item');
+    return;
   }
 }
