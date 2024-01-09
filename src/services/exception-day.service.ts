@@ -85,6 +85,17 @@ export class ExceptionDayService {
     return id;
   }
 
+  public async removeCalendar(id: number) {
+    const deleteResult = await this.getExceptionDaysBaseQuery()
+      .delete()
+      .where('id = :id', { id })
+      .execute();
+
+    if (deleteResult.affected < 1)
+      throw new BadRequestException('cannot remove item');
+    return;
+  }
+
   private _checkDateValid(
     dto: AddExceptionDayDto | UpdateExceptionDayDto,
     startDate: Date,
@@ -116,9 +127,12 @@ export class ExceptionDayService {
     const isAfterOrSame = (start: number, end: number) =>
       this._dateTimeService.isAfter(start, end) ||
       this._dateTimeService.isSame(start, end);
-    const isTimeBetween = (time: number, start: number, end: number) =>
-      this._dateTimeService.isAfter(time, start) &&
-      this._dateTimeService.isBefore(time, end);
+    const isTimeBetween = (time: number, start: number, end: number) => {
+      return (
+        this._dateTimeService.isAfter(time, start) &&
+        this._dateTimeService.isBefore(time, end)
+      );
+    };
 
     const validateTimeRange = (
       start: number | undefined,
@@ -146,8 +160,8 @@ export class ExceptionDayService {
         end1 !== undefined &&
         start2 !== undefined &&
         end2 !== undefined &&
-        (isTimeBetween(start1, start2, end2) ||
-          isTimeBetween(end1, start2, end2))
+        (!isTimeBetween(start1, start2, end2) ||
+          !isTimeBetween(end1, start2, end2))
       ) {
         throw new BadRequestException(errorMessage);
       }

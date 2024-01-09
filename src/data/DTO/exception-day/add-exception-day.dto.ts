@@ -1,11 +1,13 @@
 import { Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator';
 
 export class AddExceptionDayDto {
   @ApiProperty({ type: Date })
   @IsNotEmpty()
   date: Date;
+  @IsInt({ message: 'period must be an integer' })
+  @Min(1, { message: 'period should be greater than 0' })
   @ApiProperty({ type: Number })
   period: number;
 
@@ -29,8 +31,4 @@ export class AddExceptionDayDto {
   @ApiProperty({ type: Number })
   @IsOptional()
   endExtraTime: number;
-
-  @ApiProperty({ type: Boolean })
-  @IsOptional()
-  isClosed: boolean = false;
 }

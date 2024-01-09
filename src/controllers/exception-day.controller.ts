@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -56,5 +57,11 @@ export class ExceptionDayController {
   @ApiOkResponse({ type: Number })
   async update(@Param('id') id: number, @Body() dto: UpdateExceptionDayDto) {
     return await this._exceptionDayService.updateExceptionDay(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  async delete(@Param('id') id: number) {
+    return await this._exceptionDayService.removeCalendar(id);
   }
 }

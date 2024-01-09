@@ -78,7 +78,7 @@ export class BarberServiceService {
         id: barberService.service.id,
         gender: barberService.service.gender,
         serviceDescription: barberService.service.description,
-        imageId: barberService.service.image.id,
+        imageId: barberService.service.image?.id,
         title: barberService.service.title,
       },
       barberDescription: barberService.description,
@@ -104,7 +104,7 @@ export class BarberServiceService {
         throw new NotFoundException('Barber not found');
       }
       if (dto.add.length) await this._addServices(dto.add, barber);
-      if (dto.delete.length) await this._removeServices(dto.delete);
+      if (dto.delete.length) await this._removeServices(dto.delete, barber);
 
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -154,10 +154,11 @@ export class BarberServiceService {
         ),
     );
   }
-  private async _removeServices(deleteIds: number[]) {
+  private async _removeServices(deleteIds: number[], barber: Barber) {
     const servicesToDelete = await this._repository
       .createQueryBuilder('bs')
       .leftJoin('bs.service', 'service')
+      .where('barber.id = :barberId', { barberId: barber.id })
       .where('service.id IN (:...deleteIds)', { deleteIds })
       .getMany();
 
