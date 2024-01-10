@@ -15,4 +15,6 @@ export class ProfileResponseViewModel {
 
   @ApiProperty()
   avatarId?: string | null;
+  @ApiProperty()
+  mobileNumber: string;
 }

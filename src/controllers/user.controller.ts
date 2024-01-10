@@ -67,7 +67,11 @@ export class UserController {
     this.logger.log('hit the get profile');
     if (user.profile) {
       const { avatar, ...rest } = user.profile;
-      return { ...rest, avatarId: user.profile.avatar ? avatar.id : null };
+      return {
+        ...rest,
+        avatarId: user.profile.avatar ? avatar.id : null,
+        mobileNumber: user.mobileNumber,
+      };
     } else throw new BadRequestException('user profile not found');
   }
 
