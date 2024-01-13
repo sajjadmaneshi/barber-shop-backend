@@ -158,15 +158,20 @@ export class BarberService {
     return barberBio;
   }
 
-  public async getBarberAddress(userId: string): Promise<Address[]> {
-    const barber = await this.getBarberBaseQuery()
-      .leftJoin('b.user', 'user')
-      .leftJoinAndSelect('b.addresses', 'address')
+  public async getBarberAddress(userId: string): Promise<Address> {
+    const barberAddress = await this._addressRepository
+      .createQueryBuilder('address')
+      .leftJoin('address.barber', 'barber')
+      .leftJoin('barber.user', 'user')
       .leftJoinAndSelect('address.city', 'city')
+      .leftJoinAndSelect('city.province', 'province')
       .where('user.id=:userId', { userId })
       .getOne();
 
-    return barber.addresses;
+    if (!barberAddress) {
+      throw new BadRequestException('barber has not any address');
+    }
+    return barberAddress;
   }
 
   public async getBarberWithUserId(id: string) {

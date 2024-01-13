@@ -26,9 +26,10 @@ import { RoleGuard } from '../common/guards/role.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
-import { Address } from '../data/entities/address.entity';
+
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { CalendarService } from '../services/calendar.service';
+import { Address } from '../data/entities/address.entity';
 
 @Controller(Barber)
 @ApiTags(Barber)
