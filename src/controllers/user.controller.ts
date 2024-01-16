@@ -54,7 +54,7 @@ export class UserController {
   @Get()
   async findAll() {
     this.logger.log('hit the find All route');
-    const users = await this._userRepository.find();
+    const users = await this.userService.getUsers();
     this.logger.debug(`found ${users.length}`);
     return users;
   }

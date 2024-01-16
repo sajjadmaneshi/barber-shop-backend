@@ -11,6 +11,7 @@ import { AddUserDto } from '../data/DTO/user/add-user.dto';
 import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { RoleService } from './role.service';
 import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
+import { UserViewModel } from '../data/models/user.view-model';
 
 @Injectable()
 export class UserService {
@@ -25,6 +26,27 @@ export class UserService {
     return this._userRepository
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC');
+  }
+
+  public async getUsers() {
+    const users = await this.getUsersBaseQuery()
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('profile.avatar', 'avatar')
+      .getMany();
+    return users.map(
+      (x) =>
+        ({
+          id: x.id,
+          firstName: x.profile?.firstname,
+          lastName: x.profile?.lastname,
+          gender: x.profile?.gender,
+          role: x.role.name,
+          mobileNumber: x.mobileNumber,
+          avatarId: x.profile?.avatar?.id,
+          isRegistered: x.isRegistered,
+        }) as UserViewModel,
+    );
   }
 
   public async getUser(id: string): Promise<any> {
