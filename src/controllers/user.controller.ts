@@ -130,9 +130,12 @@ export class UserController {
       user.profile.firstname = dto.firstname;
       user.profile.lastname = dto.lastname;
       user.profile.gender = dto.gender;
-      const document = await this.documentService.findOne(dto.avatarId);
-      if (!document) throw new BadRequestException('avatar not found');
-      user.profile.avatar = document;
+      if (dto.avatarId) {
+        const document = await this.documentService.findOne(dto.avatarId);
+        if (!document) throw new BadRequestException('avatar not found');
+        user.profile.avatar = document;
+      } else user.profile.avatar = null;
+
       await this._userRepository.save(user);
       return user.profile.id;
     } else {

@@ -25,8 +25,7 @@ export class ExceptionDayService {
   }
 
   public async getExceptionDaysOfSpecificCalendar(calendarId: number) {
-    let exceptionDays: ExceptionDayEntity[] = [];
-    exceptionDays = await this.getExceptionDaysBaseQuery()
+    const exceptionDays = await this.getExceptionDaysBaseQuery()
       .leftJoin('eDay.calendar', 'calendar')
       .where('calendar.id=:calendarId', { calendarId })
       .getMany();
@@ -83,6 +82,16 @@ export class ExceptionDayService {
       throw new BadRequestException('exception Day cannot update');
     }
     return id;
+  }
+
+  public async changeIsClosed(id: number, isClosed: boolean): Promise<void> {
+    const result = await this._repository.update(id, { isClosed });
+    if (result.affected === 0) {
+      throw new BadRequestException(
+        'exception day not found or other problem occurred',
+      );
+    }
+    return;
   }
 
   public async removeCalendar(id: number) {

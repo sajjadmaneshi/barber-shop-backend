@@ -24,11 +24,11 @@ export class Address {
   @ApiProperty({ type: Number })
   city: City;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'double precision' })
   @ApiProperty({ type: Number })
   latitude: number;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'double precision' })
   @ApiProperty({ type: Number })
   longitude: number;
 
