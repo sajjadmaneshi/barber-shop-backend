@@ -52,6 +52,8 @@ export class UserController {
   ) {}
 
   @Get()
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  @Roles(RoleEnum.SUPER_ADMIN)
   async findAll() {
     this.logger.log('hit the find All route');
     const users = await this.userService.getUsers();

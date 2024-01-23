@@ -16,7 +16,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { BarberServiceViewModel } from '../data/models/barber-service.view-model';
+import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/role.decorator';
