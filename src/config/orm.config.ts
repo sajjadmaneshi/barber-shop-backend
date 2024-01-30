@@ -4,8 +4,8 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UserRole } from '../data/entities/user-role.entity';
 import { ProfileEntity } from '../data/entities/profile.entity';
 import { DocumentEntity } from '../data/entities/document.entity';
-import { City } from '../data/entities/city.entity';
-import { Province } from '../data/entities/province.entity';
+import { CityEntity } from '../data/entities/city.entity';
+import { ProvinceEntity } from '../data/entities/province.entity';
 import { Barber } from '../data/entities/barber.entity';
 import { Address } from '../data/entities/address.entity';
 import { ServiceEntity } from '../data/entities/service.entity';
@@ -28,8 +28,8 @@ export default registerAs(
       UserRole,
       ProfileEntity,
       DocumentEntity,
-      City,
-      Province,
+      CityEntity,
+      ProvinceEntity,
       Barber,
       Address,
       ServiceEntity,

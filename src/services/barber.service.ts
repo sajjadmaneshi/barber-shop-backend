@@ -14,8 +14,9 @@ import { AddBarberBaseInfoDto } from '../data/DTO/barber/add-barber-base-info.dt
 import { Address } from '../data/entities/address.entity';
 import { GeolocationService } from './geolocation.service';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
-import { City } from '../data/entities/city.entity';
+import { CityEntity } from '../data/entities/city.entity';
 import { DocumentService } from './document.service';
+import { BarberViewModel } from '../data/models/barber/barber.view-model';
 
 @Injectable()
 export class BarberService {
@@ -39,7 +40,22 @@ export class BarberService {
   }
 
   public async getAllBarbers() {
-    return await this.getBarberBaseQuery().getMany();
+    const barbers = await this.getBarberBaseQuery()
+      .leftJoinAndSelect('b.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('b.addresses', 'address')
+      .getMany();
+    return barbers.map(
+      (barber) =>
+        ({
+          id: barber.id,
+          mobileNumber: barber.user.mobileNumber,
+          firstName: barber.user.profile?.firstname,
+          lastName: barber.user.profile?.lastname,
+          bio: barber.bio,
+          address: barber.addresses[0],
+        }) as BarberViewModel,
+    );
   }
 
   async completeBarberInfo(
@@ -106,7 +122,7 @@ export class BarberService {
         });
 
         if (address) {
-          let city: City | undefined;
+          let city: CityEntity | undefined;
           if (dto.cityId)
             city = await this._geoLocationService.getCityById(dto.cityId);
           const partialAddress = {

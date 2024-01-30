@@ -52,7 +52,7 @@ export class ServiceController {
   @Post()
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: AddServiceDto })
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: Number })
   @HttpCode(201)
   async create(@Body() dto: AddServiceDto) {
     return await this._barberServiceService.createService(dto);
@@ -61,7 +61,7 @@ export class ServiceController {
   @Patch(':id')
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: UpdateServiceDto })
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: Number })
   async update(
     @Param('id') id: number,
     @Body() dto: UpdateServiceDto,
@@ -71,7 +71,6 @@ export class ServiceController {
 
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN)
-  @ApiOkResponse({ type: String })
   async delete(@Param('id') id: number) {
     return await this._barberServiceService.removeService(id);
   }

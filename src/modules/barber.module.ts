@@ -8,8 +8,8 @@ import { UserRole } from '../data/entities/user-role.entity';
 import { ProfileEntity } from '../data/entities/profile.entity';
 import { RoleService } from '../services/role.service';
 import { GeolocationService } from '../services/geolocation.service';
-import { City } from '../data/entities/city.entity';
-import { Province } from '../data/entities/province.entity';
+import { CityEntity } from '../data/entities/city.entity';
+import { ProvinceEntity } from '../data/entities/province.entity';
 import { Address } from '../data/entities/address.entity';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
@@ -23,9 +23,9 @@ import { DateTimeService } from '../common/services/date-time.service';
       UserEntity,
       UserRole,
       ProfileEntity,
-      City,
+      CityEntity,
       Address,
-      Province,
+      ProvinceEntity,
       Barber,
       CalendarEntity,
       DocumentEntity,

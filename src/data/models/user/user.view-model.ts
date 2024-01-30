@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender } from '../entities/profile.entity';
+import { Gender } from '../../entities/profile.entity';
 
 export class UserViewModel {
   @ApiProperty()

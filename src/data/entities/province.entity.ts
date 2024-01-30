@@ -1,9 +1,9 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { City } from './city.entity';
+import { CityEntity } from './city.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity()
-export class Province {
+@Entity({ name: 'province' })
+export class ProvinceEntity {
   @PrimaryGeneratedColumn()
   @ApiProperty({ type: Number })
   id: number;
@@ -11,6 +11,8 @@ export class Province {
   @Column()
   name: string;
 
-  @OneToMany(() => City, (city) => city.province)
-  cities: City[];
+  @OneToMany(() => CityEntity, (city) => city.province, {
+    onDelete: 'CASCADE',
+  })
+  cities: CityEntity[];
 }

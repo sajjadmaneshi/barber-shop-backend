@@ -1,17 +1,12 @@
 import { Repository, UpdateResult } from 'typeorm';
 import { UserEntity } from '../data/entities/user.entity';
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddUserDto } from '../data/DTO/user/add-user.dto';
 import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { RoleService } from './role.service';
 import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
-import { UserViewModel } from '../data/models/user.view-model';
+import { UserViewModel } from '../data/models/user/user.view-model';
 
 @Injectable()
 export class UserService {

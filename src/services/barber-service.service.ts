@@ -8,7 +8,7 @@ import { In, Repository } from 'typeorm';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
-import { BarberServiceViewModel } from '../data/models/barber-service.view-model';
+import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';
 import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';
 
 import { ServiceEntity } from '../data/entities/service.entity';

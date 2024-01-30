@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { City } from './city.entity';
+import { CityEntity } from './city.entity';
 import { Barber } from './barber.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -19,10 +19,10 @@ export class Address {
   @ApiProperty({ type: Number })
   shopAddress: string;
 
-  @ManyToOne(() => City, (city) => city.addresses, { eager: true })
+  @ManyToOne(() => CityEntity, (city) => city.addresses, { eager: true })
   @JoinColumn({ name: 'city_id' })
   @ApiProperty({ type: Number })
-  city: City;
+  city: CityEntity;
 
   @Column({ type: 'double precision' })
   @ApiProperty({ type: Number })

@@ -6,24 +6,24 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Province } from './province.entity';
+import { ProvinceEntity } from './province.entity';
 import { Barber } from './barber.entity';
 import { Address } from './address.entity';
 
-@Entity()
-export class City {
+@Entity({ name: 'city' })
+export class CityEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
 
-  @ManyToOne(() => Province, (province) => province.cities, {
+  @ManyToOne(() => ProvinceEntity, (province) => province.cities, {
     eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'province_id' })
-  province: Province;
+  province: ProvinceEntity;
 
   @OneToMany(() => Address, (address) => address.city)
   addresses: Address[];
