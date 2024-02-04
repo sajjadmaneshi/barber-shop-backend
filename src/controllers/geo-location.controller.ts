@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { GeolocationService } from '../services/geolocation.service';
@@ -14,6 +15,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Geolocation } from '../common/controller-names';
@@ -37,9 +39,15 @@ export class GeoLocationController {
     return await this._geoLocationService.getAllProvinces();
   }
 
-  @Get('province/:id/cities')
-  public async getAllCityOfProvince(@Param('id') id: number) {
-    return await this._geoLocationService.getAllCityOfProvince(id);
+  @Get('cities')
+  @ApiQuery({
+    name: 'provinceId',
+    type: Number,
+
+    required: false,
+  })
+  public async getAllCityOfProvince(@Query('provinceId') provinceId?: number) {
+    return await this._geoLocationService.getAllCity(provinceId);
   }
 
   @Post('province')

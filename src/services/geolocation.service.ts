@@ -31,16 +31,25 @@ export class GeolocationService {
     return await this.getProvinceBaseQuery().getMany();
   }
 
-  public async getAllCityOfProvince(
-    provinceId: number,
-  ): Promise<ProvinceEntity | null> {
-    const province = await this.getProvinceBaseQuery()
-      .leftJoinAndSelect('p.cities', 'city')
-      .where('p.id = :provinceId', { provinceId })
-      .getOne();
-    if (!province)
-      throw new NotFoundException('province with this id not found');
-    return province;
+  public async getAllCity(provinceId?: number): Promise<CityEntity[]> {
+    if (provinceId) {
+      const province = await this.getProvinceBaseQuery()
+        .leftJoinAndSelect('p.cities', 'city')
+        .where('p.id = :provinceId', { provinceId })
+        .getOne();
+
+      if (!province) {
+        throw new NotFoundException('Province with this id not found');
+      }
+
+      return province.cities;
+    } else {
+      // If provinceId is null, fetch all cities
+      return await this._cityRepository
+        .createQueryBuilder('c')
+        .leftJoinAndSelect('c.province', 'province')
+        .getMany();
+    }
   }
 
   public async createProvince(dto: AddProvinceDto): Promise<number> {
@@ -86,7 +95,7 @@ export class GeolocationService {
   public async createCity(dto: AddCityDto) {
     const provinceId = dto.provinceId;
     const name = dto.name;
-    const existingCity = this._cityRepository
+    const existingCity = await this._cityRepository
       .createQueryBuilder('city')
       .leftJoin('city.province', 'province')
       .where('city.name=:name', { name })
@@ -118,7 +127,10 @@ export class GeolocationService {
       if (!province) {
         throw new BadRequestException('province with this mid not found');
       }
-      result = await this._cityRepository.update(id, { ...dto, province });
+      result = await this._cityRepository.update(id, {
+        name: dto.name,
+        province,
+      });
     } else {
       result = await this._cityRepository.update(id, { ...dto });
     }
