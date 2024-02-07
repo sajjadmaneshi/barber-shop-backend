@@ -33,18 +33,12 @@ export class GeolocationService {
 
   public async getAllCity(provinceId?: number): Promise<CityEntity[]> {
     if (provinceId) {
-      const province = await this.getProvinceBaseQuery()
-        .leftJoinAndSelect('p.cities', 'city')
-        .where('p.id = :provinceId', { provinceId })
-        .getOne();
-
-      if (!province) {
-        throw new NotFoundException('Province with this id not found');
-      }
-
-      return province.cities;
+      return await this._cityRepository
+        .createQueryBuilder('c')
+        .leftJoinAndSelect('c.province', 'province')
+        .where('province.id=:provinceId', { provinceId })
+        .getMany();
     } else {
-      // If provinceId is null, fetch all cities
       return await this._cityRepository
         .createQueryBuilder('c')
         .leftJoinAndSelect('c.province', 'province')
