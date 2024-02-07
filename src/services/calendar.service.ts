@@ -102,35 +102,51 @@ export class CalendarService {
     if (isAfterOrSame(startTime, endTime))
       throw new BadRequestException('start time should be before end date');
 
-    if (isAfterOrSame(startRestTime, endRestTime))
+    if (
+      startRestTime !== null &&
+      endRestTime !== null &&
+      isAfterOrSame(startRestTime, endRestTime)
+    )
       throw new BadRequestException(
         'start rest date should be before end rest date',
       );
 
-    if (isAfterOrSame(startExtraTime, endExtraTime))
+    if (
+      startExtraTime !== null &&
+      endExtraTime !== null &&
+      isAfterOrSame(startExtraTime, endExtraTime)
+    )
       throw new BadRequestException(
         'start extra should be before end extra date',
       );
 
     if (
-      !isBetween(startRestTime, startTime, endTime) ||
-      !isBetween(endRestTime, startTime, endTime)
+      startRestTime !== null &&
+      endRestTime !== null &&
+      (!isBetween(startRestTime, startTime, endTime) ||
+        !isBetween(endRestTime, startTime, endTime))
     )
       throw new BadRequestException(
         'rest time should be between start and end date',
       );
 
     if (
-      !isBetween(startExtraTime, startTime, endTime) ||
-      !isBetween(endExtraTime, startTime, endTime)
+      startExtraTime !== null &&
+      endExtraTime !== null &&
+      (!isBetween(startExtraTime, startTime, endTime) ||
+        !isBetween(endExtraTime, startTime, endTime))
     )
       throw new BadRequestException(
         'extra dateTime should be between start and end date',
       );
 
     if (
-      isBetween(startRestTime, startExtraTime, endExtraTime) ||
-      isBetween(endRestTime, startExtraTime, endExtraTime)
+      startRestTime !== null &&
+      endRestTime !== null &&
+      startExtraTime !== null &&
+      endExtraTime !== null &&
+      (isBetween(startRestTime, startExtraTime, endExtraTime) ||
+        isBetween(endRestTime, startExtraTime, endExtraTime))
     )
       throw new BadRequestException(
         'rest time should not conflict with extra dateTime',
