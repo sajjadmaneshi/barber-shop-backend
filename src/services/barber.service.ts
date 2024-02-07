@@ -53,6 +53,7 @@ export class BarberService {
           firstName: barber.user.profile?.firstname,
           lastName: barber.user.profile?.lastname,
           bio: barber.bio,
+          gender: barber.user.profile?.gender,
           address: barber.addresses[0],
         }) as BarberViewModel,
     );
@@ -221,7 +222,11 @@ export class BarberService {
         profile.lastname = dto.lastName;
         await this._profileRepository.save(profile);
         user.profile = profile;
+
         const result = await this._userRepository.save(user);
+        const barber = new Barber();
+        barber.user = user;
+        await this._repository.save(barber);
         await queryRunner.commitTransaction();
         return result.id;
       } catch (err) {

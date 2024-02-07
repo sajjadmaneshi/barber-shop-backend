@@ -23,7 +23,7 @@ export class Barber {
   user: UserEntity;
 
   @Column({ nullable: true })
-  bio: string;
+  bio?: string;
 
   @OneToMany(() => Address, (address) => address.barber, { cascade: true })
   addresses: Address[];

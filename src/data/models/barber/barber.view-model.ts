@@ -1,5 +1,6 @@
 import { Address } from '../../entities/address.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from '../../entities/profile.entity';
 
 export class BarberViewModel {
   @ApiProperty()
@@ -14,4 +15,6 @@ export class BarberViewModel {
   bio?: string;
   @ApiProperty()
   address: Address;
+  @ApiProperty()
+  gender: Gender;
 }
