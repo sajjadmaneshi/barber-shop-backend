@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -8,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Barber } from '../common/controller-names';
-import { Barber as BarberEntity } from '../data/entities/barber.entity';
+import { BarberEntity as BarberEntity } from '../data/entities/barber.entity';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -100,5 +101,12 @@ export class BarberController {
     @CurrentUser() user: UserEntity,
   ) {
     return await this._barberService.updateBarberInfo(user, dto);
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  async deleteBArber(@Param('id') id: number) {
+    return await this._barberService.deleteBarber(id);
   }
 }

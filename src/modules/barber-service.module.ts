@@ -7,11 +7,15 @@ import { BarberServiceService } from '../services/barber-service.service';
 import { BarberServiceController } from '../controllers/barber-service.controller';
 
 import { ServiceEntity } from '../data/entities/service.entity';
-import { Barber } from '../data/entities/barber.entity';
+import { BarberEntity } from '../data/entities/barber.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Barber, ServiceEntity, BarberServiceEntity]),
+    TypeOrmModule.forFeature([
+      BarberEntity,
+      ServiceEntity,
+      BarberServiceEntity,
+    ]),
   ],
   controllers: [BarberServiceController],
   providers: [BarberServiceService],

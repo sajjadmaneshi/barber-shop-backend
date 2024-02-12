@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BarberController } from '../controllers/barber.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Barber } from '../data/entities/barber.entity';
+import { BarberEntity } from '../data/entities/barber.entity';
 import { BarberService } from '../services/barber.service';
 import { UserEntity } from '../data/entities/user.entity';
 import { UserRole } from '../data/entities/user-role.entity';
@@ -26,7 +26,7 @@ import { DateTimeService } from '../common/services/date-time.service';
       CityEntity,
       Address,
       ProvinceEntity,
-      Barber,
+      BarberEntity,
       CalendarEntity,
       DocumentEntity,
     ]),

@@ -13,7 +13,7 @@ import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-servi
 
 import { ServiceEntity } from '../data/entities/service.entity';
 
-import { Barber } from '../data/entities/barber.entity';
+import { BarberEntity } from '../data/entities/barber.entity';
 import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
 
 @Injectable()
@@ -27,8 +27,8 @@ export class BarberServiceService {
     @InjectRepository(ServiceEntity)
     private readonly _serviceRepository: Repository<ServiceEntity>,
 
-    @InjectRepository(Barber)
-    private readonly _barberRepository: Repository<Barber>,
+    @InjectRepository(BarberEntity)
+    private readonly _barberRepository: Repository<BarberEntity>,
   ) {}
   private getServicesBaseQuery() {
     return this._repository
@@ -115,7 +115,7 @@ export class BarberServiceService {
     }
   }
 
-  private async _addServices(addIds: number[], barber: Barber) {
+  private async _addServices(addIds: number[], barber: BarberEntity) {
     const filteredId = await this._filterBarberServices(addIds, barber);
     const services = await this._serviceRepository.find({
       where: { id: In(filteredId) },
@@ -137,7 +137,7 @@ export class BarberServiceService {
 
   private async _filterBarberServices(
     addIds: number[],
-    barber: Barber,
+    barber: BarberEntity,
   ): Promise<number[]> {
     const existingBarberServices = await this._repository
       .createQueryBuilder('bs')
@@ -154,7 +154,7 @@ export class BarberServiceService {
         ),
     );
   }
-  private async _removeServices(deleteIds: number[], barber: Barber) {
+  private async _removeServices(deleteIds: number[], barber: BarberEntity) {
     const servicesToDelete = await this._repository
       .createQueryBuilder('bs')
       .leftJoin('bs.service', 'service')

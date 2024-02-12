@@ -12,8 +12,8 @@ import { BarberServiceEntity } from './barber-service.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { CalendarEntity } from './calendar.entity';
 
-@Entity()
-export class Barber {
+@Entity({ name: 'barber' })
+export class BarberEntity {
   @PrimaryGeneratedColumn()
   @ApiProperty({ type: Number })
   id: number;

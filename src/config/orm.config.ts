@@ -6,7 +6,7 @@ import { ProfileEntity } from '../data/entities/profile.entity';
 import { DocumentEntity } from '../data/entities/document.entity';
 import { CityEntity } from '../data/entities/city.entity';
 import { ProvinceEntity } from '../data/entities/province.entity';
-import { Barber } from '../data/entities/barber.entity';
+import { BarberEntity } from '../data/entities/barber.entity';
 import { Address } from '../data/entities/address.entity';
 import { ServiceEntity } from '../data/entities/service.entity';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
@@ -30,7 +30,7 @@ export default registerAs(
       DocumentEntity,
       CityEntity,
       ProvinceEntity,
-      Barber,
+      BarberEntity,
       Address,
       ServiceEntity,
       BarberServiceEntity,

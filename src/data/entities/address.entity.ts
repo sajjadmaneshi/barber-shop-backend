@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CityEntity } from './city.entity';
-import { Barber } from './barber.entity';
+import { BarberEntity } from './barber.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -32,7 +32,7 @@ export class Address {
   @ApiProperty({ type: Number })
   longitude: number;
 
-  @ManyToOne(() => Barber, (barber) => barber.addresses)
+  @ManyToOne(() => BarberEntity, (barber) => barber.addresses)
   @JoinColumn({ name: 'barber_id' })
-  barber: Barber;
+  barber: BarberEntity;
 }

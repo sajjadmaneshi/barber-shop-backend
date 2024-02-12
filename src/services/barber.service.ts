@@ -4,8 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Barber } from '../data/entities/barber.entity';
+import { DeleteResult, Repository } from 'typeorm';
+import { BarberEntity } from '../data/entities/barber.entity';
 import { RegisterBarberDto } from '../data/DTO/profile/register-barber.dto';
 import { UserEntity } from '../data/entities/user.entity';
 import { ProfileEntity } from '../data/entities/profile.entity';
@@ -21,8 +21,8 @@ import { BarberViewModel } from '../data/models/barber/barber.view-model';
 @Injectable()
 export class BarberService {
   constructor(
-    @InjectRepository(Barber)
-    private readonly _repository: Repository<Barber>,
+    @InjectRepository(BarberEntity)
+    private readonly _repository: Repository<BarberEntity>,
     @InjectRepository(ProfileEntity)
     private readonly _profileRepository: Repository<ProfileEntity>,
 
@@ -67,7 +67,7 @@ export class BarberService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const barber = new Barber();
+      const barber = new BarberEntity();
       barber.user = user;
 
       barber.bio = dto.bio;
@@ -224,7 +224,7 @@ export class BarberService {
         user.profile = profile;
 
         const result = await this._userRepository.save(user);
-        const barber = new Barber();
+        const barber = new BarberEntity();
         barber.user = user;
         await this._repository.save(barber);
         await queryRunner.commitTransaction();
@@ -236,5 +236,16 @@ export class BarberService {
         await queryRunner.release();
       }
     }
+  }
+
+  public async deleteBarber(id: number): Promise<DeleteResult> {
+    const deleteResult = await this.getBarberBaseQuery()
+      .delete()
+      .where('id=:id', { id })
+      .execute();
+    if (deleteResult.affected > 1) {
+      throw new BadRequestException('cannot remove item');
+    }
+    return;
   }
 }

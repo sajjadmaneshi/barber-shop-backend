@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { Repository } from 'typeorm';
 import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
-import { Barber } from '../data/entities/barber.entity';
+import { BarberEntity } from '../data/entities/barber.entity';
 import { DateTimeService } from '../common/services/date-time.service';
 import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
 
@@ -19,8 +19,8 @@ export class CalendarService {
   constructor(
     @InjectRepository(CalendarEntity)
     private readonly _repository: Repository<CalendarEntity>,
-    @InjectRepository(Barber)
-    private readonly _barberRepository: Repository<Barber>,
+    @InjectRepository(BarberEntity)
+    private readonly _barberRepository: Repository<BarberEntity>,
 
     private readonly _dateTimeService: DateTimeService,
   ) {}

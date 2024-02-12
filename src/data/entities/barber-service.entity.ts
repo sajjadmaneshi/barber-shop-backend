@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Barber } from './barber.entity';
+import { BarberEntity } from './barber.entity';
 import { ServiceEntity } from './service.entity';
 
 @Entity({ name: 'barber_service' })
@@ -14,9 +14,11 @@ export class BarberServiceEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Barber, (barber) => barber.barberServices, { eager: true })
+  @ManyToOne(() => BarberEntity, (barber) => barber.barberServices, {
+    eager: true,
+  })
   @JoinColumn({ name: 'barber_id' })
-  barber: Barber;
+  barber: BarberEntity;
 
   @ManyToOne(() => ServiceEntity, (service) => service.barberServices, {
     eager: true,
