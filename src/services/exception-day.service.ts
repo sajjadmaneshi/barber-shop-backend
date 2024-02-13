@@ -148,11 +148,7 @@ export class ExceptionDayService {
       end: number | undefined,
       errorMessage: string,
     ) => {
-      if (
-        start !== undefined &&
-        end !== undefined &&
-        isAfterOrSame(start, end)
-      ) {
+      if (start && end && isAfterOrSame(start, end)) {
         throw new BadRequestException(errorMessage);
       }
     };
@@ -165,10 +161,10 @@ export class ExceptionDayService {
       errorMessage: string,
     ) => {
       if (
-        start1 !== undefined &&
-        end1 !== undefined &&
-        start2 !== undefined &&
-        end2 !== undefined &&
+        start1 &&
+        end1 &&
+        start2 &&
+        end2 &&
         (!isTimeBetween(start1, start2, end2) ||
           !isTimeBetween(end1, start2, end2))
       ) {

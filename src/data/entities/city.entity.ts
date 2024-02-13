@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProvinceEntity } from './province.entity';
-import { BarberEntity } from './barber.entity';
 import { Address } from './address.entity';
 
 @Entity({ name: 'city' })

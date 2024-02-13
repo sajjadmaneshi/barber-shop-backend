@@ -22,7 +22,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     response.status(status).json({
       statusCode: status,
-      message: exception.response?.message,
+      message: exception.message
+        ? exception.message
+        : exception.response?.message,
       path: request.url,
     });
   }

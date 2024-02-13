@@ -6,6 +6,8 @@ export class AddExceptionDayDto {
   @ApiProperty({ type: Date })
   @IsNotEmpty()
   date: Date;
+
+  @IsOptional()
   @IsInt({ message: 'period must be an integer' })
   @Min(1, { message: 'period should be greater than 0' })
   @ApiProperty({ type: Number })

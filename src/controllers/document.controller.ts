@@ -21,8 +21,6 @@ import {
   ApiCreatedResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { DeleteResult } from 'typeorm';
-
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { saveFileToStorage } from '../common/file.storage';

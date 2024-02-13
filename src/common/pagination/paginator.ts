@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 import { SelectQueryBuilder } from 'typeorm';
-import { ApiParam, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export interface PaginateOptions {
   limit: number;

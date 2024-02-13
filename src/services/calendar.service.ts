@@ -32,12 +32,11 @@ export class CalendarService {
   }
 
   public async getBarberCalendars(userId: string): Promise<CalendarEntity[]> {
-    let calendars: CalendarEntity[] = [];
-    calendars = await this.getCalendarsBaseQuery()
+    const calendars = (await this.getCalendarsBaseQuery()
       .leftJoin('calendar.barber', 'barber')
       .leftJoin('barber.user', 'user')
       .where('user.id=:userId', { userId })
-      .getMany();
+      .getMany()) as CalendarEntity[];
     this.logger.log(calendars);
     return calendars;
   }
@@ -103,8 +102,8 @@ export class CalendarService {
       throw new BadRequestException('start time should be before end date');
 
     if (
-      startRestTime !== null &&
-      endRestTime !== null &&
+      startRestTime &&
+      endRestTime &&
       isAfterOrSame(startRestTime, endRestTime)
     )
       throw new BadRequestException(
@@ -112,8 +111,8 @@ export class CalendarService {
       );
 
     if (
-      startExtraTime !== null &&
-      endExtraTime !== null &&
+      startExtraTime &&
+      endExtraTime &&
       isAfterOrSame(startExtraTime, endExtraTime)
     )
       throw new BadRequestException(
@@ -121,8 +120,8 @@ export class CalendarService {
       );
 
     if (
-      startRestTime !== null &&
-      endRestTime !== null &&
+      startRestTime &&
+      endRestTime &&
       (!isBetween(startRestTime, startTime, endTime) ||
         !isBetween(endRestTime, startTime, endTime))
     )
@@ -131,8 +130,8 @@ export class CalendarService {
       );
 
     if (
-      startExtraTime !== null &&
-      endExtraTime !== null &&
+      startExtraTime &&
+      endExtraTime &&
       (!isBetween(startExtraTime, startTime, endTime) ||
         !isBetween(endExtraTime, startTime, endTime))
     )
@@ -141,10 +140,10 @@ export class CalendarService {
       );
 
     if (
-      startRestTime !== null &&
-      endRestTime !== null &&
-      startExtraTime !== null &&
-      endExtraTime !== null &&
+      startRestTime &&
+      endRestTime &&
+      startExtraTime &&
+      endExtraTime &&
       (isBetween(startRestTime, startExtraTime, endExtraTime) ||
         isBetween(endRestTime, startExtraTime, endExtraTime))
     )
