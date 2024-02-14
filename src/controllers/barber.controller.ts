@@ -83,7 +83,7 @@ export class BarberController {
 
   @Post('completeInfo')
   @ApiBody({ type: AddBarberBaseInfoDto })
-  @Roles(RoleEnum.BARBER)
+  @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @UseGuards(AuthGuardJwt, RoleGuard)
   async completeBarberInfo(
     @Body() dto: AddBarberBaseInfoDto,
@@ -92,21 +92,22 @@ export class BarberController {
     return await this._barberService.completeBarberInfo(user, dto);
   }
 
-  @Patch('updateInfo')
+  @Patch('updateInfo/:id')
   @ApiBody({ type: UpdateBarberBaseInfoDto })
-  @Roles(RoleEnum.BARBER)
+  @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @UseGuards(AuthGuardJwt, RoleGuard)
   async updateBarberInfo(
     @Body() dto: UpdateBarberBaseInfoDto,
     @CurrentUser() user: UserEntity,
+    @Param('id') id?: number,
   ) {
-    return await this._barberService.updateBarberInfo(user, dto);
+    return await this._barberService.updateBarberInfo(user, dto, id);
   }
 
   @Delete(':id')
-  @Roles(RoleEnum.SUPER_ADMIN)
+  @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @UseGuards(AuthGuardJwt, RoleGuard)
-  async deleteBArber(@Param('id') id: number) {
+  async deleteBarber(@Param('id') id: number) {
     return await this._barberService.deleteBarber(id);
   }
 }

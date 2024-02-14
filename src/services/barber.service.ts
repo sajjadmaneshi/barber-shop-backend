@@ -17,6 +17,7 @@ import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-i
 import { CityEntity } from '../data/entities/city.entity';
 import { DocumentService } from './document.service';
 import { BarberViewModel } from '../data/models/barber/barber.view-model';
+import e from 'express';
 
 @Injectable()
 export class BarberService {
@@ -68,26 +69,26 @@ export class BarberService {
     await queryRunner.startTransaction();
     try {
       const barber = new BarberEntity();
+
       barber.user = user;
 
       barber.bio = dto.bio;
       await this._repository.save(barber);
-      const address = new Address();
-      address.city = await this._geoLocationService.getCityById(dto.cityId);
-      address.shopAddress = dto.address;
-      address.longitude = dto.longitude;
-      address.latitude = dto.latitude;
-      address.barber = barber;
+      const addressDto = new AddressDto(
+        dto.cityId,
+        dto.address,
+        dto.latitude,
+        dto.longitude,
+      );
       if (dto.avatarId) {
         const document = await this._documentService.findOne(dto.avatarId);
         if (!document) throw new BadRequestException('avatar not found');
         user.profile.avatar = document;
       }
-
       user.isRegistered = true;
       await this._userRepository.save(user);
       await this._profileRepository.save(user.profile);
-      await this._addressRepository.save(address);
+      await this.createAndSaveAddress(addressDto, barber);
       await queryRunner.commitTransaction();
       return barber.id;
     } catch (err) {
@@ -101,21 +102,24 @@ export class BarberService {
   async updateBarberInfo(
     user: UserEntity,
     dto: UpdateBarberBaseInfoDto,
+    barberId?: number,
   ): Promise<number> {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const existingBarber = await this._repository.findOne({
-        where: { user },
-      });
+      const existingBarber = barberId
+        ? await this._repository.findOne({ where: { id: barberId } })
+        : await this._repository.findOne({
+            where: { user },
+          });
       if (!existingBarber) throw new NotFoundException('barber not found');
-
+      const barberUser = existingBarber.user;
       if (dto.avatarId) {
         const document = await this._documentService.findOne(dto.avatarId);
         if (!document) throw new BadRequestException('file not found');
-        user.profile.avatar = document;
-        await this._profileRepository.save(user.profile);
+        barberUser.profile.avatar = document;
+        await this._profileRepository.save(barberUser.profile);
       }
       if (this._shouldChangeAddress(dto)) {
         const address = await this._addressRepository.findOne({
@@ -133,6 +137,14 @@ export class BarberService {
             city,
           };
           await this._addressRepository.update(address.id, partialAddress);
+        } else {
+          const addressDto = new AddressDto(
+            dto.cityId,
+            dto.address,
+            dto.latitude,
+            dto.longitude,
+          );
+          await this.createAndSaveAddress(addressDto, existingBarber);
         }
       }
 
@@ -148,6 +160,21 @@ export class BarberService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private async createAndSaveAddress(
+    addressDto: AddressDto,
+    barber: BarberEntity,
+  ) {
+    const address = new Address();
+    address.city = await this._geoLocationService.getCityById(
+      addressDto.cityId,
+    );
+    address.shopAddress = addressDto.address;
+    address.longitude = addressDto.longitude;
+    address.latitude = addressDto.latitude;
+    address.barber = barber;
+    await this._addressRepository.save(address);
   }
 
   private _shouldChangeAddress(dto: UpdateBarberBaseInfoDto) {
@@ -248,4 +275,12 @@ export class BarberService {
     }
     return;
   }
+}
+export class AddressDto {
+  constructor(
+    public cityId: number,
+    public address: string,
+    public latitude: number,
+    public longitude: number,
+  ) {}
 }
