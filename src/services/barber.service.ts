@@ -11,13 +11,12 @@ import { UserEntity } from '../data/entities/user.entity';
 import { ProfileEntity } from '../data/entities/profile.entity';
 import { RoleService } from './role.service';
 import { AddBarberBaseInfoDto } from '../data/DTO/barber/add-barber-base-info.dto';
-import { Address } from '../data/entities/address.entity';
+import { AddressEntity } from '../data/entities/address.entity';
 import { GeolocationService } from './geolocation.service';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
 import { CityEntity } from '../data/entities/city.entity';
 import { DocumentService } from './document.service';
 import { BarberViewModel } from '../data/models/barber/barber.view-model';
-import e from 'express';
 
 @Injectable()
 export class BarberService {
@@ -29,8 +28,8 @@ export class BarberService {
 
     @InjectRepository(UserEntity)
     private readonly _userRepository: Repository<UserEntity>,
-    @InjectRepository(Address)
-    private readonly _addressRepository: Repository<Address>,
+    @InjectRepository(AddressEntity)
+    private readonly _addressRepository: Repository<AddressEntity>,
     private readonly _roleService: RoleService,
     private readonly _documentService: DocumentService,
     private readonly _geoLocationService: GeolocationService,
@@ -44,12 +43,16 @@ export class BarberService {
     const barbers = await this.getBarberBaseQuery()
       .leftJoinAndSelect('b.user', 'user')
       .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('profile.avatar', 'avatar')
       .leftJoinAndSelect('b.addresses', 'address')
+      .leftJoinAndSelect('address.city', 'city')
+      .leftJoinAndSelect('city.province', 'province')
       .getMany();
     return barbers.map(
       (barber) =>
         ({
           id: barber.id,
+          avatarId: barber.user.profile?.avatar?.id,
           mobileNumber: barber.user.mobileNumber,
           firstName: barber.user.profile?.firstname,
           lastName: barber.user.profile?.lastname,
@@ -166,7 +169,7 @@ export class BarberService {
     addressDto: AddressDto,
     barber: BarberEntity,
   ) {
-    const address = new Address();
+    const address = new AddressEntity();
     address.city = await this._geoLocationService.getCityById(
       addressDto.cityId,
     );
@@ -202,7 +205,7 @@ export class BarberService {
     return barberBio;
   }
 
-  public async getBarberAddress(userId: string): Promise<Address> {
+  public async getBarberAddress(userId: string): Promise<AddressEntity> {
     const barberAddress = await this._addressRepository
       .createQueryBuilder('address')
       .leftJoin('address.barber', 'barber')

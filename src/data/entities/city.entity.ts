@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProvinceEntity } from './province.entity';
-import { Address } from './address.entity';
+import { AddressEntity } from './address.entity';
 
 @Entity({ name: 'city' })
 export class CityEntity {
@@ -24,6 +24,6 @@ export class CityEntity {
   @JoinColumn({ name: 'province_id' })
   province: ProvinceEntity;
 
-  @OneToMany(() => Address, (address) => address.city)
-  addresses: Address[];
+  @OneToMany(() => AddressEntity, (address) => address.city)
+  addresses: AddressEntity[];
 }

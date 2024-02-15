@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { DocumentEntity } from './document.entity';
+import { UserEntity } from './user.entity';
 
 export enum Gender {
   male,
@@ -33,4 +35,10 @@ export class ProfileEntity {
 
   @Column('enum', { enum: Gender, default: Gender.male })
   gender: Gender;
+
+  @OneToOne(() => UserEntity, (user) => user.profile, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  user: UserEntity;
 }

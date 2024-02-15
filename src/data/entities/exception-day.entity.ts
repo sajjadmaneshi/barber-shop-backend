@@ -66,7 +66,10 @@ export class ExceptionDayEntity {
   @Column()
   isClosed: boolean = false;
 
-  @ManyToOne(() => CalendarEntity, (calendar) => calendar.exceptionDays)
+  @ManyToOne(() => CalendarEntity, (calendar) => calendar.exceptionDays, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'calendar_id' })
   calendar: CalendarEntity;
 }

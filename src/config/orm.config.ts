@@ -7,7 +7,7 @@ import { DocumentEntity } from '../data/entities/document.entity';
 import { CityEntity } from '../data/entities/city.entity';
 import { ProvinceEntity } from '../data/entities/province.entity';
 import { BarberEntity } from '../data/entities/barber.entity';
-import { Address } from '../data/entities/address.entity';
+import { AddressEntity } from '../data/entities/address.entity';
 import { ServiceEntity } from '../data/entities/service.entity';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
 import { CalendarEntity } from '../data/entities/calendar.entity';
@@ -31,7 +31,7 @@ export default registerAs(
       CityEntity,
       ProvinceEntity,
       BarberEntity,
-      Address,
+      AddressEntity,
       ServiceEntity,
       BarberServiceEntity,
       CalendarEntity,

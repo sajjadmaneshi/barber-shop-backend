@@ -30,7 +30,7 @@ import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-i
 
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { CalendarService } from '../services/calendar.service';
-import { Address } from '../data/entities/address.entity';
+import { AddressEntity } from '../data/entities/address.entity';
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -49,7 +49,7 @@ export class BarberController {
   }
   @Get('address')
   @UseGuards(AuthGuardJwt)
-  @ApiOkResponse({ type: Address })
+  @ApiOkResponse({ type: AddressEntity })
   async getBarberAddress(@CurrentUser() user: UserEntity) {
     return await this._barberService.getBarberAddress(user.id);
   }

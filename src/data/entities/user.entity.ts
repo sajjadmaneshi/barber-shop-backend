@@ -20,8 +20,6 @@ export class UserEntity {
   @OneToOne(() => ProfileEntity, {
     nullable: true,
     eager: true,
-    cascade: true,
-    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'profile_id' })
   profile: ProfileEntity;

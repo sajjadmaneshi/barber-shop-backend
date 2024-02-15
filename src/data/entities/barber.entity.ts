@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { Address } from './address.entity';
+import { AddressEntity } from './address.entity';
 import { BarberServiceEntity } from './barber-service.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { CalendarEntity } from './calendar.entity';
@@ -18,19 +18,21 @@ export class BarberEntity {
   @ApiProperty({ type: Number })
   id: number;
 
-  @OneToOne(() => UserEntity, { eager: true })
+  @OneToOne(() => UserEntity, {
+    eager: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
   @Column({ nullable: true })
   bio?: string;
 
-  @OneToMany(() => Address, (address) => address.barber, { cascade: true })
-  addresses: Address[];
+  @OneToMany(() => AddressEntity, (address) => address.barber)
+  addresses: AddressEntity[];
 
-  @OneToMany(() => CalendarEntity, (calendar) => calendar.barber, {
-    cascade: true,
-  })
+  @OneToMany(() => CalendarEntity, (calendar) => calendar.barber)
   calendars: CalendarEntity[];
 
   @OneToMany(() => BarberServiceEntity, (barberService) => barberService.barber)

@@ -67,7 +67,11 @@ export class CalendarEntity {
   })
   endExtraTime: number;
 
-  @ManyToOne(() => BarberEntity, (barber) => barber.calendars, { eager: true })
+  @ManyToOne(() => BarberEntity, (barber) => barber.calendars, {
+    eager: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'barber_id' })
   barber: BarberEntity;
 

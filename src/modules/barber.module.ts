@@ -10,7 +10,7 @@ import { RoleService } from '../services/role.service';
 import { GeolocationService } from '../services/geolocation.service';
 import { CityEntity } from '../data/entities/city.entity';
 import { ProvinceEntity } from '../data/entities/province.entity';
-import { Address } from '../data/entities/address.entity';
+import { AddressEntity } from '../data/entities/address.entity';
 import { DocumentService } from '../services/document.service';
 import { DocumentEntity } from '../data/entities/document.entity';
 import { CalendarService } from '../services/calendar.service';
@@ -24,7 +24,7 @@ import { DateTimeService } from '../common/services/date-time.service';
       UserRole,
       ProfileEntity,
       CityEntity,
-      Address,
+      AddressEntity,
       ProvinceEntity,
       BarberEntity,
       CalendarEntity,
