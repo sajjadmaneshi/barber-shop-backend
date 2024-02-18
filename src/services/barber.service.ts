@@ -17,6 +17,7 @@ import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-i
 import { CityEntity } from '../data/entities/city.entity';
 import { DocumentService } from './document.service';
 import { BarberViewModel } from '../data/models/barber/barber.view-model';
+import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 
 @Injectable()
 export class BarberService {
@@ -100,6 +101,21 @@ export class BarberService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async updateBarberProfile(barberId: number, dto: UpdateProfileDto) {
+    const existingBarber = await this._repository.findOne({
+      where: { id: barberId },
+    });
+    if (!existingBarber)
+      throw new BadRequestException('barber with this id not found');
+    const result = await this._profileRepository.update(
+      existingBarber.user.profile.id,
+      dto,
+    );
+    if (result.affected === 0)
+      throw new BadRequestException('cannot update this barber');
+    return existingBarber.id;
   }
 
   async updateBarberInfo(

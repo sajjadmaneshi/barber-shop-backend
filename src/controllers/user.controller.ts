@@ -60,6 +60,22 @@ export class UserController {
     this.logger.debug(`found ${users.length}`);
     return users;
   }
+
+  @Get('roles')
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  @Roles(RoleEnum.SUPER_ADMIN)
+  async findAllRoles() {
+    const roles = await this.userService.getRoles();
+    this.logger.debug(`found ${roles.length}`);
+    return roles;
+  }
+
+  @Get('simpleInfo')
+  @UseGuards(AuthGuardJwt)
+  async getSimpleInfo(@CurrentUser() user: UserEntity) {
+    return await this.userService.getSimpleInfo(user.id);
+  }
+
   @Get('profile')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({

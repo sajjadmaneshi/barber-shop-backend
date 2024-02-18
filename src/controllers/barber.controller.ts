@@ -31,6 +31,7 @@ import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-i
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { CalendarService } from '../services/calendar.service';
 import { AddressEntity } from '../data/entities/address.entity';
+import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -102,6 +103,17 @@ export class BarberController {
     @Param('id') id?: number,
   ) {
     return await this._barberService.updateBarberInfo(user, dto, id);
+  }
+
+  @Patch('profile/:barberId')
+  @ApiBody({ type: UpdateProfileDto })
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @UseGuards(AuthGuardJwt, RoleGuard)
+  async updateBarberProfile(
+    @Body() dto: UpdateProfileDto,
+    @Param('barberId') barberId?: number,
+  ) {
+    return await this._barberService.updateBarberProfile(barberId, dto);
   }
 
   @Delete(':id')

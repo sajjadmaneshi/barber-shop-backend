@@ -7,6 +7,7 @@ import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { RoleService } from './role.service';
 import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
 import { UserViewModel } from '../data/models/user/user.view-model';
+import { UserSimpleInfoViewModel } from '../data/models/user/user-simple-info.view-model';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,10 @@ export class UserService {
     return this._userRepository
       .createQueryBuilder('user')
       .orderBy('user.id', 'DESC');
+  }
+
+  public async getRoles() {
+    return await this._roleService.getUserRolesBaseQuery().getMany();
   }
 
   public async getUsers() {
@@ -56,14 +61,6 @@ export class UserService {
       throw new BadRequestException('user with this id not found');
     }
     return user;
-
-    // const { profile, ...restUser } = user;
-    // const { avatar, ...rest } = profile;
-    // return {
-    //   ...restUser,
-    //   profile: { ...rest },
-    //   avatarId: avatar ? avatar.id : null,
-    // };
   }
 
   public async createUser(input: AddUserDto): Promise<UserEntity> {
@@ -105,6 +102,19 @@ export class UserService {
     if (deleteResult.affected < 1)
       throw new BadRequestException('cannot remove item');
     return;
+  }
+
+  public async getSimpleInfo(userId: string) {
+    const existingUser = await this._userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!existingUser) throw new BadRequestException('user not found');
+    return {
+      firstName: existingUser?.profile?.firstname,
+      lastName: existingUser?.profile?.lastname,
+      avatarId: existingUser.profile.avatar?.id,
+      role: existingUser.role.name,
+    } as UserSimpleInfoViewModel;
   }
 
   public async getUserByMobileNumber(

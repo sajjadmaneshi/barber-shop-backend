@@ -11,7 +11,7 @@ export class RoleService {
     private readonly _repository: Repository<UserRole>,
   ) {}
 
-  private getUserRolesBaseQuery() {
+  public getUserRolesBaseQuery() {
     return this._repository.createQueryBuilder('e').orderBy('e.id', 'DESC');
   }
 
