@@ -11,6 +11,7 @@ import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { BarberEntity } from '../data/entities/barber.entity';
 import { DateTimeService } from '../common/services/date-time.service';
 import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
+import { CalendarViewModel } from '../data/models/calendar/calendar.view-model';
 
 @Injectable()
 export class CalendarService {
@@ -29,6 +30,35 @@ export class CalendarService {
     return this._repository
       .createQueryBuilder('calendar')
       .orderBy('calendar.id', 'DESC');
+  }
+
+  public async getAll() {
+    const calendars = await this.getCalendarsBaseQuery()
+      .leftJoinAndSelect('calendar.barber', 'barber')
+      .leftJoinAndSelect('barber.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .getMany();
+    return calendars.map(
+      (calendar) =>
+        ({
+          id: calendar.id,
+          startDate: calendar.startDate,
+          endDate: calendar.endDate,
+          endTime: calendar.endTime,
+          startTime: calendar.startTime,
+          daysOfWork: calendar.daysOfWork,
+          startExtraTime: calendar.startExtraTime,
+          endExtraTime: calendar.endExtraTime,
+          startRestTime: calendar.startRestTime,
+          endRestTime: calendar.endRestTime,
+          barber: {
+            id: calendar.barber.id,
+            firstName: calendar.barber.user.profile.firstname,
+            lastName: calendar.barber.user.profile.lastname,
+          },
+          period: calendar.period,
+        }) as CalendarViewModel,
+    );
   }
 
   public async getBarberCalendars(userId: string): Promise<CalendarEntity[]> {

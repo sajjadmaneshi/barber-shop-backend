@@ -35,9 +35,16 @@ export class CalendarController {
   constructor(private readonly _calendarService: CalendarService) {}
 
   @Get()
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({ type: CalendarEntity })
+  async findAll() {
+    return await this._calendarService.getAll();
+  }
+
+  @Get('barberCalendars')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: CalendarEntity })
-  async findAll(@CurrentUser() user: UserEntity) {
+  async findAllBarberCalendars(@CurrentUser() user: UserEntity) {
     return await this._calendarService.getBarberCalendars(user.id);
   }
   @Get(':id')
