@@ -24,10 +24,16 @@ export class BarberEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
+  @ApiProperty({ type: UserEntity })
   user: UserEntity;
 
   @Column({ nullable: true })
+  @ApiProperty({ type: String })
   bio?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty({ type: String })
+  barberShopName?: string;
 
   @OneToMany(() => AddressEntity, (address) => address.barber)
   addresses: AddressEntity[];

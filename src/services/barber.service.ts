@@ -77,6 +77,7 @@ export class BarberService {
       barber.user = user;
 
       barber.bio = dto.bio;
+      barber.barberShopName = dto.barberShopName;
       await this._repository.save(barber);
       const addressDto = new AddressDto(
         dto.cityId,
@@ -169,6 +170,7 @@ export class BarberService {
 
       await this._repository.update(existingBarber.id, {
         bio: dto.bio ?? existingBarber.bio,
+        barberShopName: dto.barberShopName ?? existingBarber.barberShopName,
       });
 
       await queryRunner.commitTransaction();
@@ -268,7 +270,6 @@ export class BarberService {
         profile.lastname = dto.lastName;
         await this._profileRepository.save(profile);
         user.profile = profile;
-
         const result = await this._userRepository.save(user);
         const barber = new BarberEntity();
         barber.user = user;

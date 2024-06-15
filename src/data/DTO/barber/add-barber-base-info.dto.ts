@@ -10,6 +10,10 @@ export class AddBarberBaseInfoDto {
   @IsString()
   @ApiProperty({ type: String })
   bio: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ type: String })
+  barberShopName: string;
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })
