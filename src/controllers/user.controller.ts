@@ -153,7 +153,7 @@ export class UserController {
         if (!document) throw new BadRequestException('avatar not found');
         user.profile.avatar = document;
       } else user.profile.avatar = null;
-
+      await this._profileRepository.save(user.profile);
       await this._userRepository.save(user);
       return user.profile.id;
     } else {

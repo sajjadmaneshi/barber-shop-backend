@@ -26,6 +26,10 @@ export class ServiceEntity {
   @ApiProperty()
   @Column({ type: 'decimal' })
   price: number;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  iconName?: string;
   @ApiProperty()
   @Column()
   @IsInt({ message: 'Value must be an integer' })
@@ -36,12 +40,13 @@ export class ServiceEntity {
   @ApiProperty()
   @Column({ nullable: true })
   description: string;
-  @ApiProperty()
+
   @ManyToOne(() => DocumentEntity, (image) => image.services, {
     nullable: true,
     eager: true,
     cascade: true,
   })
+  @ApiProperty()
   @JoinColumn({ name: 'image_id' })
   image: DocumentEntity;
 

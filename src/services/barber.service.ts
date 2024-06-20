@@ -72,10 +72,7 @@ export class BarberService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const barber = new BarberEntity();
-
-      barber.user = user;
-
+      const barber = await this._repository.findOne({ where: { user } });
       barber.bio = dto.bio;
       barber.barberShopName = dto.barberShopName;
       await this._repository.save(barber);

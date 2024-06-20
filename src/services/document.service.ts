@@ -1,4 +1,9 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { DeleteResult, Repository } from 'typeorm';
 import { DocumentEntity } from '../data/entities/document.entity';
 
@@ -12,7 +17,7 @@ export class DocumentService {
     @InjectRepository(DocumentEntity)
     private readonly _repository: Repository<DocumentEntity>,
   ) {}
-
+  private readonly logger = new Logger(DocumentService.name);
   public async findOne(id: string): Promise<DocumentEntity | null> {
     return await this._repository
       .createQueryBuilder('d')

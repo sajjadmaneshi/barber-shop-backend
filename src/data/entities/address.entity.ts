@@ -21,7 +21,7 @@ export class AddressEntity {
 
   @ManyToOne(() => CityEntity, (city) => city.addresses, { eager: true })
   @JoinColumn({ name: 'city_id' })
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: () => Number })
   city: CityEntity;
 
   @Column({ type: 'double precision' })

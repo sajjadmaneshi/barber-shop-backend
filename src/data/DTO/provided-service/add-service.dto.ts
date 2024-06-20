@@ -23,6 +23,11 @@ export class AddServiceDto {
   @ApiProperty({ enum: Gender })
   gender: Gender;
 
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ type: String })
+  iconName?: string;
+
   @IsNotEmpty()
   @IsNumber()
   @ApiProperty({ type: Number })

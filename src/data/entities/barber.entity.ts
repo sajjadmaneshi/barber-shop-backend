@@ -24,7 +24,7 @@ export class BarberEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
-  @ApiProperty({ type: UserEntity })
+  @ApiProperty({ type: () => UserEntity })
   user: UserEntity;
 
   @Column({ nullable: true })

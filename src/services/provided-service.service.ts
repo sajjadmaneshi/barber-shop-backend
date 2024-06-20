@@ -52,6 +52,7 @@ export class ProvidedServiceService {
         price: x.price,
         feeDiscount: x.feeDiscount,
         description: x.description,
+        iconName: x.iconName,
         imageId: x.image?.id,
       })),
     };
@@ -75,6 +76,7 @@ export class ProvidedServiceService {
     service.feeDiscount = dto.feeDiscount;
     service.description = dto.description;
     service.gender = dto.gender;
+    service.iconName = dto.iconName;
     let document: DocumentEntity | null = null;
 
     if (dto.imageId) {
@@ -103,7 +105,7 @@ export class ProvidedServiceService {
       image: document,
     } as ServiceEntity);
     if (result.affected === 0) {
-      throw new NotFoundException(`Barber Service with ID ${id} not found`);
+      throw new NotFoundException(`Service with ID ${id} not found`);
     }
     this.logger.log(`service with id ${id} updated`);
     return id;

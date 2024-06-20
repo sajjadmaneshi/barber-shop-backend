@@ -112,7 +112,7 @@ export class UserService {
     return {
       firstName: existingUser?.profile?.firstname,
       lastName: existingUser?.profile?.lastname,
-      avatarId: existingUser.profile.avatar?.id,
+      avatarId: existingUser.profile?.avatar?.id,
       role: existingUser.role.name,
     } as UserSimpleInfoViewModel;
   }

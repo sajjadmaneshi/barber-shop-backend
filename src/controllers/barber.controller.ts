@@ -93,7 +93,7 @@ export class BarberController {
     return await this._barberService.completeBarberInfo(user, dto);
   }
 
-  @Patch('updateInfo/:id')
+  @Patch('updateInfo/:id?')
   @ApiBody({ type: UpdateBarberBaseInfoDto })
   @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @UseGuards(AuthGuardJwt, RoleGuard)
