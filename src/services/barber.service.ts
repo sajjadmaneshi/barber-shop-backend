@@ -18,6 +18,12 @@ import { CityEntity } from '../data/entities/city.entity';
 import { DocumentService } from './document.service';
 import { BarberViewModel } from '../data/models/barber/barber.view-model';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
+import {
+  paginate,
+  PaginateOptions,
+  PaginationResult,
+} from '../common/pagination/paginator';
+
 
 @Injectable()
 export class BarberService {
@@ -40,28 +46,46 @@ export class BarberService {
     return this._repository.createQueryBuilder('b').orderBy('b.id', 'ASC');
   }
 
-  public async getAllBarbers() {
-    const barbers = await this.getBarberBaseQuery()
+  public async getAllBarbers(
+    paginateOptions?: PaginateOptions,
+    search?: string,
+    city?: number,
+  ): Promise<PaginationResult<BarberViewModel>> {
+    const query = this.getBarberBaseQuery()
       .leftJoinAndSelect('b.user', 'user')
       .leftJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('profile.avatar', 'avatar')
       .leftJoinAndSelect('b.addresses', 'address')
       .leftJoinAndSelect('address.city', 'city')
-      .leftJoinAndSelect('city.province', 'province')
-      .getMany();
-    return barbers.map(
-      (barber) =>
-        ({
-          id: barber.id,
-          avatarId: barber.user.profile?.avatar?.id,
-          mobileNumber: barber.user.mobileNumber,
-          firstName: barber.user.profile?.firstname,
-          lastName: barber.user.profile?.lastname,
-          bio: barber.bio,
-          gender: barber.user.profile?.gender,
-          address: barber.addresses[0],
-        }) as BarberViewModel,
-    );
+      .leftJoinAndSelect('city.province', 'province');
+
+    if (search) {
+      query.andWhere(
+        '(profile.firstname LIKE :search OR profile.lastname LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+    if (city) {
+      query.andWhere('(address.city.id=:city)', { city });
+    }
+    const result = await paginate<BarberEntity>(query, paginateOptions);
+    return {
+      total: result.total,
+      data: result.data.map(
+        (barber) =>
+          ({
+            id: barber.id,
+            avatarId: barber.user.profile?.avatar?.id,
+            mobileNumber: barber.user.mobileNumber,
+            firstName: barber.user.profile?.firstname,
+            lastName: barber.user.profile?.lastname,
+            bio: barber.bio,
+            barberShopName: barber.barberShopName,
+            gender: barber.user.profile?.gender,
+            address: barber.addresses[0],
+          }) as BarberViewModel,
+      ),
+    };
   }
 
   async completeBarberInfo(

@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { Barber } from '../common/controller-names';
@@ -32,6 +33,9 @@ import { CalendarEntity } from '../data/entities/calendar.entity';
 import { CalendarService } from '../services/calendar.service';
 import { AddressEntity } from '../data/entities/address.entity';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
+import { query } from 'express';
+import { BarberViewModel } from "../data/models/barber/barber.view-model";
+import { PaginationResult } from "../common/pagination/paginator";
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -43,10 +47,22 @@ export class BarberController {
   ) {}
 
   @Get()
-  @UseGuards(AuthGuardJwt)
-  @ApiOkResponse({ type: [BarberEntity] })
-  async getAll() {
-    return await this._barberService.getAllBarbers();
+  @ApiOkResponse({ type: [PaginationResult<BarberViewModel>] })
+  async getAll(
+    @Query('page') page?: number,
+    @Query('city') city?: number,
+    @Query('q') search?: string,
+  ) {
+    return await this._barberService.getAllBarbers(
+      page
+        ? {
+            currentPage: page,
+            limit: 10,
+          }
+        : null,
+      search,
+      city,
+    );
   }
   @Get('address')
   @UseGuards(AuthGuardJwt)

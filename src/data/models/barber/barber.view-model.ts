@@ -12,6 +12,8 @@ export class BarberViewModel {
   @ApiProperty()
   lastName: string;
   @ApiProperty()
+  barberShopName: string;
+  @ApiProperty()
   bio?: string;
   @ApiProperty()
   address: AddressEntity;
