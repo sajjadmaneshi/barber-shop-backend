@@ -19,6 +19,7 @@ import { BarberServiceModule } from './modules/barber-service.module';
 
 import { CalendarModule } from './modules/calendar.module';
 import { ExceptionDayModule } from './modules/exception-day.module';
+import { TimeSlotModule } from './modules/time-slot.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ExceptionDayModule } from './modules/exception-day.module';
     BarberServiceModule,
     CalendarModule,
     ExceptionDayModule,
+    TimeSlotModule,
   ],
   controllers: [],
   providers: [

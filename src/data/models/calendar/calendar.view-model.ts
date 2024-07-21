@@ -9,24 +9,24 @@ export class CalendarViewModel {
   @ApiProperty({ type: Date })
   startDate: Date;
 
-  @ApiProperty({ type: Number })
-  startTime: number;
+  @ApiProperty({ type: 'time' })
+  startTime: string;
 
   @ApiProperty({ type: Date })
   endDate: Date;
 
-  @ApiProperty({ type: Number })
-  endTime: number;
+  @ApiProperty({ type: 'time' })
+  endTime: string;
   @ApiProperty({ type: Number })
   period: number;
-  @ApiProperty({ type: Number })
-  startRestTime: number;
-  @ApiProperty({ type: Number })
-  endRestTime: number;
-  @ApiProperty({ type: Number })
-  startExtraTime: number;
-  @ApiProperty({ type: Number })
-  endExtraTime: number;
+  @ApiProperty({ type: 'time' })
+  startRestTime: string;
+  @ApiProperty({ type: 'time' })
+  endRestTime: string;
+  @ApiProperty({ type: 'time' })
+  startExtraTime: string;
+  @ApiProperty({ type: 'time' })
+  endExtraTime: string;
   @ApiProperty()
   barber: { id: number; firstName: string; lastName: string };
 }

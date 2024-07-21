@@ -6,12 +6,22 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CalendarEntity } from '../data/entities/calendar.entity';
-import { Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { BarberEntity } from '../data/entities/barber.entity';
-import { DateTimeService } from '../common/services/date-time.service';
 import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
 import { CalendarViewModel } from '../data/models/calendar/calendar.view-model';
+import { TimeSlotEntity } from '../data/entities/time-slot.entity';
+import {
+  isAfter,
+  parse,
+  format,
+  addMinutes,
+  isEqual,
+  isBefore,
+  addDays,
+} from 'date-fns';
+import { DateTimeService } from '../common/services/date-time.service';
 
 @Injectable()
 export class CalendarService {
@@ -22,7 +32,6 @@ export class CalendarService {
     private readonly _repository: Repository<CalendarEntity>,
     @InjectRepository(BarberEntity)
     private readonly _barberRepository: Repository<BarberEntity>,
-
     private readonly _dateTimeService: DateTimeService,
   ) {}
 
@@ -84,24 +93,52 @@ export class CalendarService {
     dto: AddCalendarDto,
     userId: string,
   ): Promise<number> {
-    const existingCalendar = await this.isCalendarInThisPeriod(
-      dto.startDate,
-      dto.endDate,
-    );
-    if (existingCalendar) {
-      throw new BadRequestException('calendar with this date exist before');
+    const queryRunner = this._repository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await this.validateCalendarPeriod(dto.startDate, dto.endDate);
+      const barber = await this.getBarberByUserId(userId);
+      this._checkDateValid(dto);
+      const calendar = new CalendarEntity({ ...dto, barber });
+      const result = await queryRunner.manager.save(calendar);
+      await this.generateAndInsertTimeSlots(result, queryRunner);
+      await queryRunner.commitTransaction();
+      return result.id;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(error.message);
+    } finally {
+      await queryRunner.release();
     }
-    const calendar = new CalendarEntity({ ...dto });
+  }
+
+  private async getBarberByUserId(userId: string): Promise<BarberEntity> {
     const barber = await this._barberRepository
       .createQueryBuilder('b')
       .leftJoin('b.user', 'user')
-      .where('user.id=:userId', { userId })
+      .where('user.id = :userId', { userId })
       .getOne();
-    if (!barber) throw new BadRequestException('user with this id not found');
-    this._checkDateValid(dto);
-    calendar.barber = barber;
-    const result = await this._repository.save(calendar);
-    return result.id;
+
+    if (!barber) {
+      throw new BadRequestException('user with this id not found');
+    }
+
+    return barber;
+  }
+
+  private async validateCalendarPeriod(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<void> {
+    const existingCalendar = await this.isCalendarInThisPeriod(
+      startDate,
+      endDate,
+    );
+    if (existingCalendar) {
+      throw new BadRequestException('calendar with this date exists');
+    }
   }
 
   private _checkDateValid(dto: AddCalendarDto | UpdateCalendarDto) {
@@ -116,25 +153,15 @@ export class CalendarService {
       endExtraTime,
     } = dto;
 
-    const isAfterDateOrSame = (start: string, end: string) =>
-      this._dateTimeService.isAfterDate(start, end) ||
-      this._dateTimeService.isSameDate(start, end);
-    const isAfterOrSame = (start: number, end: number) =>
-      this._dateTimeService.isAfter(start, end) ||
-      this._dateTimeService.isSame(start, end);
-    const isBetween = (time: number, start: number, end: number) =>
-      this._dateTimeService.isAfter(time, start) &&
-      this._dateTimeService.isBefore(time, end);
-
-    if (isAfterDateOrSame(startDate.toString(), endDate.toString()))
+    if (!this._dateTimeService.isAfterOrSameDate(startDate, endDate))
       throw new BadRequestException('start date should be before end date');
-    if (isAfterOrSame(startTime, endTime))
+    if (!this._dateTimeService.isAfterOrSameTime(startTime, endTime))
       throw new BadRequestException('start time should be before end date');
 
     if (
       startRestTime &&
       endRestTime &&
-      isAfterOrSame(startRestTime, endRestTime)
+      !this._dateTimeService.isAfterOrSameTime(startRestTime, endRestTime)
     )
       throw new BadRequestException(
         'start rest date should be before end rest date',
@@ -143,7 +170,7 @@ export class CalendarService {
     if (
       startExtraTime &&
       endExtraTime &&
-      isAfterOrSame(startExtraTime, endExtraTime)
+      !this._dateTimeService.isAfterOrSameTime(startExtraTime, endExtraTime)
     )
       throw new BadRequestException(
         'start extra should be before end extra date',
@@ -152,8 +179,8 @@ export class CalendarService {
     if (
       startRestTime &&
       endRestTime &&
-      (!isBetween(startRestTime, startTime, endTime) ||
-        !isBetween(endRestTime, startTime, endTime))
+      (!this._dateTimeService.isBetween(startRestTime, startTime, endTime) ||
+        !this._dateTimeService.isBetween(endRestTime, startTime, endTime))
     )
       throw new BadRequestException(
         'rest time should be between start and end date',
@@ -162,8 +189,8 @@ export class CalendarService {
     if (
       startExtraTime &&
       endExtraTime &&
-      (!isBetween(startExtraTime, startTime, endTime) ||
-        !isBetween(endExtraTime, startTime, endTime))
+      (!this._dateTimeService.isBetween(startExtraTime, startTime, endTime) ||
+        !this._dateTimeService.isBetween(endExtraTime, startTime, endTime))
     )
       throw new BadRequestException(
         'extra dateTime should be between start and end date',
@@ -174,8 +201,16 @@ export class CalendarService {
       endRestTime &&
       startExtraTime &&
       endExtraTime &&
-      (isBetween(startRestTime, startExtraTime, endExtraTime) ||
-        isBetween(endRestTime, startExtraTime, endExtraTime))
+      (this._dateTimeService.isBetween(
+        startRestTime,
+        startExtraTime,
+        endExtraTime,
+      ) ||
+        this._dateTimeService.isBetween(
+          endRestTime,
+          startExtraTime,
+          endExtraTime,
+        ))
     )
       throw new BadRequestException(
         'rest time should not conflict with extra dateTime',
@@ -198,6 +233,98 @@ export class CalendarService {
     if (deleteResult.affected < 1)
       throw new BadRequestException('cannot remove item');
     return;
+  }
+
+  async generateTimeSlots(
+    calendar: CalendarEntity,
+    date: Date,
+  ): Promise<TimeSlotEntity[]> {
+    const timeSlots = [];
+    const today = new Date();
+
+    const {
+      startRestTime,
+      startExtraTime,
+      endRestTime,
+      endExtraTime,
+      startTime,
+      endTime,
+      period,
+    } = calendar;
+
+    const parsedStartTime = parse(startTime, 'HH:mm:ss', today);
+    const parsedEndTime = parse(endTime, 'HH:mm:ss', today);
+
+    let parsedStartRestTime: Date,
+      parsedEndRestTime: Date,
+      parsedStartExtraTime: Date,
+      parsedEndExtraTime: Date;
+
+    if (startRestTime)
+      parsedStartRestTime = parse(startRestTime, 'HH:mm:ss', today);
+    if (endRestTime) parsedEndRestTime = parse(endRestTime, 'HH:mm:ss', today);
+    if (startExtraTime)
+      parsedStartExtraTime = parse(startExtraTime, 'HH:mm:ss', today);
+    if (endExtraTime)
+      parsedEndExtraTime = parse(endExtraTime, 'HH:mm:ss', today);
+
+    let slotStartTime = parsedStartTime;
+
+    while (isAfter(parsedEndTime, slotStartTime)) {
+      const slotEndTime = addMinutes(slotStartTime, period);
+
+      const withinRestTime =
+        startRestTime &&
+        endRestTime &&
+        (isAfter(slotStartTime, parsedStartRestTime) ||
+          isEqual(slotStartTime, parsedStartRestTime)) &&
+        (isBefore(slotEndTime, parsedEndRestTime) ||
+          isEqual(slotEndTime, parsedEndRestTime));
+
+      const withinExtraTime =
+        startExtraTime &&
+        endExtraTime &&
+        (isAfter(slotStartTime, parsedStartExtraTime) ||
+          isEqual(slotStartTime, parsedStartExtraTime)) &&
+        (isBefore(slotEndTime, parsedEndExtraTime) ||
+          isEqual(slotEndTime, parsedEndExtraTime));
+
+      const isReserved = withinRestTime || withinExtraTime || false;
+
+      timeSlots.push({
+        dateTime: date,
+        startTime: format(slotStartTime, 'HH:mm:ss'),
+        endTime: format(slotEndTime, 'HH:mm:ss'),
+        isReserved,
+        calendar,
+      });
+
+      slotStartTime = slotEndTime;
+    }
+
+    return timeSlots;
+  }
+
+  async generateAndInsertTimeSlots(
+    calendar: CalendarEntity,
+    queryRunner: QueryRunner,
+  ) {
+    const start = new Date(calendar.startDate);
+    const end = new Date(calendar.endDate);
+    const workDays = calendar.daysOfWork.split(',').map((day) => +day.trim());
+
+    for (
+      let date = start;
+      isBefore(date, addDays(end, 1));
+      date = addDays(date, 1)
+    ) {
+      let dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
+      dayOfWeek = (dayOfWeek + 1) % 7;
+      if (workDays[dayOfWeek] === 1) {
+        const timeSlots = await this.generateTimeSlots(calendar, date);
+        await queryRunner.manager.save(TimeSlotEntity, timeSlots);
+      }
+    }
   }
 
   public async updateCalendar(

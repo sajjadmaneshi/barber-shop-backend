@@ -16,6 +16,8 @@ import { DocumentEntity } from '../data/entities/document.entity';
 import { CalendarService } from '../services/calendar.service';
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { DateTimeService } from '../common/services/date-time.service';
+import { ReserveEntity } from '../data/entities/reserve.entity';
+import { TimeSlotEntity } from '../data/entities/time-slot.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { DateTimeService } from '../common/services/date-time.service';
       BarberEntity,
       CalendarEntity,
       DocumentEntity,
+      ReserveEntity,
+      TimeSlotEntity,
     ]),
   ],
 

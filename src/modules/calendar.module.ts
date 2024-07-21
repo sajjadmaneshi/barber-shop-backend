@@ -8,10 +8,18 @@ import { CalendarEntity } from '../data/entities/calendar.entity';
 import { CalendarController } from '../controllers/calendar.controller';
 import { CalendarService } from '../services/calendar.service';
 import { DateTimeService } from '../common/services/date-time.service';
+import { TimeSlotEntity } from '../data/entities/time-slot.entity';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CalendarEntity, UserEntity, BarberEntity]),
+    TypeOrmModule.forFeature([
+      TimeSlotEntity,
+      BarberEntity,
+      CalendarEntity,
+
+      UserEntity,
+    ]),
   ],
 
   controllers: [CalendarController],

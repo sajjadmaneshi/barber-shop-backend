@@ -9,31 +9,32 @@ export class AddCalendarDto {
   @ApiProperty({ type: Date })
   @IsNotEmpty()
   startDate: Date;
-  @ApiProperty({ type: Number, default: () => 'CURRENT_TIMESTAMP' })
+
+  @ApiProperty({ type: String })
   @IsNotEmpty()
-  startTime: number;
+  startTime: string;
 
   @ApiProperty({ type: Date })
   @IsNotEmpty()
   endDate: Date;
-  @ApiProperty({ type: Number, default: () => 'CURRENT_TIMESTAMP' })
+  @ApiProperty({ type: String })
   @IsNotEmpty()
-  endTime: number;
+  endTime: string;
   @IsInt({ message: 'period must be an integer' })
   @Min(1, { message: 'period should be greater than 0' })
   @ApiProperty({ type: Number })
   period: number;
 
   @IsOptional()
-  @ApiProperty({ type: Number, default: () => 'CURRENT_TIMESTAMP' })
-  startRestTime?: number;
+  @ApiProperty({ type: String })
+  startRestTime?: string;
   @IsOptional()
-  @ApiProperty({ type: Number, default: () => 'CURRENT_TIMESTAMP' })
-  endRestTime?: number;
+  @ApiProperty({ type: String })
+  endRestTime?: string;
   @IsOptional()
-  @ApiProperty({ type: Number, default: () => 'CURRENT_TIMESTAMP' })
-  startExtraTime?: number;
+  @ApiProperty({ type: String })
+  startExtraTime?: string;
   @IsOptional()
-  @ApiProperty({ type: Number, default: () => 'CURRENT_TIMESTAMP' })
-  endExtraTime?: number;
+  @ApiProperty({ type: String })
+  endExtraTime?: string;
 }

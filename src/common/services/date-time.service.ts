@@ -1,34 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import { isAfter, isBefore, isEqual, parse } from 'date-fns';
 
 @Injectable()
 export class DateTimeService {
-  parseISOStringToUtcDate(dateString: string): Date {
-    return new Date(dateString);
+  isAfterOrSameDate(start: Date, end: Date) {
+    return isAfter(end, start) || isEqual(end, start);
+  }
+  isAfterOrSameTime(start: string, end: string) {
+    const today = new Date(); // Current date
+    const startTime = parse(start, 'HH:mm:ss', today);
+    const endTime = parse(end, 'HH:mm:ss', today);
+    return isAfter(endTime, startTime) || isEqual(endTime, startTime);
   }
 
-  isBefore(startTime: number, endTime: number): boolean {
-    return startTime < endTime;
-  }
-
-  isAfter(startTime: number, endTime: number): boolean {
-    return startTime > endTime;
-  }
-  isAfterDate(date1: string, date2: string): boolean {
-    const startDate = this.parseISOStringToUtcDate(date1);
-    const endDate = this.parseISOStringToUtcDate(date2);
-    return startDate.getTime() > endDate.getTime();
-  }
-  isBeforeDate(date1: string, date2: string): boolean {
-    const startDate = this.parseISOStringToUtcDate(date1);
-    const endDate = this.parseISOStringToUtcDate(date2);
-    return startDate.getTime() < endDate.getTime();
-  }
-  isSameDate(date1: string, date2: string): boolean {
-    const startDate = this.parseISOStringToUtcDate(date1);
-    const endDate = this.parseISOStringToUtcDate(date2);
-    return startDate.getTime() === endDate.getTime();
-  }
-  isSame(startTime: number, endTime: number): boolean {
-    return startTime === endTime;
+  isBetween(time: any, start: any, end: any) {
+    const today = new Date(); // Current date
+    const startTime = parse(start, 'HH:mm:ss', today);
+    const endTime = parse(end, 'HH:mm:ss', today);
+    const checkTime = parse(time, 'HH:mm:ss', today);
+    return isAfter(checkTime, startTime) && isBefore(checkTime, endTime);
   }
 }

@@ -24,7 +24,6 @@ import {
   PaginationResult,
 } from '../common/pagination/paginator';
 
-
 @Injectable()
 export class BarberService {
   constructor(
