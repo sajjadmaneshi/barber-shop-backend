@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { CalendarService } from '../services/calendar.service';
 import { Roles } from '../common/decorators/role.decorator';
-import { RoleEnum } from '../common/enums/roleEnum';
+import { RoleEnum } from '../common/enums/role.enum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';
 import { CalendarEntity } from '../data/entities/calendar.entity';

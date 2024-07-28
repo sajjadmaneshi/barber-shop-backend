@@ -24,8 +24,8 @@ export class TimeSlotService {
       .leftJoin('calendar.barber', 'barber')
       .where('barber.id = :barberId', { barberId })
       .andWhere('ts.dateTime >= :startOfDay AND ts.dateTime <= :endOfDay', {
-        startOfDay: startOfDayDate.toISOString(), // Convert to ISO string for consistency
-        endOfDay: endOfDayDate.toISOString(), // Convert to ISO string for consistency
+        startOfDay: startOfDayDate.toISOString(),
+        endOfDay: endOfDayDate.toISOString(),
       })
       .getMany();
   }

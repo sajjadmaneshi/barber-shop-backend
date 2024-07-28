@@ -1,20 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from '../../common/enums/gender.enum';
 
 export class ProfileResponseViewModel {
-  @ApiProperty()
-  id: number;
+  constructor(partial?: Partial<ProfileResponseViewModel>) {
+    Object.assign(this as ProfileResponseViewModel, partial);
+  }
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   firstname: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   lastname: string;
 
-  @ApiProperty()
-  gender: string;
+  @ApiProperty({ enum: Gender })
+  gender: Gender;
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   avatarId?: string | null;
-  @ApiProperty()
+  @ApiProperty({ type: String })
   mobileNumber: string;
+  @ApiProperty({ type: String })
+  role: string;
 }

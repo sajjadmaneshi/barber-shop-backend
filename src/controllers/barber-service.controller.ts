@@ -20,7 +20,7 @@ import { BarberServiceViewModel } from '../data/models/barber/barber-service.vie
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/role.decorator';
-import { RoleEnum } from '../common/enums/roleEnum';
+import { RoleEnum } from '../common/enums/role.enum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';
 import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';

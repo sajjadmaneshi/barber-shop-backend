@@ -23,7 +23,7 @@ import { AddProvinceDto } from '../data/DTO/geo-location/add-province.dto';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/role.decorator';
-import { RoleEnum } from '../common/enums/roleEnum';
+import { RoleEnum } from '../common/enums/role.enum';
 import { AddCityDto } from '../data/DTO/geo-location/add-city.dto';
 import { UpdateProvinceDto } from '../data/DTO/geo-location/update-province.dto';
 import { UpdateCityDto } from '../data/DTO/geo-location/update-city.dto';

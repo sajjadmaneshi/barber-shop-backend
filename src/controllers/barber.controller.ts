@@ -23,7 +23,7 @@ import { RegisterBarberDto } from '../data/DTO/profile/register-barber.dto';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { AddBarberBaseInfoDto } from '../data/DTO/barber/add-barber-base-info.dto';
 import { Roles } from '../common/decorators/role.decorator';
-import { RoleEnum } from '../common/enums/roleEnum';
+import { RoleEnum } from '../common/enums/role.enum';
 import { RoleGuard } from '../common/guards/role.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';

@@ -18,11 +18,13 @@ export class DocumentService {
     private readonly _repository: Repository<DocumentEntity>,
   ) {}
   private readonly logger = new Logger(DocumentService.name);
-  public async findOne(id: string): Promise<DocumentEntity | null> {
-    return await this._repository
+  public async findOne(id: string): Promise<DocumentEntity> {
+    const document = await this._repository
       .createQueryBuilder('d')
       .andWhere('d.id = :id', { id })
       .getOne();
+    if (!document) throw new BadRequestException('document not found');
+    return document;
   }
 
   public async create(

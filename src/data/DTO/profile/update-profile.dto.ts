@@ -1,5 +1,5 @@
-import { AddProfileDto } from './add-profile.dto';
+import { UpdateUserInfoDto } from './update-user-info.dto';
 
 import { PartialType } from '@nestjs/swagger';
 
-export class UpdateProfileDto extends PartialType(AddProfileDto) {}
+export class UpdateProfileDto extends PartialType(UpdateUserInfoDto) {}

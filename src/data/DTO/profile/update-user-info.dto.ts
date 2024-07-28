@@ -1,8 +1,8 @@
-import { Gender } from '../../entities/profile.entity';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from '../../../common/enums/gender.enum';
 
-export class AddProfileDto {
+export class UpdateUserInfoDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })

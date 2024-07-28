@@ -51,7 +51,7 @@ export class AuthService {
           otp,
           role: 'CUSTOMER',
         };
-        await this._userService.createUser(user);
+        await this._userService.registerCustomer(user);
       }
       return otp;
     } catch (error: any) {

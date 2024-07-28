@@ -3,11 +3,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserRole } from './user-role.entity';
-import { ProfileEntity } from './profile.entity';
+
+import { DocumentEntity } from './document.entity';
+import { Gender } from '../../common/enums/gender.enum';
 
 @Entity('user')
 export class UserEntity {
@@ -17,12 +18,21 @@ export class UserEntity {
   @Column({ length: 11 })
   mobileNumber: string;
 
-  @OneToOne(() => ProfileEntity, {
+  @Column({ nullable: true })
+  firstname?: string;
+  @Column({ nullable: true })
+  lastname?: string;
+
+  @ManyToOne(() => DocumentEntity, (avatar) => avatar.users, {
     nullable: true,
     eager: true,
+    cascade: true,
   })
-  @JoinColumn({ name: 'profile_id' })
-  profile: ProfileEntity;
+  @JoinColumn({ name: 'avatar_id' })
+  avatar: DocumentEntity;
+
+  @Column('enum', { enum: Gender, default: Gender.male, nullable: true })
+  gender: Gender;
 
   @Column({ nullable: true })
   otp?: string;

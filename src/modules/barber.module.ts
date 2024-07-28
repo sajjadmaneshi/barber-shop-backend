@@ -5,7 +5,6 @@ import { BarberEntity } from '../data/entities/barber.entity';
 import { BarberService } from '../services/barber.service';
 import { UserEntity } from '../data/entities/user.entity';
 import { UserRole } from '../data/entities/user-role.entity';
-import { ProfileEntity } from '../data/entities/profile.entity';
 import { RoleService } from '../services/role.service';
 import { GeolocationService } from '../services/geolocation.service';
 import { CityEntity } from '../data/entities/city.entity';
@@ -24,7 +23,6 @@ import { TimeSlotEntity } from '../data/entities/time-slot.entity';
     TypeOrmModule.forFeature([
       UserEntity,
       UserRole,
-      ProfileEntity,
       CityEntity,
       AddressEntity,
       ProvinceEntity,

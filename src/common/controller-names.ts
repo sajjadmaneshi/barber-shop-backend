@@ -1,7 +1,7 @@
 export const Auth = 'auth';
 
 export const Users = 'users';
-
+export const Account = 'account';
 export const Document = 'document';
 export const Geolocation = 'geo-location';
 export const Barber = 'barber';

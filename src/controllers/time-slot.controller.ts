@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { TimeSlot } from '../common/controller-names';
+import {  TimeSlot } from "../common/controller-names";
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { TimeSlotService } from '../services/time-slot.service';
 import { TimeSlotEntity } from '../data/entities/time-slot.entity';

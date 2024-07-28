@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender } from '../../entities/profile.entity';
+import { Gender } from '../../../common/enums/gender.enum';
 
 export class UserViewModel {
   @ApiProperty()
@@ -7,11 +7,11 @@ export class UserViewModel {
   @ApiProperty()
   mobileNumber: string;
   @ApiProperty()
-  firstName: string;
+  firstName?: string;
   @ApiProperty()
-  lastName: string;
+  lastName?: string;
   @ApiProperty()
-  gender: Gender;
+  gender?: Gender;
   @ApiProperty()
   avatarId?: string;
   @ApiProperty()

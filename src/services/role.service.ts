@@ -26,6 +26,10 @@ export class RoleService {
     return role;
   }
 
+  public async getRoles() {
+    return await this.getUserRolesBaseQuery().getMany();
+  }
+
   checkIfExist(name: string): void {
     const role = this.getRole(name.trim().trimEnd().trimStart().toUpperCase());
     if (role) {

@@ -3,11 +3,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { BarberEntity } from './barber.entity';
 import { ServiceEntity } from './service.entity';
+import { ReserveEntity } from './reserve.entity';
 
 @Entity({ name: 'barber_service' })
 export class BarberServiceEntity {
@@ -25,6 +27,9 @@ export class BarberServiceEntity {
   })
   @JoinColumn({ name: 'service_id' })
   service: ServiceEntity;
+
+  @OneToMany(() => ReserveEntity, (reserve) => reserve.barberService)
+  reserves: ReserveEntity[];
 
   @Column({ nullable: true })
   description: string;

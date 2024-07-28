@@ -4,9 +4,7 @@ import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 
 import ormConfig from './config/orm.config';
 
-import { UserModule } from './modules/user.module';
 import ormConfigProd from './config/orm.config.prod';
-import { AuthModule } from './modules/auth.module';
 import { InitializeService } from './common/services/initial-app.service';
 import { UserRole } from './data/entities/user-role.entity';
 import { DocumentModule } from './modules/document.module';
@@ -20,6 +18,8 @@ import { BarberServiceModule } from './modules/barber-service.module';
 import { CalendarModule } from './modules/calendar.module';
 import { ExceptionDayModule } from './modules/exception-day.module';
 import { TimeSlotModule } from './modules/time-slot.module';
+import { ReserveModule } from './modules/reserve.module';
+import { AccountModule } from './modules/account.module';
 
 @Module({
   imports: [
@@ -33,8 +33,7 @@ import { TimeSlotModule } from './modules/time-slot.module';
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     } as TypeOrmModuleAsyncOptions),
     TypeOrmModule.forFeature([UserRole]),
-    UserModule,
-    AuthModule,
+    AccountModule,
     DocumentModule,
     GeoLocationModule,
     BarberModule,
@@ -43,6 +42,7 @@ import { TimeSlotModule } from './modules/time-slot.module';
     CalendarModule,
     ExceptionDayModule,
     TimeSlotModule,
+    ReserveModule,
   ],
   controllers: [],
   providers: [

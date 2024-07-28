@@ -62,8 +62,8 @@ export class CalendarService {
           endRestTime: calendar.endRestTime,
           barber: {
             id: calendar.barber.id,
-            firstName: calendar.barber.user.profile.firstname,
-            lastName: calendar.barber.user.profile.lastname,
+            firstName: calendar.barber.user.firstname,
+            lastName: calendar.barber.user.lastname,
           },
           period: calendar.period,
         }) as CalendarViewModel,

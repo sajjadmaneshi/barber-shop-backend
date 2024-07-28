@@ -8,7 +8,6 @@ import { DeleteResult, Repository } from 'typeorm';
 import { BarberEntity } from '../data/entities/barber.entity';
 import { RegisterBarberDto } from '../data/DTO/profile/register-barber.dto';
 import { UserEntity } from '../data/entities/user.entity';
-import { ProfileEntity } from '../data/entities/profile.entity';
 import { RoleService } from './role.service';
 import { AddBarberBaseInfoDto } from '../data/DTO/barber/add-barber-base-info.dto';
 import { AddressEntity } from '../data/entities/address.entity';
@@ -29,9 +28,6 @@ export class BarberService {
   constructor(
     @InjectRepository(BarberEntity)
     private readonly _repository: Repository<BarberEntity>,
-    @InjectRepository(ProfileEntity)
-    private readonly _profileRepository: Repository<ProfileEntity>,
-
     @InjectRepository(UserEntity)
     private readonly _userRepository: Repository<UserEntity>,
     @InjectRepository(AddressEntity)
@@ -74,13 +70,13 @@ export class BarberService {
         (barber) =>
           ({
             id: barber.id,
-            avatarId: barber.user.profile?.avatar?.id,
+            avatarId: barber.user?.avatar?.id,
             mobileNumber: barber.user.mobileNumber,
-            firstName: barber.user.profile?.firstname,
-            lastName: barber.user.profile?.lastname,
+            firstName: barber.user?.firstname,
+            lastName: barber.user?.lastname,
             bio: barber.bio,
             barberShopName: barber.barberShopName,
-            gender: barber.user.profile?.gender,
+            gender: barber.user?.gender,
             address: barber.addresses[0],
           }) as BarberViewModel,
       ),
@@ -108,11 +104,10 @@ export class BarberService {
       if (dto.avatarId) {
         const document = await this._documentService.findOne(dto.avatarId);
         if (!document) throw new BadRequestException('avatar not found');
-        user.profile.avatar = document;
+        user.avatar = document;
       }
       user.isRegistered = true;
       await this._userRepository.save(user);
-      await this._profileRepository.save(user.profile);
       await this.createAndSaveAddress(addressDto, barber);
       await queryRunner.commitTransaction();
       return barber.id;
@@ -130,8 +125,8 @@ export class BarberService {
     });
     if (!existingBarber)
       throw new BadRequestException('barber with this id not found');
-    const result = await this._profileRepository.update(
-      existingBarber.user.profile.id,
+    const result = await this._userRepository.update(
+      existingBarber.user.id,
       dto,
     );
     if (result.affected === 0)
@@ -158,8 +153,8 @@ export class BarberService {
       if (dto.avatarId) {
         const document = await this._documentService.findOne(dto.avatarId);
         if (!document) throw new BadRequestException('file not found');
-        barberUser.profile.avatar = document;
-        await this._profileRepository.save(barberUser.profile);
+        barberUser.avatar = document;
+        await this._userRepository.save(barberUser);
       }
       if (this._shouldChangeAddress(dto)) {
         const address = await this._addressRepository.findOne({
@@ -284,12 +279,10 @@ export class BarberService {
         const user = new UserEntity();
         user.mobileNumber = dto.mobileNumber;
         user.role = await this._roleService.getRole('BARBER');
-        const profile = new ProfileEntity();
-        profile.gender = dto.gender;
-        profile.firstname = dto.firstName;
-        profile.lastname = dto.lastName;
-        await this._profileRepository.save(profile);
-        user.profile = profile;
+
+        user.gender = dto.gender;
+        user.firstname = dto.firstName;
+        user.lastname = dto.lastName;
         const result = await this._userRepository.save(user);
         const barber = new BarberEntity();
         barber.user = user;

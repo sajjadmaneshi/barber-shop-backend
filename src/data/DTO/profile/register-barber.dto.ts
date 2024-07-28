@@ -1,6 +1,7 @@
-import { Gender } from '../../entities/profile.entity';
+
 import { IsEnum, IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from "../../../common/enums/gender.enum";
 
 export class RegisterBarberDto {
   @IsNotEmpty()

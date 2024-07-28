@@ -1,5 +1,6 @@
-import { Gender } from '../entities/profile.entity';
+
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from "../../common/enums/gender.enum";
 
 export class ServiceViewModel {
   @ApiProperty({ type: Number })

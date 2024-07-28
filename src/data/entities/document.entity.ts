@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ProfileEntity } from './profile.entity';
 import { ServiceEntity } from './service.entity';
+import { UserEntity } from './user.entity';
 
 @Entity('document')
 export class DocumentEntity {
@@ -19,8 +19,8 @@ export class DocumentEntity {
   @Column()
   createdAt: string;
 
-  @OneToMany(() => ProfileEntity, (profile) => profile.avatar)
-  profiles: ProfileEntity[];
+  @OneToMany(() => UserEntity, (user) => user.avatar)
+  users: UserEntity[];
   @OneToMany(() => ServiceEntity, (service) => service.image)
   services: ServiceEntity[];
 }

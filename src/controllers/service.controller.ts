@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
-import { RoleEnum } from '../common/enums/roleEnum';
+import { RoleEnum } from '../common/enums/role.enum';
 import { Roles } from '../common/decorators/role.decorator';
 import { ProvidedServiceService } from '../services/provided-service.service';
 

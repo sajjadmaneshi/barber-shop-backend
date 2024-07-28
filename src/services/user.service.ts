@@ -7,7 +7,14 @@ import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { RoleService } from './role.service';
 import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
 import { UserViewModel } from '../data/models/user/user.view-model';
-import { UserSimpleInfoViewModel } from '../data/models/user/user-simple-info.view-model';
+
+import { CustomerEntity } from '../data/entities/customer.entity';
+import { CustomerService } from './customer.service';
+import { ProfileResponseViewModel } from '../data/models/profile-response.view-model';
+
+import { UpdateUserInfoDto } from '../data/DTO/profile/update-user-info.dto';
+import { DocumentEntity } from '../data/entities/document.entity';
+import { DocumentService } from './document.service';
 
 @Injectable()
 export class UserService {
@@ -16,6 +23,8 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly _userRepository: Repository<UserEntity>,
     private readonly _roleService: RoleService,
+    private readonly _customerService: CustomerService,
+    private readonly _documentService: DocumentService,
   ) {}
 
   private getUsersBaseQuery() {
@@ -24,37 +33,31 @@ export class UserService {
       .orderBy('user.id', 'DESC');
   }
 
-  public async getRoles() {
-    return await this._roleService.getUserRolesBaseQuery().getMany();
-  }
-
   public async getUsers() {
     const users = await this.getUsersBaseQuery()
-      .leftJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('user.role', 'role')
-      .leftJoinAndSelect('profile.avatar', 'avatar')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .getMany();
     return users.map(
       (x) =>
         ({
           id: x.id,
-          firstName: x.profile?.firstname,
-          lastName: x.profile?.lastname,
-          gender: x.profile?.gender,
+          firstName: x.firstname,
+          lastName: x?.lastname,
+          gender: x?.gender,
           role: x.role.name,
           mobileNumber: x.mobileNumber,
-          avatarId: x.profile?.avatar?.id,
+          avatarId: x?.avatar?.id,
           isRegistered: x.isRegistered,
         }) as UserViewModel,
     );
   }
 
-  public async getUser(id: string): Promise<any> {
+  public async getUser(id: string): Promise<UserEntity> {
     const user = await this._userRepository
       .createQueryBuilder('u')
-      .leftJoinAndSelect('u.profile', 'profile')
       .leftJoinAndSelect('u.role', 'role')
-      .leftJoinAndSelect('profile.avatar', 'avatar')
+      .leftJoinAndSelect('u.avatar', 'avatar')
       .where('u.id = :id', { id })
       .getOne();
     if (!user) {
@@ -63,12 +66,29 @@ export class UserService {
     return user;
   }
 
-  public async createUser(input: AddUserDto): Promise<UserEntity> {
+  public async registerCustomer(input: AddUserDto): Promise<number> {
+    const queryRunner =
+      this._userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     const user = new UserEntity();
-    user.mobileNumber = input.mobileNumber;
-    user.otp = input.otp;
-    user.role = await this._roleService.getRole(input.role);
-    return await this._userRepository.save(user);
+    const customer = new CustomerEntity();
+    try {
+      user.mobileNumber = input.mobileNumber;
+      user.otp = input.otp;
+      user.role = await this._roleService.getRole(input.role);
+      const result = await this._userRepository.save(user);
+      if (result) customer.user = result;
+      const customerResult =
+        await this._customerService.createCustomer(customer);
+      await queryRunner.commitTransaction();
+      return customerResult.id;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(error.message);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async changeRole(changeRoleDto: ChangeRoleDto): Promise<boolean> {
@@ -104,17 +124,33 @@ export class UserService {
     return;
   }
 
-  public async getSimpleInfo(userId: string) {
-    const existingUser = await this._userRepository.findOne({
-      where: { id: userId },
-    });
-    if (!existingUser) throw new BadRequestException('user not found');
-    return {
-      firstName: existingUser?.profile?.firstname,
-      lastName: existingUser?.profile?.lastname,
-      avatarId: existingUser.profile?.avatar?.id,
+  public async getUserProfile(userId: string) {
+    const existingUser = await this.getUser(userId);
+    return new ProfileResponseViewModel({
+      mobileNumber: existingUser.mobileNumber,
+      firstname: existingUser.firstname,
+      lastname: existingUser.lastname,
+      gender: existingUser.gender,
+      avatarId: existingUser.avatar?.id,
       role: existingUser.role.name,
-    } as UserSimpleInfoViewModel;
+    });
+  }
+
+  public async completeInfo(
+    userId: string,
+    completeInfoDto: UpdateUserInfoDto,
+  ) {
+    const existingUser = await this.getUser(userId);
+    existingUser.gender = completeInfoDto.gender;
+    existingUser.firstname = completeInfoDto.firstname;
+    existingUser.lastname = completeInfoDto.lastname;
+    let document: DocumentEntity | null = null;
+    if (completeInfoDto.avatarId)
+      document = await this._documentService.findOne(completeInfoDto.avatarId);
+
+    existingUser.avatar = document;
+    existingUser.isRegistered = true;
+    return this._userRepository.save(existingUser);
   }
 
   public async getUserByMobileNumber(

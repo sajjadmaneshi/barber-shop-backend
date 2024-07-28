@@ -6,11 +6,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Gender } from './profile.entity';
 import { IsInt, Max, Min } from 'class-validator';
 import { DocumentEntity } from './document.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { BarberServiceEntity } from './barber-service.entity';
+import { Gender } from '../../common/enums/gender.enum';
 
 @Entity({ name: 'service' })
 export class ServiceEntity {
