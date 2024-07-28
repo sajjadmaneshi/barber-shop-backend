@@ -13,6 +13,7 @@ import { TimeSlotEntity } from './time-slot.entity';
 
 import { BarberServiceEntity } from './barber-service.entity';
 import { BarberEntity } from './barber.entity';
+import { ReserveStatusEnum } from "../../common/enums/reserve-status.enum";
 
 @Entity({ name: 'reserve' })
 export class ReserveEntity {
@@ -54,6 +55,10 @@ export class ReserveEntity {
   })
   @JoinColumn({ name: 'customer_id' })
   customer: CustomerEntity;
+
+  @ApiProperty({ enum: ReserveStatusEnum })
+  @Column()
+  status: ReserveStatusEnum;
 
   @ApiProperty({ type: Date })
   @Column()

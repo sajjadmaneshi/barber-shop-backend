@@ -11,6 +11,8 @@ import { BarberServiceEntity } from '../data/entities/barber-service.entity';
 import { BarberEntity } from '../data/entities/barber.entity';
 import { CustomerReserveViewModel } from '../data/models/reserve/customer-reserve.view-model';
 import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
+import { ReserveStatusEnum } from '../common/enums/reserve-status.enum';
+import { UnitOfWork } from '../common/services/unit-of-work.service';
 
 @Injectable()
 export class ReserveService {
@@ -27,7 +29,10 @@ export class ReserveService {
     private readonly _customerRepository: Repository<CustomerEntity>,
     @InjectRepository(BarberEntity)
     private readonly _barberRepository: Repository<BarberEntity>,
-  ) {}
+    private readonly _unitOfWork: UnitOfWork,
+  ) {
+    _unitOfWork.repository = _repository;
+  }
 
   private getReserveBaseQuery() {
     return this._repository
@@ -72,7 +77,7 @@ export class ReserveService {
       customer: {
         id: reserve.customer.id,
         firstName: reserve.customer.user.firstname,
-        lastName: reserve.customer.user.firstname,
+        lastName: reserve.customer.user.lastname,
         avatarId: reserve.customer.user.avatar?.id,
       },
     } as BarberReserveViewModel;
@@ -100,7 +105,7 @@ export class ReserveService {
       barber: {
         id: reserve.barber.id,
         firstName: reserve.barber.user.firstname,
-        lastName: reserve.barber.user.firstname,
+        lastName: reserve.barber.user.lastname,
         address: reserve.barber.addresses[0]?.shopAddress,
         barberShopName: reserve.barber.barberShopName,
         avatarId: reserve.barber.user.avatar?.id,
@@ -119,8 +124,7 @@ export class ReserveService {
       .leftJoinAndSelect('reserve.barber', 'barber')
       .leftJoinAndSelect('barber.addresses', 'address')
       .leftJoinAndSelect('barber.user', 'bUser')
-      .leftJoinAndSelect('bUser.profile', 'profile')
-      .leftJoinAndSelect('profile.avatar', 'avatar');
+      .leftJoinAndSelect('bUser.avatar', 'avatar');
   }
 
   public async getCustomerReserves(
@@ -165,9 +169,7 @@ export class ReserveService {
     const barberService = await this._getBarberServiceById(
       createReserveDto.service_id,
     );
-    const queryRunner = this._repository.manager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await this._unitOfWork.begin();
     try {
       const reserve = new ReserveEntity({
         timeSlot: timeSlot,
@@ -175,18 +177,38 @@ export class ReserveService {
         customer,
         barber,
         barberService,
+        status: ReserveStatusEnum.AWAITING_PAYMENT,
       });
       await this._repository.save(reserve);
-      timeSlot.isReserved = true;
-      await this._timeSlotRepository.save(timeSlot);
-      await queryRunner.commitTransaction();
 
+      await this._timeSlotRepository.update(timeSlot.id, { isReserved: true });
+
+      await this._unitOfWork.commit();
       return new Date();
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      await this._unitOfWork.rollback();
       throw new BadRequestException(error.message);
-    } finally {
-      await queryRunner.release();
+    }
+  }
+
+  public async cancelCustomerReserve(reserveId: number, userId: string) {
+    const customer = await this._getCustomerById(userId);
+    const existingReserve = await this._repository.findOne({
+      where: { id: reserveId, customer },
+    });
+    if (!existingReserve)
+      throw new BadRequestException('reserve with this id not found');
+    await this._unitOfWork.begin();
+    try {
+      existingReserve.status = ReserveStatusEnum.CANCELLED;
+      await this._repository.save(existingReserve);
+      const timeSlot = existingReserve.timeSlot;
+      timeSlot.isReserved = false;
+      await this._timeSlotRepository.save(timeSlot);
+      await this._unitOfWork.commit();
+      return existingReserve.id;
+    } catch (error) {
+      await this._unitOfWork.rollback();
     }
   }
 
@@ -199,6 +221,7 @@ export class ReserveService {
       throw new BadRequestException('this time reserved before');
     return timeSlot;
   }
+
   private async _getCustomerById(userId: string) {
     const customer = await this._customerRepository
       .createQueryBuilder('c')
@@ -208,6 +231,7 @@ export class ReserveService {
     if (!customer) throw new BadRequestException('customer  not found');
     return customer;
   }
+
   private async _getBarberServiceById(barberServiceId: number) {
     const barberService = await this._barberServiceRepository.findOne({
       where: { id: barberServiceId },
@@ -216,6 +240,7 @@ export class ReserveService {
       throw new BadRequestException('barber Service not found');
     return barberService;
   }
+
   private async _getBarberById(barberId: number) {
     const barber = await this._barberRepository.findOne({
       where: { id: barberId },

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { Reserve } from '../common/controller-names';
 import {
   ApiBearerAuth,
@@ -33,6 +33,16 @@ export class ReserveController {
   ) {
     const userId = user.id;
     return await this._reserveService.reserveForCustomer(userId, dto);
+  }
+
+  @Roles(RoleEnum.CUSTOMER, RoleEnum.SUPER_ADMIN)
+  @Patch(':id/cancel-customer-reserve')
+  async cancelCustomerReserve(
+    @CurrentUser() user: UserEntity,
+    @Param('id') id: number,
+  ) {
+    const userId = user.id;
+    return await this._reserveService.cancelCustomerReserve(id, userId);
   }
 
   @Roles(RoleEnum.CUSTOMER, RoleEnum.SUPER_ADMIN)
