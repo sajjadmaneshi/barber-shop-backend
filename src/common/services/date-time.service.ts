@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { isAfter, isBefore, isEqual, parse } from 'date-fns';
+import {
+  areIntervalsOverlapping,
+  isAfter,
+  isBefore,
+  isEqual,
+  parse,
+} from 'date-fns';
 
 @Injectable()
 export class DateTimeService {
@@ -8,16 +14,38 @@ export class DateTimeService {
   }
   isAfterOrSameTime(start: string, end: string) {
     const today = new Date(); // Current date
-    const startTime = parse(start, 'HH:mm:ss', today);
-    const endTime = parse(end, 'HH:mm:ss', today);
+    const startTime = parse(start, 'HH:mm', today);
+    const endTime = parse(end, 'HH:mm', today);
     return isAfter(endTime, startTime) || isEqual(endTime, startTime);
   }
 
-  isBetween(time: any, start: any, end: any) {
+  isBetweenTime(time: any, start: any, end: any) {
     const today = new Date(); // Current date
-    const startTime = parse(start, 'HH:mm:ss', today);
-    const endTime = parse(end, 'HH:mm:ss', today);
-    const checkTime = parse(time, 'HH:mm:ss', today);
+    const startTime = parse(start, 'HH:mm', today);
+    const endTime = parse(end, 'HH:mm', today);
+    const checkTime = parse(time, 'HH:mm', today);
+
     return isAfter(checkTime, startTime) && isBefore(checkTime, endTime);
+  }
+  isBetweenDate(date: Date, startDate: Date, endDate: Date) {
+    return (
+      (isAfter(date, startDate) || isEqual(date, startDate)) &&
+      (isBefore(date, endDate) || isEqual(date, startDate))
+    );
+  }
+  checkOverLapping(start1: string, end1: string, start2: string, end2: string) {
+    const today = new Date();
+    const parseTime = (time: string) => parse(time, 'HH:mm', today);
+
+    const restInterval = {
+      start: parseTime(start1),
+      end: parseTime(end1),
+    };
+    const extraInterval = {
+      start: parseTime(start2),
+      end: parseTime(end2),
+    };
+
+    return areIntervalsOverlapping(restInterval, extraInterval);
   }
 }

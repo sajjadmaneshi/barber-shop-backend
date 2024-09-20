@@ -179,8 +179,12 @@ export class CalendarService {
     if (
       startRestTime &&
       endRestTime &&
-      (!this._dateTimeService.isBetween(startRestTime, startTime, endTime) ||
-        !this._dateTimeService.isBetween(endRestTime, startTime, endTime))
+      (!this._dateTimeService.isBetweenTime(
+        startRestTime,
+        startTime,
+        endTime,
+      ) ||
+        !this._dateTimeService.isBetweenTime(endRestTime, startTime, endTime))
     )
       throw new BadRequestException(
         'rest time should be between start and end date',
@@ -189,8 +193,12 @@ export class CalendarService {
     if (
       startExtraTime &&
       endExtraTime &&
-      (!this._dateTimeService.isBetween(startExtraTime, startTime, endTime) ||
-        !this._dateTimeService.isBetween(endExtraTime, startTime, endTime))
+      (!this._dateTimeService.isBetweenTime(
+        startExtraTime,
+        startTime,
+        endTime,
+      ) ||
+        !this._dateTimeService.isBetweenTime(endExtraTime, startTime, endTime))
     )
       throw new BadRequestException(
         'extra dateTime should be between start and end date',
@@ -201,12 +209,12 @@ export class CalendarService {
       endRestTime &&
       startExtraTime &&
       endExtraTime &&
-      (this._dateTimeService.isBetween(
+      (this._dateTimeService.isBetweenTime(
         startRestTime,
         startExtraTime,
         endExtraTime,
       ) ||
-        this._dateTimeService.isBetween(
+        this._dateTimeService.isBetweenTime(
           endRestTime,
           startExtraTime,
           endExtraTime,

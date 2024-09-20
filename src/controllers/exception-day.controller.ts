@@ -57,6 +57,7 @@ export class ExceptionDayController {
     @Body() dto: AddExceptionDayDto,
   ) {
     return await this._exceptionDayService.createNewExceptionDay(id, dto);
+
   }
 
   @Patch(':id')

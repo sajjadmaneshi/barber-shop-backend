@@ -32,35 +32,41 @@ export class ExceptionDayEntity {
 
   @Column({
     nullable: true,
+    type: 'time',
   })
-  @ApiProperty({ type: Number })
-  startTime: number;
+  @ApiProperty({ type: 'time' })
+  startTime: string;
   @Column({
     nullable: true,
+    type: 'time',
   })
-  @ApiProperty({ type: Number })
-  endTime: number;
+  @ApiProperty({ type: 'time' })
+  endTime: string;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: 'time' })
   @Column({
     nullable: true,
+    type: 'time',
   })
-  startRestTime: number;
-  @ApiProperty({ type: Number })
+  startRestTime: string;
+  @ApiProperty({ type: 'time' })
   @Column({
     nullable: true,
+    type: 'time',
   })
-  endRestTime: number;
-  @ApiProperty({ type: Number })
+  endRestTime: string;
+  @ApiProperty({ type: 'time' })
   @Column({
     nullable: true,
+    type: 'time',
   })
-  startExtraTime: number;
-  @ApiProperty({ type: Number })
+  startExtraTime: string;
+  @ApiProperty({ type: 'time' })
   @Column({
     nullable: true,
+    type: 'time',
   })
-  endExtraTime: number;
+  endExtraTime: string;
 
   @ApiProperty({ type: Boolean })
   @Column()

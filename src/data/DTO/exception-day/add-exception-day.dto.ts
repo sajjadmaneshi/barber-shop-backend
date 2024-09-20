@@ -13,24 +13,24 @@ export class AddExceptionDayDto {
   @ApiProperty({ type: Number })
   period: number;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: String })
   @IsOptional()
-  startTime: number;
+  startTime: string;
   @Column()
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: String })
   @IsOptional()
-  endTime: number;
+  endTime: string;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: String })
   @IsOptional()
-  startRestTime: number;
-  @ApiProperty({ type: Number })
+  startRestTime: string;
+  @ApiProperty({ type: String })
   @IsOptional()
-  endRestTime: number;
-  @ApiProperty({ type: Number })
+  endRestTime: string;
+  @ApiProperty({ type: String })
   @IsOptional()
-  startExtraTime: number;
-  @ApiProperty({ type: Number })
+  startExtraTime: string;
+  @ApiProperty({ type: String })
   @IsOptional()
-  endExtraTime: number;
+  endExtraTime: string;
 }

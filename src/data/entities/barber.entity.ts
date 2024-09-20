@@ -11,7 +11,7 @@ import { AddressEntity } from './address.entity';
 import { BarberServiceEntity } from './barber-service.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { CalendarEntity } from './calendar.entity';
-import { ReserveEntity } from "./reserve.entity";
+import { ReserveEntity } from './reserve.entity';
 
 @Entity({ name: 'barber' })
 export class BarberEntity {
@@ -35,7 +35,6 @@ export class BarberEntity {
   @Column({ nullable: true })
   @ApiProperty({ type: String })
   barberShopName?: string;
-
 
   @OneToMany(() => ReserveEntity, (reserve) => reserve.barber)
   reserves: ReserveEntity[];
