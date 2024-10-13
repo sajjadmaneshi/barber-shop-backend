@@ -36,6 +36,7 @@ import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 import { query } from 'express';
 import { BarberViewModel } from "../data/models/barber/barber.view-model";
 import { PaginationResult } from "../common/pagination/paginator";
+import { BarberServiceViewModel } from "../data/models/barber/barber-service.view-model";
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -64,6 +65,15 @@ export class BarberController {
       city,
     );
   }
+
+
+  @Get(':barberId/services')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER, RoleEnum.CUSTOMER)
+  @ApiOkResponse({ type: BarberServiceViewModel })
+  async findBarberServices(@Param('barberId') barberId: number) {
+    return await this._barberService.getBarberServices(barberId);
+  }
+
   @Get('address')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({ type: AddressEntity })

@@ -45,6 +45,7 @@ export class BarberServiceController {
   async findOne(@Param('id') id: number) {
     return await this._barberServiceService.getService(id);
   }
+
   @Post()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: Number })

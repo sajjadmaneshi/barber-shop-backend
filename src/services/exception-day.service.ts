@@ -6,6 +6,7 @@ import { AddExceptionDayDto } from '../data/DTO/exception-day/add-exception-day.
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { DateTimeService } from '../common/services/date-time.service';
 import { UpdateExceptionDayDto } from '../data/DTO/exception-day/update-exception-day.dto';
+import { ChangeExceptionDayClosedDto } from '../data/DTO/exception-day/change-exception-day-closed.dto';
 
 @Injectable()
 export class ExceptionDayService {
@@ -84,14 +85,37 @@ export class ExceptionDayService {
     return id;
   }
 
-  public async changeIsClosed(id: number, isClosed: boolean): Promise<void> {
-    const result = await this._repository.update(id, { isClosed });
-    if (result.affected === 0) {
+  public async changeIsClosed(
+    dto: ChangeExceptionDayClosedDto,
+  ): Promise<number> {
+    const calendar = await this._calendarRepository.findOne({
+      where: { id: dto.calendarId },
+    });
+    if (!calendar)
+      throw new BadRequestException('calendar with this id NotFound');
+    if (
+      !this._dateTimeService.isBetweenDate(
+        dto.date,
+        calendar.startDate,
+        calendar.endDate,
+      )
+    )
       throw new BadRequestException(
-        'exception day not found or other problem occurred',
+        'date should be between start and end date',
       );
-    }
-    return;
+    const addExceptionDayDto = <AddExceptionDayDto>{
+      date: dto.date,
+      startTime: calendar.startTime,
+      endTime: calendar.endTime,
+      startExtraTime: calendar.startExtraTime,
+      endExtraTime: calendar.endExtraTime,
+      startRestTime: calendar.startRestTime,
+      endRestTime: calendar.endRestTime,
+      period: calendar.period,
+
+      isClosed: dto.isClosed,
+    };
+    return await this.createNewExceptionDay(dto.calendarId, addExceptionDayDto);
   }
 
   public async removeCalendar(id: number) {
@@ -189,6 +213,10 @@ export class ExceptionDayService {
       'Extra dateTime should be between start and end time',
     );
     if (
+      startRestTime &&
+      endRestTime &&
+      startExtraTime &&
+      endExtraTime &&
       this._dateTimeService.checkOverLapping(
         startRestTime,
         endRestTime,

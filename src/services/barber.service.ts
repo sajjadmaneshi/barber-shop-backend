@@ -22,6 +22,8 @@ import {
   PaginateOptions,
   PaginationResult,
 } from '../common/pagination/paginator';
+import { BarberServiceEntity } from '../data/entities/barber-service.entity';
+import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';
 
 @Injectable()
 export class BarberService {
@@ -32,6 +34,9 @@ export class BarberService {
     private readonly _userRepository: Repository<UserEntity>,
     @InjectRepository(AddressEntity)
     private readonly _addressRepository: Repository<AddressEntity>,
+
+    @InjectRepository(BarberServiceEntity)
+    private readonly _barberServiceRepository: Repository<BarberServiceEntity>,
     private readonly _roleService: RoleService,
     private readonly _documentService: DocumentService,
     private readonly _geoLocationService: GeolocationService,
@@ -48,15 +53,14 @@ export class BarberService {
   ): Promise<PaginationResult<BarberViewModel>> {
     const query = this.getBarberBaseQuery()
       .leftJoinAndSelect('b.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('profile.avatar', 'avatar')
+      .leftJoinAndSelect('user.avatar', 'avatar')
       .leftJoinAndSelect('b.addresses', 'address')
       .leftJoinAndSelect('address.city', 'city')
       .leftJoinAndSelect('city.province', 'province');
 
     if (search) {
       query.andWhere(
-        '(profile.firstname LIKE :search OR profile.lastname LIKE :search)',
+        '(user.firstname LIKE :search OR user.lastname LIKE :search)',
         { search: `%${search}%` },
       );
     }
@@ -92,6 +96,7 @@ export class BarberService {
     await queryRunner.startTransaction();
     try {
       const barber = await this._repository.findOne({ where: { user } });
+      if (!barber) throw new BadRequestException('barber not found');
       barber.bio = dto.bio;
       barber.barberShopName = dto.barberShopName;
       await this._repository.save(barber);
@@ -261,6 +266,33 @@ export class BarberService {
       .getOne();
     if (!barber) throw new NotFoundException('barber with this id not Found');
     return barber;
+  }
+  public async getBarberServices(
+    barberId: number,
+  ): Promise<BarberServiceViewModel[]> {
+    const barberServices = await this._barberServiceRepository
+      .createQueryBuilder('barberService')
+      .orderBy('barberService.id', 'DESC')
+      .leftJoinAndSelect('barberService.barber', 'barber')
+      .leftJoinAndSelect('barberService.service', 'service')
+      .leftJoinAndSelect('service.image', 'image')
+      .where('barber.id = :barberId', { barberId })
+      .getMany();
+    return barberServices.map(
+      (service) =>
+        ({
+          id: service.id,
+          barberDescription: service.description,
+          service: {
+            id: service.service.id,
+            gender: service.service.gender,
+            serviceDescription: service.service.description,
+            imageId: service.service.image?.id,
+            iconName: service.service.iconName,
+            title: service.service.title,
+          },
+        }) as BarberServiceViewModel,
+    );
   }
 
   public async createBarber(dto: RegisterBarberDto) {

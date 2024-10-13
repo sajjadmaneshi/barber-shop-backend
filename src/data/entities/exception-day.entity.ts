@@ -16,7 +16,7 @@ export class ExceptionDayEntity {
   }
 
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',

@@ -57,7 +57,6 @@ export class ExceptionDayController {
     @Body() dto: AddExceptionDayDto,
   ) {
     return await this._exceptionDayService.createNewExceptionDay(id, dto);
-
   }
 
   @Patch(':id')
@@ -66,15 +65,12 @@ export class ExceptionDayController {
   async update(@Param('id') id: number, @Body() dto: UpdateExceptionDayDto) {
     return await this._exceptionDayService.updateExceptionDay(id, dto);
   }
-  @Put(':id/')
+  @Put()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: Boolean })
+  @ApiOkResponse({ type: Number })
   @ApiBody({ type: ChangeExceptionDayClosedDto })
-  async changeIsClosed(
-    @Param('id') id: number,
-    @Body() dto: ChangeExceptionDayClosedDto,
-  ) {
-    return await this._exceptionDayService.changeIsClosed(id, dto.isClosed);
+  async changeIsClosed(@Body() dto: ChangeExceptionDayClosedDto) {
+    return await this._exceptionDayService.changeIsClosed(dto);
   }
 
   @Delete(':id')

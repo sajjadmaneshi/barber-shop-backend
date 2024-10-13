@@ -13,6 +13,9 @@ export class AddExceptionDayDto {
   @ApiProperty({ type: Number })
   period: number;
 
+  @ApiProperty({ type: Boolean })
+  isClosed: boolean = false;
+
   @ApiProperty({ type: String })
   @IsOptional()
   startTime: string;

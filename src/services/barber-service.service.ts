@@ -60,6 +60,31 @@ export class BarberServiceService {
         }) as BarberServiceViewModel,
     );
   }
+  public async getBarberServices(
+    barberId: number,
+  ): Promise<BarberServiceViewModel[]> {
+    const barberServices = await this.getServicesBaseQuery()
+      .leftJoinAndSelect('barberService.barber', 'barber')
+      .leftJoinAndSelect('barberService.service', 'service')
+      .leftJoinAndSelect('service.image', 'image')
+      .where('barber.id = :barberId', { barberId })
+      .getMany();
+    return barberServices.map(
+      (service) =>
+        ({
+          id: service.id,
+          barberDescription: service.description,
+          service: {
+            id: service.service.id,
+            gender: service.service.gender,
+            serviceDescription: service.service.description,
+            imageId: service.service.image?.id,
+            iconName: service.service.iconName,
+            title: service.service.title,
+          },
+        }) as BarberServiceViewModel,
+    );
+  }
 
   public async getService(id: number): Promise<BarberServiceViewModel> {
     const barberService = await this.getServicesBaseQuery()

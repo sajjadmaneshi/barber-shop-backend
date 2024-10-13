@@ -14,16 +14,16 @@ export class DateTimeService {
   }
   isAfterOrSameTime(start: string, end: string) {
     const today = new Date(); // Current date
-    const startTime = parse(start, 'HH:mm', today);
-    const endTime = parse(end, 'HH:mm', today);
+    const startTime = parse(start, 'HH:mm:ss', today);
+    const endTime = parse(end, 'HH:mm:ss', today);
     return isAfter(endTime, startTime) || isEqual(endTime, startTime);
   }
 
   isBetweenTime(time: any, start: any, end: any) {
     const today = new Date(); // Current date
-    const startTime = parse(start, 'HH:mm', today);
-    const endTime = parse(end, 'HH:mm', today);
-    const checkTime = parse(time, 'HH:mm', today);
+    const startTime = parse(start, 'HH:mm:ss', today);
+    const endTime = parse(end, 'HH:mm:ss', today);
+    const checkTime = parse(time, 'HH:mm:ss', today);
 
     return isAfter(checkTime, startTime) && isBefore(checkTime, endTime);
   }
@@ -35,7 +35,7 @@ export class DateTimeService {
   }
   checkOverLapping(start1: string, end1: string, start2: string, end2: string) {
     const today = new Date();
-    const parseTime = (time: string) => parse(time, 'HH:mm', today);
+    const parseTime = (time: string) => parse(time, 'HH:mm:ss', today);
 
     const restInterval = {
       start: parseTime(start1),
