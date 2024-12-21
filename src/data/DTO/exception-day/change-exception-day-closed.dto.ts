@@ -6,8 +6,8 @@ export class ChangeExceptionDayClosedDto {
   @ApiProperty({ type: Boolean })
   public isClosed: boolean;
   @IsNotEmpty()
-  @ApiProperty({ type: Number })
-  public calendarId: number;
+  @ApiProperty({ type: String })
+  public calendarId: string;
   @ApiProperty({ type: Date })
   @IsNotEmpty()
   date: Date;

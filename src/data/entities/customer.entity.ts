@@ -11,9 +11,9 @@ import { ReserveEntity } from './reserve.entity';
 
 @Entity('customer')
 export class CustomerEntity {
-  @PrimaryGeneratedColumn()
-  @ApiProperty({ type: Number })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty({ type: String })
+  id: string;
 
   @OneToOne(() => UserEntity, {
     eager: true,

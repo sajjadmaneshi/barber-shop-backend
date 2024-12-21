@@ -13,7 +13,7 @@ export class TimeSlotController {
   @ApiOkResponse({ type: TimeSlotEntity })
   async findAll(
     @Param('date') date: Date,
-    @Param('barberId') barberId: number,
+    @Param('barberId') barberId: string,
   ) {
     return await this._timeSlotService.getBarberTimeSlotsOfSpecificDate(
       date,

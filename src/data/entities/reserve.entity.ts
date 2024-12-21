@@ -21,9 +21,9 @@ export class ReserveEntity {
     Object.assign(this as ReserveEntity, partial);
   }
 
-  @PrimaryGeneratedColumn()
-  @ApiProperty({ type: Number })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty({ type: String })
+  id: string;
 
   @OneToOne(() => TimeSlotEntity, {
     eager: true,
@@ -44,11 +44,7 @@ export class ReserveEntity {
   @JoinColumn({ name: 'barber_service_id' })
   barberService: BarberServiceEntity;
 
-  @ManyToOne(() => BarberEntity, (barber) => barber.reserves, {
-    eager: true,
-  })
-  @JoinColumn({ name: 'barber_id' })
-  barber: BarberEntity;
+
 
   @ManyToOne(() => CustomerEntity, (customer) => customer.reserves, {
     eager: true,

@@ -24,12 +24,16 @@ import {
 } from '../common/pagination/paginator';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
 import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';
+import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
+import { ReserveEntity } from '../data/entities/reserve.entity';
 
 @Injectable()
 export class BarberService {
   constructor(
     @InjectRepository(BarberEntity)
     private readonly _repository: Repository<BarberEntity>,
+    @InjectRepository(ReserveEntity)
+    private readonly _reserveRepository: Repository<ReserveEntity>,
     @InjectRepository(UserEntity)
     private readonly _userRepository: Repository<UserEntity>,
     @InjectRepository(AddressEntity)
@@ -50,11 +54,10 @@ export class BarberService {
     paginateOptions?: PaginateOptions,
     search?: string,
     city?: number,
-  ): Promise<PaginationResult<BarberViewModel>> {
+  ): Promise<{ total: number; data: Promise<BarberViewModel>[] }> {
     const query = this.getBarberBaseQuery()
       .leftJoinAndSelect('b.user', 'user')
       .leftJoinAndSelect('user.avatar', 'avatar')
-      .leftJoinAndSelect('b.addresses', 'address')
       .leftJoinAndSelect('address.city', 'city')
       .leftJoinAndSelect('city.province', 'province');
 
@@ -68,10 +71,12 @@ export class BarberService {
       query.andWhere('(address.city.id=:city)', { city });
     }
     const result = await paginate<BarberEntity>(query, paginateOptions);
+
     return {
+
       total: result.total,
       data: result.data.map(
-        (barber) =>
+     async   (barber) =>
           ({
             id: barber.id,
             avatarId: barber.user?.avatar?.id,
@@ -79,18 +84,41 @@ export class BarberService {
             firstName: barber.user?.firstname,
             lastName: barber.user?.lastname,
             bio: barber.bio,
-            barberShopName: barber.barberShopName,
+            barberShopName: barber.shopName,
             gender: barber.user?.gender,
-            address: barber.addresses[0],
+            address: await this.getBarberAddress(barber.user?.id),
           }) as BarberViewModel,
       ),
+    };
+  }
+
+  public async getAllBarberReserves(
+    barberId: string,
+    paginateOptions?: PaginateOptions,
+  ): Promise<PaginationResult<BarberReserveViewModel>> {
+    const query = this._reserveRepository
+      .createQueryBuilder('r')
+      .orderBy('r.id', 'ASC')
+      .leftJoin('r.barber', 'barber')
+      .where('barber.id=:barberId', { barberId })
+      .leftJoinAndSelect('r.barberService', 'barberService')
+      .leftJoinAndSelect('barberService.service', 'service')
+      .leftJoinAndSelect('r.timeSlot', 'timeSlot')
+      .leftJoinAndSelect('r.customer', 'customer')
+      .leftJoinAndSelect('customer.user', 'cUser')
+      .leftJoinAndSelect('cUser.avatar', 'avatar');
+
+    const result = await paginate<ReserveEntity>(query, paginateOptions);
+    return {
+      total: result.total,
+      data: result.data.map((reserve) => this._mapBarberReserveModel(reserve)),
     };
   }
 
   async completeBarberInfo(
     user: UserEntity,
     dto: AddBarberBaseInfoDto,
-  ): Promise<number> {
+  ): Promise<string> {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -98,7 +126,7 @@ export class BarberService {
       const barber = await this._repository.findOne({ where: { user } });
       if (!barber) throw new BadRequestException('barber not found');
       barber.bio = dto.bio;
-      barber.barberShopName = dto.barberShopName;
+      barber.shopName = dto.barberShopName;
       await this._repository.save(barber);
       const addressDto = new AddressDto(
         dto.cityId,
@@ -124,7 +152,18 @@ export class BarberService {
     }
   }
 
-  async updateBarberProfile(barberId: number, dto: UpdateProfileDto) {
+  private _mapBarberReserveModel(reserve: ReserveEntity) {
+    return {
+      id: reserve.id,
+      startTime: reserve.timeSlot.startTime,
+      endTime: reserve.timeSlot.endTime,
+      date: reserve.timeSlot.date,
+      service: reserve.barberService.service,
+      customer: reserve.customer.user,
+    } as BarberReserveViewModel;
+  }
+
+  async updateBarberProfile(barberId: string, dto: UpdateProfileDto) {
     const existingBarber = await this._repository.findOne({
       where: { id: barberId },
     });
@@ -142,8 +181,8 @@ export class BarberService {
   async updateBarberInfo(
     user: UserEntity,
     dto: UpdateBarberBaseInfoDto,
-    barberId?: number,
-  ): Promise<number> {
+    barberId?: string,
+  ): Promise<string> {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -190,7 +229,7 @@ export class BarberService {
 
       await this._repository.update(existingBarber.id, {
         bio: dto.bio ?? existingBarber.bio,
-        barberShopName: dto.barberShopName ?? existingBarber.barberShopName,
+        shopName: dto.barberShopName ?? existingBarber.shopName,
       });
 
       await queryRunner.commitTransaction();
@@ -214,7 +253,7 @@ export class BarberService {
     address.shopAddress = addressDto.address;
     address.longitude = addressDto.longitude;
     address.latitude = addressDto.latitude;
-    address.barber = barber;
+    address.barber=barber
     await this._addressRepository.save(address);
   }
 
@@ -222,7 +261,7 @@ export class BarberService {
     return dto.cityId || dto.latitude || dto.address || dto.longitude;
   }
 
-  public async getBarber(id: number) {
+  public async getBarber(id: string) {
     const barber = await this.getBarberBaseQuery()
       .leftJoinAndSelect('b.user', 'user')
       .leftJoinAndSelect('b.addresses', 'address')
@@ -247,6 +286,7 @@ export class BarberService {
     const barberAddress = await this._addressRepository
       .createQueryBuilder('address')
       .leftJoin('address.barber', 'barber')
+
       .leftJoin('barber.user', 'user')
       .leftJoinAndSelect('address.city', 'city')
       .leftJoinAndSelect('city.province', 'province')
@@ -259,16 +299,8 @@ export class BarberService {
     return barberAddress;
   }
 
-  public async getBarberWithUserId(id: string) {
-    const barber = await this.getBarberBaseQuery()
-      .leftJoin('b.user', 'user')
-      .where('user.id=:id', { id })
-      .getOne();
-    if (!barber) throw new NotFoundException('barber with this id not Found');
-    return barber;
-  }
   public async getBarberServices(
-    barberId: number,
+    barberId: string,
   ): Promise<BarberServiceViewModel[]> {
     const barberServices = await this._barberServiceRepository
       .createQueryBuilder('barberService')
@@ -311,7 +343,7 @@ export class BarberService {
         const user = new UserEntity();
         user.mobileNumber = dto.mobileNumber;
         user.role = await this._roleService.getRole('BARBER');
-
+        user.lastLogin=new Date();
         user.gender = dto.gender;
         user.firstname = dto.firstName;
         user.lastname = dto.lastName;
@@ -330,7 +362,7 @@ export class BarberService {
     }
   }
 
-  public async deleteBarber(id: number): Promise<DeleteResult> {
+  public async deleteBarber(id: string): Promise<DeleteResult> {
     const deleteResult = await this.getBarberBaseQuery()
       .delete()
       .where('id=:id', { id })
@@ -343,7 +375,7 @@ export class BarberService {
 }
 export class AddressDto {
   constructor(
-    public cityId: number,
+    public cityId: string,
     public address: string,
     public latitude: number,
     public longitude: number,

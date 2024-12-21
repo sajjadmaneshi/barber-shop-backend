@@ -34,9 +34,10 @@ import { CalendarService } from '../services/calendar.service';
 import { AddressEntity } from '../data/entities/address.entity';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
 import { query } from 'express';
-import { BarberViewModel } from "../data/models/barber/barber.view-model";
-import { PaginationResult } from "../common/pagination/paginator";
-import { BarberServiceViewModel } from "../data/models/barber/barber-service.view-model";
+import { BarberViewModel } from '../data/models/barber/barber.view-model';
+import { PaginationResult } from '../common/pagination/paginator';
+import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';
+import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -66,11 +67,27 @@ export class BarberController {
     );
   }
 
-
+  @Get(':barberId/reserves')
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({ type: [PaginationResult<BarberReserveViewModel>] })
+  async getAllReserves(
+    @Param('barberId') barberId: string,
+    @Query('page') page?: number,
+  ) {
+    return await this._barberService.getAllBarberReserves(
+      barberId,
+      page
+        ? {
+            currentPage: page,
+            limit: 10,
+          }
+        : null,
+    );
+  }
   @Get(':barberId/services')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER, RoleEnum.CUSTOMER)
   @ApiOkResponse({ type: BarberServiceViewModel })
-  async findBarberServices(@Param('barberId') barberId: number) {
+  async findBarberServices(@Param('barberId') barberId: string) {
     return await this._barberService.getBarberServices(barberId);
   }
 
@@ -98,7 +115,7 @@ export class BarberController {
   @Get(':id')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({ type: BarberEntity })
-  async getBarber(@Param('id') id: number) {
+  async getBarber(@Param('id') id: string) {
     return await this._barberService.getBarber(id);
   }
 
@@ -126,7 +143,7 @@ export class BarberController {
   async updateBarberInfo(
     @Body() dto: UpdateBarberBaseInfoDto,
     @CurrentUser() user: UserEntity,
-    @Param('id') id?: number,
+    @Param('id') id?: string,
   ) {
     return await this._barberService.updateBarberInfo(user, dto, id);
   }
@@ -137,7 +154,7 @@ export class BarberController {
   @UseGuards(AuthGuardJwt, RoleGuard)
   async updateBarberProfile(
     @Body() dto: UpdateProfileDto,
-    @Param('barberId') barberId?: number,
+    @Param('barberId') barberId?: string,
   ) {
     return await this._barberService.updateBarberProfile(barberId, dto);
   }
@@ -145,7 +162,7 @@ export class BarberController {
   @Delete(':id')
   @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @UseGuards(AuthGuardJwt, RoleGuard)
-  async deleteBarber(@Param('id') id: number) {
+  async deleteBarber(@Param('id') id: string) {
     return await this._barberService.deleteBarber(id);
   }
 }

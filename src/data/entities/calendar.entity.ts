@@ -18,9 +18,9 @@ export class CalendarEntity {
   constructor(partial?: Partial<CalendarEntity>) {
     Object.assign(this as CalendarEntity, partial);
   }
-  @ApiProperty({ type: Number })
-  @PrimaryGeneratedColumn()
-  id: number;
+  @ApiProperty({ type: String })
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @ApiProperty({ type: String })
   @Column({ type: String })
   @MaxLength(13)
@@ -32,7 +32,7 @@ export class CalendarEntity {
   @ApiProperty({ type: Date })
   startDate: Date;
   @Column({ type: 'time' })
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   startTime: string;
   @CreateDateColumn({
     type: 'timestamp with time zone',
@@ -41,25 +41,19 @@ export class CalendarEntity {
   @ApiProperty({ type: Date })
   endDate: Date;
   @Column({ type: 'time' })
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   endTime: string;
   @ApiProperty({ type: Number })
   @Column()
   period: number;
   @Column({ type: 'time', nullable: true })
-  @ApiProperty({ type: 'time', nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   startRestTime: string;
 
   @Column({ type: 'time', nullable: true })
-  @ApiProperty({ type: 'time', nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   endRestTime: string;
 
-  @Column({ type: 'time', nullable: true })
-  @ApiProperty({ type: 'time', nullable: true })
-  startExtraTime: string;
-  @Column({ type: 'time', nullable: true })
-  @ApiProperty({ type: 'time', nullable: true })
-  endExtraTime: string;
 
   @ManyToOne(() => BarberEntity, (barber) => barber.calendars, {
     eager: true,

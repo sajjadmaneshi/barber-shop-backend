@@ -3,9 +3,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AddCityDto {
   @IsNotEmpty()
-  @IsNumber()
-  @ApiProperty({ type: Number })
-  provinceId: number;
+  @IsString()
+  @ApiProperty({ type: String })
+  provinceId: string;
   @IsNotEmpty()
   @IsString()
   @ApiProperty()

@@ -4,9 +4,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'province' })
 export class ProvinceEntity {
-  @PrimaryGeneratedColumn()
-  @ApiProperty({ type: Number })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty({ type: String })
+  id: string;
   @ApiProperty({ type: String })
   @Column()
   name: string;
@@ -14,5 +14,5 @@ export class ProvinceEntity {
   @OneToMany(() => CityEntity, (city) => city.province, {
     onDelete: 'CASCADE',
   })
-  cities: CityEntity[];
+  city: CityEntity[];
 }

@@ -9,6 +9,7 @@ import { UserRole } from './user-role.entity';
 
 import { DocumentEntity } from './document.entity';
 import { Gender } from '../../common/enums/gender.enum';
+import { ApiProperty } from "@nestjs/swagger";
 
 @Entity('user')
 export class UserEntity {
@@ -40,10 +41,16 @@ export class UserEntity {
   @Column({ default: false })
   isRegistered: boolean;
 
+  @ApiProperty({ type: Date })
+  @Column()
+  lastLogin: Date;
+
   @ManyToOne(() => UserRole, (userRole) => userRole.users, {
     nullable: false,
     eager: true,
   })
   @JoinColumn({ name: 'role_id' })
   role: UserRole;
+
+
 }

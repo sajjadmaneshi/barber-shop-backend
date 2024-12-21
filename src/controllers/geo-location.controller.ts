@@ -34,7 +34,7 @@ import { UpdateCityDto } from '../data/DTO/geo-location/update-city.dto';
 export class GeoLocationController {
   constructor(private readonly _geoLocationService: GeolocationService) {}
 
-  @Get('province')
+  @Get('provinces')
   public async getAll() {
     return await this._geoLocationService.getAllProvinces();
   }
@@ -42,66 +42,65 @@ export class GeoLocationController {
   @Get('cities')
   @ApiQuery({
     name: 'provinceId',
-    type: Number,
-
+    type: String,
     required: false,
   })
-  public async getAllCityOfProvince(@Query('provinceId') provinceId?: number) {
+  public async getAllCityOfProvince(@Query('provinceId') provinceId?: string) {
     return await this._geoLocationService.getAllCity(provinceId);
   }
 
-  @Post('province')
+  @Post('provinces')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: AddProvinceDto })
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @HttpCode(201)
   public async createProvince(@Body() dto: AddProvinceDto) {
     return await this._geoLocationService.createProvince(dto);
   }
 
-  @Patch('province/:id')
+  @Patch('provinces/:id')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: UpdateProvinceDto })
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @HttpCode(201)
   public async updateProvince(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() dto: UpdateProvinceDto,
   ) {
     return await this._geoLocationService.updateProvince(id, dto);
   }
-  @Post('city')
+  @Post('cities')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: AddCityDto })
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @HttpCode(201)
   public async createCity(@Body() dto: AddCityDto) {
     return await this._geoLocationService.createCity(dto);
   }
 
-  @Patch('city/:id')
+  @Patch('cities/:id')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: UpdateCityDto })
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @HttpCode(201)
-  public async updateCity(@Param('id') id: number, @Body() dto: UpdateCityDto) {
+  public async updateCity(@Param('id') id: string, @Body() dto: UpdateCityDto) {
     return await this._geoLocationService.updateCity(id, dto);
   }
 
-  @Delete('province/:id')
+  @Delete('provinces/:id')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
-  async deleteProvince(@Param('id') id: number) {
+  async deleteProvince(@Param('id') id: string) {
     return await this._geoLocationService.deleteProvince(id);
   }
-  @Delete('city/:id')
+  @Delete('cities/:id')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
-  async deleteCity(@Param('id') id: number) {
+  async deleteCity(@Param('id') id: string) {
     return await this._geoLocationService.deleteCity(id);
   }
 }

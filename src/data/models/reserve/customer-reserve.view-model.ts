@@ -1,25 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ServiceEntity } from '../../entities/service.entity';
+import { BarberEntity } from '../../entities/barber.entity';
 
 export class CustomerReserveViewModel {
-  @ApiProperty({ type: Number })
-  id: number;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
+  id: string;
+  @ApiProperty({ type: String })
   startTime: string;
 
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   endTime: string;
 
-  @ApiProperty()
-  service: { id: number; name: string };
+  @ApiProperty({ type: Date })
+  date: Date;
 
-  @ApiProperty()
-  barber: {
-    id: number;
-    firstName: string;
-    lastName: string;
+  @ApiProperty({ type: () => ServiceEntity })
+  service: ServiceEntity;
 
-    address: string;
-    barberShopName: string;
-    avatarId?: string;
-  };
+  @ApiProperty({ type: () => BarberEntity })
+  barber: BarberEntity;
 }

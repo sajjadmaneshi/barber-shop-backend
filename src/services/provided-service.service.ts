@@ -58,7 +58,7 @@ export class ProvidedServiceService {
     };
   }
 
-  public async getService(id: number): Promise<ServiceViewModel | undefined> {
+  public async getService(id: string): Promise<ServiceViewModel | undefined> {
     const service = await this.getServicesBaseQuery()
       .andWhere('service.id = :id', { id })
       .leftJoinAndSelect('service.image', 'image')
@@ -69,7 +69,7 @@ export class ProvidedServiceService {
     return { ...serviceData, imageId: image.id } as ServiceViewModel;
   }
 
-  public async createService(dto: AddServiceDto): Promise<number> {
+  public async createService(dto: AddServiceDto): Promise<string> {
     const service = new ServiceEntity();
     service.title = dto.title;
     service.price = dto.price;
@@ -90,9 +90,9 @@ export class ProvidedServiceService {
   }
 
   public async updateService(
-    id: number,
+    id: string,
     dto: UpdateServiceDto,
-  ): Promise<number> {
+  ): Promise<string> {
     const { imageId, ...updateData } = dto;
     let document: DocumentEntity | null = null;
 
@@ -111,7 +111,7 @@ export class ProvidedServiceService {
     return id;
   }
 
-  public async removeService(id: number): Promise<DeleteResult> {
+  public async removeService(id: string): Promise<DeleteResult> {
     const deleteResult = await this._repository
       .createQueryBuilder('service')
       .delete()

@@ -18,4 +18,6 @@ export class UserViewModel {
   isRegistered: boolean;
   @ApiProperty()
   role: string;
+  @ApiProperty()
+  lastLogin: Date;
 }

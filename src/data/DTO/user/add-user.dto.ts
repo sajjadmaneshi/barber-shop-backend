@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString, Length } from "class-validator";
 
 export class AddUserDto {
   @IsNotEmpty()
@@ -12,4 +12,7 @@ export class AddUserDto {
 
   @IsString()
   role: string;
+
+  @IsDate()
+  lastLogin: Date;
 }

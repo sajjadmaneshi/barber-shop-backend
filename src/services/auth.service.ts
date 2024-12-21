@@ -9,6 +9,7 @@ import { UserEntity } from '../data/entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateUserDto } from '../data/DTO/user/update-user.dto';
 import { VerifyOtpDto } from '../data/DTO/user/verify-otp.dto';
+import { AddUserDto } from "../data/DTO/user/add-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,7 @@ export class AuthService {
   }
 
   async registerUser(mobileNumber: string): Promise<string> {
+
     try {
       const existingUser =
         await this._userService.getUserByMobileNumber(mobileNumber);
@@ -44,13 +46,15 @@ export class AuthService {
       if (existingUser) {
         await this._userService.updateUser(existingUser.id, {
           otp,
+          lastLogin: new Date(),
         } as UpdateUserDto);
       } else {
         const user = {
           mobileNumber,
           otp,
           role: 'CUSTOMER',
-        };
+          lastLogin:new Date()
+        } as AddUserDto;
         await this._userService.registerCustomer(user);
       }
       return otp;

@@ -36,7 +36,7 @@ export class ExceptionDayController {
   @Get('calendar/:id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: [ExceptionDayEntity] })
-  async getSpecificCalendarExceptionDays(@Param('id') id: number) {
+  async getSpecificCalendarExceptionDays(@Param('id') id: string) {
     return await this._exceptionDayService.getExceptionDaysOfSpecificCalendar(
       id,
     );
@@ -45,15 +45,15 @@ export class ExceptionDayController {
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: ExceptionDayEntity })
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: string) {
     return await this._exceptionDayService.findOne(id);
   }
 
   @Post(':calendarId')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   async create(
-    @Param('calendarId') id: number,
+    @Param('calendarId') id: string,
     @Body() dto: AddExceptionDayDto,
   ) {
     return await this._exceptionDayService.createNewExceptionDay(id, dto);
@@ -61,13 +61,13 @@ export class ExceptionDayController {
 
   @Patch(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: Number })
-  async update(@Param('id') id: number, @Body() dto: UpdateExceptionDayDto) {
+  @ApiOkResponse({ type: String })
+  async update(@Param('id') id: string, @Body() dto: UpdateExceptionDayDto) {
     return await this._exceptionDayService.updateExceptionDay(id, dto);
   }
   @Put()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @ApiBody({ type: ChangeExceptionDayClosedDto })
   async changeIsClosed(@Body() dto: ChangeExceptionDayClosedDto) {
     return await this._exceptionDayService.changeIsClosed(dto);
@@ -75,7 +75,7 @@ export class ExceptionDayController {
 
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id') id: string) {
     return await this._exceptionDayService.removeCalendar(id);
   }
 }

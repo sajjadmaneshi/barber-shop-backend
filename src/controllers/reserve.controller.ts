@@ -39,7 +39,7 @@ export class ReserveController {
   @Patch(':id/cancel-customer-reserve')
   async cancelCustomerReserve(
     @CurrentUser() user: UserEntity,
-    @Param('id') id: number,
+    @Param('id') id: string,
   ) {
     const userId = user.id;
     return await this._reserveService.cancelCustomerReserve(id, userId);
@@ -65,7 +65,7 @@ export class ReserveController {
   @ApiOkResponse({ type: BarberReserveViewModel })
   async getBarberSpecificReserve(
     @CurrentUser() user: UserEntity,
-    @Param('id') id: number,
+    @Param('id') id: string,
   ) {
     const userId = user.id;
     return await this._reserveService.getBarberSpecificReserve(userId, id);
@@ -75,7 +75,7 @@ export class ReserveController {
   @ApiOkResponse({ type: CustomerReserveViewModel })
   async getCustomerSpecificReserve(
     @CurrentUser() user: UserEntity,
-    @Param('id') id: number,
+    @Param('id') id: string,
   ) {
     const userId = user.id;
     return await this._reserveService.getCustomerSpecificReserve(userId, id);

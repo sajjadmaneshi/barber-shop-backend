@@ -33,7 +33,7 @@ export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Get(':id')
-  async seeUploadFile(@Param('id') documentId, @Res() res): Promise<any> {
+  async seeUploadFile(@Param('id') documentId:string, @Res() res): Promise<any> {
     try {
       const document = await this.documentService.findOne(documentId);
       if (!document) {

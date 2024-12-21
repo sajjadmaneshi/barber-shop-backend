@@ -15,7 +15,7 @@ export class TimeSlotService {
     return this._repository.createQueryBuilder('ts').orderBy('ts.id', 'ASC');
   }
 
-  public async getBarberTimeSlotsOfSpecificDate(date: Date, barberId: number) {
+  public async getBarberTimeSlotsOfSpecificDate(date: Date, barberId: string) {
     const startOfDayDate = startOfDay(date);
     const endOfDayDate = endOfDay(date);
 

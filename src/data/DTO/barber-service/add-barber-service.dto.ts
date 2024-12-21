@@ -2,13 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsInt } from 'class-validator';
 
 export class AddBarberServiceDto {
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsInt({ each: true })
-  add: number[];
+  add: string[];
 
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsInt({ each: true })
-  delete: number[];
+  delete: string[];
 }

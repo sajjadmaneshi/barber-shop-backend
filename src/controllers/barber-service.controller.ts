@@ -42,7 +42,7 @@ export class BarberServiceController {
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: BarberServiceViewModel })
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: string) {
     return await this._barberServiceService.getService(id);
   }
 
@@ -58,17 +58,17 @@ export class BarberServiceController {
   }
   @Patch(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @ApiBody({ type: UpdateBarberServiceDescriptionDto })
   async updateService(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() dto: UpdateBarberServiceDescriptionDto,
   ) {
     return await this._barberServiceService.updateService(id, dto);
   }
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  async removeService(@Param('id') id: number) {
+  async removeService(@Param('id') id: string) {
     return await this._barberServiceService.removeService(id);
   }
 }

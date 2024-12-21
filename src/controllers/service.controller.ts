@@ -45,14 +45,14 @@ export class ServiceController {
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: ServiceViewModel })
-  async findOne(@Param('id') id: number): Promise<ServiceViewModel> {
+  async findOne(@Param('id') id: string): Promise<ServiceViewModel> {
     return await this._barberServiceService.getService(id);
   }
 
   @Post()
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: AddServiceDto })
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @HttpCode(201)
   async create(@Body() dto: AddServiceDto) {
     return await this._barberServiceService.createService(dto);
@@ -61,17 +61,17 @@ export class ServiceController {
   @Patch(':id')
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: UpdateServiceDto })
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() dto: UpdateServiceDto,
-  ): Promise<number> {
+  ): Promise<string> {
     return await this._barberServiceService.updateService(id, dto);
   }
 
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN)
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id') id: string) {
     return await this._barberServiceService.removeService(id);
   }
 }

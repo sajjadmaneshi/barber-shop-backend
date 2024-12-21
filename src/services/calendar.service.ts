@@ -56,8 +56,6 @@ export class CalendarService {
           endTime: calendar.endTime,
           startTime: calendar.startTime,
           daysOfWork: calendar.daysOfWork,
-          startExtraTime: calendar.startExtraTime,
-          endExtraTime: calendar.endExtraTime,
           startRestTime: calendar.startRestTime,
           endRestTime: calendar.endRestTime,
           barber: {
@@ -80,7 +78,7 @@ export class CalendarService {
     return calendars;
   }
 
-  public async getSpecificCalendar(id: number): Promise<CalendarEntity> {
+  public async getSpecificCalendar(id: string): Promise<CalendarEntity> {
     const calendar = await this.getCalendarsBaseQuery()
       .where('calendar.id=:id', { id })
       .getOne();
@@ -92,7 +90,7 @@ export class CalendarService {
   public async createCalendar(
     dto: AddCalendarDto,
     userId: string,
-  ): Promise<number> {
+  ): Promise<string> {
     const queryRunner = this._repository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -232,7 +230,7 @@ export class CalendarService {
       .getOne();
   }
 
-  public async removeCalendar(id: number) {
+  public async removeCalendar(id: string) {
     const deleteResult = await this.getCalendarsBaseQuery()
       .delete()
       .where('id = :id', { id })
@@ -252,9 +250,7 @@ export class CalendarService {
 
     const {
       startRestTime,
-      startExtraTime,
       endRestTime,
-      endExtraTime,
       startTime,
       endTime,
       period,
@@ -264,17 +260,11 @@ export class CalendarService {
     const parsedEndTime = parse(endTime, 'HH:mm:ss', today);
 
     let parsedStartRestTime: Date,
-      parsedEndRestTime: Date,
-      parsedStartExtraTime: Date,
-      parsedEndExtraTime: Date;
+      parsedEndRestTime: Date;
 
     if (startRestTime)
       parsedStartRestTime = parse(startRestTime, 'HH:mm:ss', today);
     if (endRestTime) parsedEndRestTime = parse(endRestTime, 'HH:mm:ss', today);
-    if (startExtraTime)
-      parsedStartExtraTime = parse(startExtraTime, 'HH:mm:ss', today);
-    if (endExtraTime)
-      parsedEndExtraTime = parse(endExtraTime, 'HH:mm:ss', today);
 
     let slotStartTime = parsedStartTime;
 
@@ -289,15 +279,9 @@ export class CalendarService {
         (isBefore(slotEndTime, parsedEndRestTime) ||
           isEqual(slotEndTime, parsedEndRestTime));
 
-      const withinExtraTime =
-        startExtraTime &&
-        endExtraTime &&
-        (isAfter(slotStartTime, parsedStartExtraTime) ||
-          isEqual(slotStartTime, parsedStartExtraTime)) &&
-        (isBefore(slotEndTime, parsedEndExtraTime) ||
-          isEqual(slotEndTime, parsedEndExtraTime));
 
-      const isReserved = withinRestTime || withinExtraTime || false;
+
+      const isReserved = withinRestTime  || false;
 
       timeSlots.push({
         dateTime: date,
@@ -337,8 +321,8 @@ export class CalendarService {
 
   public async updateCalendar(
     dto: UpdateCalendarDto,
-    id: number,
-  ): Promise<number> {
+    id: string,
+  ): Promise<string> {
     let existingCalendar = await this.getSpecificCalendar(id);
     if (existingCalendar) {
       existingCalendar = { ...existingCalendar, ...dto };
@@ -349,7 +333,7 @@ export class CalendarService {
 
       if (
         existingCalendarInThisDate?.id != null &&
-        existingCalendarInThisDate?.id !== +id
+        existingCalendarInThisDate?.id !== id
       ) {
         throw new BadRequestException('calendar with this date exist before');
       }

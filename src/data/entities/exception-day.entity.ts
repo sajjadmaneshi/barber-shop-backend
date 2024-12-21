@@ -15,8 +15,8 @@ export class ExceptionDayEntity {
     Object.assign(this as ExceptionDayEntity, partial);
   }
 
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
@@ -34,34 +34,34 @@ export class ExceptionDayEntity {
     nullable: true,
     type: 'time',
   })
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type:String })
   startTime: string;
   @Column({
     nullable: true,
     type: 'time',
   })
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type:String})
   endTime: string;
 
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type:String})
   @Column({
     nullable: true,
     type: 'time',
   })
   startRestTime: string;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type:String})
   @Column({
     nullable: true,
     type: 'time',
   })
   endRestTime: string;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type:String })
   @Column({
     nullable: true,
     type: 'time',
   })
   startExtraTime: string;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type:String})
   @Column({
     nullable: true,
     type: 'time',

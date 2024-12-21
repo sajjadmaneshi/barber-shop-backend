@@ -15,8 +15,8 @@ import { Gender } from '../../common/enums/gender.enum';
 @Entity({ name: 'service' })
 export class ServiceEntity {
   @ApiProperty()
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @ApiProperty()
   @Column()
   title: string;
@@ -46,9 +46,9 @@ export class ServiceEntity {
     eager: true,
     cascade: true,
   })
-  @ApiProperty()
+  @ApiProperty({ type: () => DocumentEntity })
   @JoinColumn({ name: 'image_id' })
-  image: DocumentEntity;
+  image?: DocumentEntity;
 
   @OneToMany(
     () => BarberServiceEntity,

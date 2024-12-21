@@ -3,8 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from "../../common/enums/gender.enum";
 
 export class ServiceViewModel {
-  @ApiProperty({ type: Number })
-  id: number;
+  @ApiProperty({ type: String })
+  id: string;
   @ApiProperty({ type: String })
   title: string;
   @ApiProperty({ enum: Gender })

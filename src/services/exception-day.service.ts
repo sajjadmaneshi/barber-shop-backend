@@ -25,7 +25,7 @@ export class ExceptionDayService {
       .orderBy('eDay.id', 'DESC');
   }
 
-  public async getExceptionDaysOfSpecificCalendar(calendarId: number) {
+  public async getExceptionDaysOfSpecificCalendar(calendarId: string) {
     const exceptionDays = await this.getExceptionDaysBaseQuery()
       .leftJoin('eDay.calendar', 'calendar')
       .where('calendar.id=:calendarId', { calendarId })
@@ -34,15 +34,15 @@ export class ExceptionDayService {
     return exceptionDays;
   }
 
-  public async findOne(id: number) {
+  public async findOne(id: string) {
     return await this.getExceptionDaysBaseQuery()
       .where('eDay.id=:id', { id })
       .getOne();
   }
 
   public async createNewExceptionDay(
-    calendarId: number,
-    dto: AddExceptionDayDto,
+    calendarId: string,
+    dto: Partial<AddExceptionDayDto>,
   ) {
     const { date } = dto;
     const existingExceptionDay = await this.getExceptionDaysBaseQuery()
@@ -64,7 +64,7 @@ export class ExceptionDayService {
     return result.id;
   }
 
-  public async updateExceptionDay(id: number, dto: UpdateExceptionDayDto) {
+  public async updateExceptionDay(id: string, dto: UpdateExceptionDayDto) {
     const existingExceptionDay = await this.getExceptionDaysBaseQuery()
       .leftJoinAndSelect('eDay.calendar', 'calendar')
       .where('eDay.id=:id', { id })
@@ -87,7 +87,7 @@ export class ExceptionDayService {
 
   public async changeIsClosed(
     dto: ChangeExceptionDayClosedDto,
-  ): Promise<number> {
+  ): Promise<string> {
     const calendar = await this._calendarRepository.findOne({
       where: { id: dto.calendarId },
     });
@@ -103,22 +103,13 @@ export class ExceptionDayService {
       throw new BadRequestException(
         'date should be between start and end date',
       );
-    const addExceptionDayDto = <AddExceptionDayDto>{
-      date: dto.date,
-      startTime: calendar.startTime,
-      endTime: calendar.endTime,
-      startExtraTime: calendar.startExtraTime,
-      endExtraTime: calendar.endExtraTime,
-      startRestTime: calendar.startRestTime,
-      endRestTime: calendar.endRestTime,
-      period: calendar.period,
-
+    const addExceptionDayDto ={
       isClosed: dto.isClosed,
-    };
+    } as Partial<AddExceptionDayDto>
     return await this.createNewExceptionDay(dto.calendarId, addExceptionDayDto);
   }
 
-  public async removeCalendar(id: number) {
+  public async removeCalendar(id: string) {
     const deleteResult = await this.getExceptionDaysBaseQuery()
       .delete()
       .where('id = :id', { id })

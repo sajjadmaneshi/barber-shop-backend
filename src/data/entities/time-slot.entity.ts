@@ -10,21 +10,21 @@ import { CalendarEntity } from './calendar.entity';
 
 @Entity({ name: 'time_slot' })
 export class TimeSlotEntity {
-  @PrimaryGeneratedColumn()
-  @ApiProperty({ type: Number })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty({ type: String })
+  id: string;
   @ApiProperty({ type: Date })
   @Column()
-  dateTime: Date;
-  @ApiProperty({ type: 'time' })
+  date: Date;
+  @ApiProperty({ type: String })
   @Column({ type: 'time' })
   startTime: string;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String})
   @Column({ type: 'time' })
   endTime: string;
   @ApiProperty({ type: Boolean })
   @Column()
-  isReserved: boolean;
+  isReserved: boolean=false;
   @ManyToOne(() => CalendarEntity, (calendar) => calendar.exceptionDays, {
     cascade: true,
     onDelete: 'CASCADE',

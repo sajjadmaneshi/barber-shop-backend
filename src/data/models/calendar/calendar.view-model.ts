@@ -1,32 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BarberViewModel } from "../barber/barber.view-model";
 
 export class CalendarViewModel {
   @ApiProperty({ type: Number })
-  id: number;
+  id: string;
   @ApiProperty({ type: String })
   daysOfWork: string;
 
   @ApiProperty({ type: Date })
   startDate: Date;
 
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   startTime: string;
 
   @ApiProperty({ type: Date })
   endDate: Date;
 
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   endTime: string;
   @ApiProperty({ type: Number })
   period: number;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   startRestTime: string;
-  @ApiProperty({ type: 'time' })
+  @ApiProperty({ type: String })
   endRestTime: string;
-  @ApiProperty({ type: 'time' })
-  startExtraTime: string;
-  @ApiProperty({ type: 'time' })
-  endExtraTime: string;
+
   @ApiProperty()
-  barber: { id: number; firstName: string; lastName: string };
+  barber:Pick<BarberViewModel,"id"|"firstName"|"lastName">;
 }

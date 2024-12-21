@@ -4,7 +4,7 @@ import { Gender } from '../../../common/enums/gender.enum';
 
 export class BarberViewModel {
   @ApiProperty()
-  id: number;
+  id: string;
   @ApiProperty()
   mobileNumber: string;
   @ApiProperty()

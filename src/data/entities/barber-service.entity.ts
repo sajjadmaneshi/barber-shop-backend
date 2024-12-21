@@ -13,8 +13,8 @@ import { ReserveEntity } from './reserve.entity';
 
 @Entity({ name: 'barber_service' })
 export class BarberServiceEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => BarberEntity, (barber) => barber.barberServices, {
     eager: true,

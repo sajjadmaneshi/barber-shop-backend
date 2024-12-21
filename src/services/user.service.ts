@@ -49,6 +49,7 @@ export class UserService {
           mobileNumber: x.mobileNumber,
           avatarId: x?.avatar?.id,
           isRegistered: x.isRegistered,
+          lastLogin:x.lastLogin
         }) as UserViewModel,
     );
   }
@@ -66,7 +67,7 @@ export class UserService {
     return user;
   }
 
-  public async registerCustomer(input: AddUserDto): Promise<number> {
+  public async registerCustomer(input: AddUserDto): Promise<string> {
     const queryRunner =
       this._userRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
@@ -76,6 +77,7 @@ export class UserService {
     try {
       user.mobileNumber = input.mobileNumber;
       user.otp = input.otp;
+      user.lastLogin=input.lastLogin;
       user.role = await this._roleService.getRole(input.role);
       const result = await this._userRepository.save(user);
       if (result) customer.user = result;

@@ -61,7 +61,7 @@ export class BarberServiceService {
     );
   }
   public async getBarberServices(
-    barberId: number,
+    barberId: string,
   ): Promise<BarberServiceViewModel[]> {
     const barberServices = await this.getServicesBaseQuery()
       .leftJoinAndSelect('barberService.barber', 'barber')
@@ -86,7 +86,7 @@ export class BarberServiceService {
     );
   }
 
-  public async getService(id: number): Promise<BarberServiceViewModel> {
+  public async getService(id: string): Promise<BarberServiceViewModel> {
     const barberService = await this.getServicesBaseQuery()
       .leftJoinAndSelect('barberService.barber', 'barber')
       .leftJoin('barber.user', 'user')
@@ -142,7 +142,7 @@ export class BarberServiceService {
     }
   }
 
-  private async _addServices(addIds: number[], barber: BarberEntity) {
+  private async _addServices(addIds: string[], barber: BarberEntity) {
     const filteredId = await this._filterBarberServices(addIds, barber);
     const services = await this._serviceRepository.find({
       where: { id: In(filteredId) },
@@ -163,9 +163,9 @@ export class BarberServiceService {
   }
 
   private async _filterBarberServices(
-    addIds: number[],
+    addIds: string[],
     barber: BarberEntity,
-  ): Promise<number[]> {
+  ): Promise<string[]> {
     const existingBarberServices = await this._repository
       .createQueryBuilder('bs')
       .leftJoin('bs.barber', 'barber')
@@ -181,7 +181,7 @@ export class BarberServiceService {
         ),
     );
   }
-  private async _removeServices(deleteIds: number[], barber: BarberEntity) {
+  private async _removeServices(deleteIds: string[], barber: BarberEntity) {
     const servicesToDelete = await this._repository
       .createQueryBuilder('bs')
       .leftJoin('bs.service', 'service')
@@ -196,9 +196,9 @@ export class BarberServiceService {
     await this._repository.remove(servicesToDelete);
   }
   public async updateService(
-    id: number,
+    id: string,
     dto: UpdateBarberServiceDescriptionDto,
-  ): Promise<number> {
+  ): Promise<string> {
     const result = await this._repository.update(id, dto);
     if (result.affected === 0) {
       throw new NotFoundException(`Barber Service with ID ${id} not found`);
@@ -207,7 +207,7 @@ export class BarberServiceService {
     return id;
   }
 
-  public async removeService(id: number): Promise<void> {
+  public async removeService(id: string): Promise<void> {
     const deleteResult = await this._repository
       .createQueryBuilder('bs')
       .delete()

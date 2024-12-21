@@ -11,13 +11,12 @@ import { AddressEntity } from './address.entity';
 import { BarberServiceEntity } from './barber-service.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { CalendarEntity } from './calendar.entity';
-import { ReserveEntity } from './reserve.entity';
 
 @Entity({ name: 'barber' })
 export class BarberEntity {
-  @PrimaryGeneratedColumn()
-  @ApiProperty({ type: Number })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty({ type: String })
+  id: string;
 
   @OneToOne(() => UserEntity, {
     eager: true,
@@ -34,13 +33,10 @@ export class BarberEntity {
 
   @Column({ nullable: true })
   @ApiProperty({ type: String })
-  barberShopName?: string;
+  shopName?: string;
 
-  @OneToMany(() => ReserveEntity, (reserve) => reserve.barber)
-  reserves: ReserveEntity[];
 
-  @OneToMany(() => AddressEntity, (address) => address.barber)
-  addresses: AddressEntity[];
+
 
   @OneToMany(() => CalendarEntity, (calendar) => calendar.barber)
   calendars: CalendarEntity[];

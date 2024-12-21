@@ -27,7 +27,7 @@ export class AddBarberBaseInfoDto {
   @ApiProperty({ type: Number })
   longitude: number;
   @IsNotEmpty()
-  @IsNumber()
-  @ApiProperty({ type: Number })
-  cityId: number;
+  @IsString()
+  @ApiProperty({ type: String })
+  cityId: string;
 }

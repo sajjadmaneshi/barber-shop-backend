@@ -50,13 +50,13 @@ export class CalendarController {
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: CalendarEntity })
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: string) {
     return await this._calendarService.getSpecificCalendar(id);
   }
 
   @Post()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: Number })
+  @ApiOkResponse({ type: String })
   @ApiBody({ type: AddCalendarDto })
   async addNewCalendar(
     @Body() dto: AddCalendarDto,
@@ -70,14 +70,14 @@ export class CalendarController {
   @ApiBody({ type: UpdateCalendarDto })
   async updateCalendar(
     @Body() dto: UpdateCalendarDto,
-    @Param('id') id: number,
+    @Param('id') id: string,
   ) {
     return this._calendarService.updateCalendar(dto, id);
   }
 
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  async remove(@Param('id') id: number) {
+  async remove(@Param('id') id: string) {
     return await this._calendarService.removeCalendar(id);
   }
 }

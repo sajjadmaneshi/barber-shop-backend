@@ -31,7 +31,7 @@ export class GeolocationService {
     return await this.getProvinceBaseQuery().getMany();
   }
 
-  public async getAllCity(provinceId?: number): Promise<CityEntity[]> {
+  public async getAllCity(provinceId?: string): Promise<CityEntity[]> {
     if (provinceId) {
       return await this._cityRepository
         .createQueryBuilder('c')
@@ -46,7 +46,7 @@ export class GeolocationService {
     }
   }
 
-  public async createProvince(dto: AddProvinceDto): Promise<number> {
+  public async createProvince(dto: AddProvinceDto): Promise<string> {
     const existingProvince = await this._repository.findOne({
       where: { name: dto.name },
     });
@@ -62,9 +62,9 @@ export class GeolocationService {
   }
 
   public async updateProvince(
-    id: number,
+    id: string,
     dto: UpdateProvinceDto,
-  ): Promise<number> {
+  ): Promise<string> {
     const result = await this._repository.update(id, { ...dto });
     if (result.affected === 0) {
       throw new BadRequestException('cannot update this province');
@@ -73,7 +73,7 @@ export class GeolocationService {
     return id;
   }
 
-  public async deleteProvince(id: number): Promise<DeleteResult> {
+  public async deleteProvince(id: string): Promise<DeleteResult> {
     const deleteResult = await this._repository
       .createQueryBuilder('state')
       .delete()
@@ -112,7 +112,7 @@ export class GeolocationService {
     return result.id;
   }
 
-  public async updateCity(id: number, dto: UpdateCityDto): Promise<number> {
+  public async updateCity(id: string, dto: UpdateCityDto): Promise<string> {
     let result!: UpdateResult;
     if (dto.provinceId) {
       const province = await this._repository.findOne({
@@ -136,7 +136,7 @@ export class GeolocationService {
     return id;
   }
 
-  public async deleteCity(id: number): Promise<DeleteResult> {
+  public async deleteCity(id: string): Promise<DeleteResult> {
     const deleteResult = await this._cityRepository
       .createQueryBuilder('city')
       .delete()
@@ -149,7 +149,7 @@ export class GeolocationService {
     return;
   }
 
-  public async getCityById(cityId: number): Promise<CityEntity | null> {
+  public async getCityById(cityId: string): Promise<CityEntity | null> {
     const city = await this._cityRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.province', 'province')

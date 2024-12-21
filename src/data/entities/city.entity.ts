@@ -11,13 +11,13 @@ import { AddressEntity } from './address.entity';
 
 @Entity({ name: 'city' })
 export class CityEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
 
-  @ManyToOne(() => ProvinceEntity, (province) => province.cities, {
+  @ManyToOne(() => ProvinceEntity, (province) => province.city, {
     eager: true,
     onDelete: 'CASCADE',
   })

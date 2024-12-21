@@ -8,7 +8,6 @@ import { CustomerEntity } from '../data/entities/customer.entity';
 import { TimeSlotEntity } from '../data/entities/time-slot.entity';
 import { CreateReserveDto } from '../data/DTO/reserve/create-reserve.dto';
 import { BarberServiceEntity } from '../data/entities/barber-service.entity';
-import { BarberEntity } from '../data/entities/barber.entity';
 import { CustomerReserveViewModel } from '../data/models/reserve/customer-reserve.view-model';
 import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
 import { ReserveStatusEnum } from '../common/enums/reserve-status.enum';
@@ -27,8 +26,6 @@ export class ReserveService {
     private readonly _barberServiceRepository: Repository<BarberServiceEntity>,
     @InjectRepository(CustomerEntity)
     private readonly _customerRepository: Repository<CustomerEntity>,
-    @InjectRepository(BarberEntity)
-    private readonly _barberRepository: Repository<BarberEntity>,
     private readonly _unitOfWork: UnitOfWork,
   ) {
     _unitOfWork.repository = _repository;
@@ -44,25 +41,22 @@ export class ReserveService {
     return await this.getReserveBaseQuery()
       .leftJoinAndSelect('reserve.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('reserve.barber', 'barber')
       .leftJoinAndSelect('barber.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
       .getMany();
   }
 
   private _getBarberBaseReserve(userId: string) {
     return this.getReserveBaseQuery()
-      .leftJoin('reserve.barber', 'barber')
       .leftJoin('barber.user', 'bUser')
       .where('bUser.id=:userId', { userId })
       .leftJoinAndSelect('reserve.barberService', 'barberService')
+      .leftJoinAndSelect('barberService.barber', 'barber')
       .leftJoinAndSelect('barberService.service', 'service')
       .leftJoinAndSelect('reserve.timeSlot', 'timeSlot')
       .leftJoinAndSelect('reserve.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'cUser')
-      .leftJoinAndSelect('cUser.profile', 'profile')
-      .leftJoinAndSelect('profile.avatar', 'avatar');
+      .leftJoinAndSelect('cUser.avatar', 'avatar');
   }
 
   private _mapBarberReserveModel(reserve: ReserveEntity) {
@@ -70,16 +64,9 @@ export class ReserveService {
       id: reserve.id,
       startTime: reserve.timeSlot.startTime,
       endTime: reserve.timeSlot.endTime,
-      service: {
-        id: reserve.barberService.service.id,
-        name: reserve.barberService.service.title,
-      },
-      customer: {
-        id: reserve.customer.id,
-        firstName: reserve.customer.user.firstname,
-        lastName: reserve.customer.user.lastname,
-        avatarId: reserve.customer.user.avatar?.id,
-      },
+      date: reserve.timeSlot.date,
+      service: reserve.barberService.service,
+      customer: reserve.customer.user,
     } as BarberReserveViewModel;
   }
 
@@ -98,18 +85,9 @@ export class ReserveService {
       id: reserve.id,
       startTime: reserve.timeSlot.startTime,
       endTime: reserve.timeSlot.endTime,
-      service: {
-        id: reserve.barberService.service.id,
-        name: reserve.barberService.service.title,
-      },
-      barber: {
-        id: reserve.barber.id,
-        firstName: reserve.barber.user.firstname,
-        lastName: reserve.barber.user.lastname,
-        address: reserve.barber.addresses[0]?.shopAddress,
-        barberShopName: reserve.barber.barberShopName,
-        avatarId: reserve.barber.user.avatar?.id,
-      },
+      date: reserve.timeSlot.date,
+      service: reserve.barberService.service,
+      barber: reserve.barberService.barber,
     } as CustomerReserveViewModel;
   }
 
@@ -119,12 +97,13 @@ export class ReserveService {
       .leftJoin('customer.user', 'cUser')
       .where('cUser.id=:userId', { userId })
       .leftJoinAndSelect('reserve.barberService', 'barberService')
-      .leftJoinAndSelect('barberService.service', 'service')
-      .leftJoinAndSelect('reserve.timeSlot', 'timeSlot')
-      .leftJoinAndSelect('reserve.barber', 'barber')
+      .leftJoinAndSelect('barberService.barber', 'barber')
       .leftJoinAndSelect('barber.addresses', 'address')
       .leftJoinAndSelect('barber.user', 'bUser')
-      .leftJoinAndSelect('bUser.avatar', 'avatar');
+      .leftJoinAndSelect('bUser.avatar', 'avatar')
+      .leftJoinAndSelect('barberService.service', 'service')
+      .leftJoinAndSelect('reserve.timeSlot', 'timeSlot')
+
   }
 
   public async getCustomerReserves(
@@ -137,7 +116,7 @@ export class ReserveService {
 
   public async getBarberSpecificReserve(
     userId: string,
-    id: number,
+    id: string,
   ): Promise<BarberReserveViewModel> {
     const reserve = await this._getBarberBaseReserve(userId)
       .where('reserve.id=:id', { id })
@@ -149,7 +128,7 @@ export class ReserveService {
 
   public async getCustomerSpecificReserve(
     userId: string,
-    id: number,
+    id: string,
   ): Promise<CustomerReserveViewModel> {
     const reserve = await this._getCustomerBaseReserve(userId)
       .where('reserve.id=:id', { id })
@@ -165,7 +144,6 @@ export class ReserveService {
   ): Promise<Date> {
     const timeSlot = await this._getTimeSlotById(createReserveDto.timeSlot_id);
     const customer = await this._getCustomerById(userId);
-    const barber = await this._getBarberById(createReserveDto.barber_id);
     const barberService = await this._getBarberServiceById(
       createReserveDto.service_id,
     );
@@ -175,7 +153,6 @@ export class ReserveService {
         timeSlot: timeSlot,
         timeStamp: new Date(),
         customer,
-        barber,
         barberService,
         status: ReserveStatusEnum.AWAITING_PAYMENT,
       });
@@ -191,7 +168,7 @@ export class ReserveService {
     }
   }
 
-  public async cancelCustomerReserve(reserveId: number, userId: string) {
+  public async cancelCustomerReserve(reserveId: string, userId: string) {
     const customer = await this._getCustomerById(userId);
     const existingReserve = await this._repository.findOne({
       where: { id: reserveId, customer },
@@ -212,7 +189,7 @@ export class ReserveService {
     }
   }
 
-  private async _getTimeSlotById(timeSlotId: number): Promise<TimeSlotEntity> {
+  private async _getTimeSlotById(timeSlotId: string): Promise<TimeSlotEntity> {
     const timeSlot = await this._timeSlotRepository.findOne({
       where: { id: timeSlotId },
     });
@@ -232,7 +209,7 @@ export class ReserveService {
     return customer;
   }
 
-  private async _getBarberServiceById(barberServiceId: number) {
+  private async _getBarberServiceById(barberServiceId: string) {
     const barberService = await this._barberServiceRepository.findOne({
       where: { id: barberServiceId },
     });
@@ -241,11 +218,4 @@ export class ReserveService {
     return barberService;
   }
 
-  private async _getBarberById(barberId: number) {
-    const barber = await this._barberRepository.findOne({
-      where: { id: barberId },
-    });
-    if (!barber) throw new BadRequestException('barber  not found');
-    return barber;
-  }
 }
