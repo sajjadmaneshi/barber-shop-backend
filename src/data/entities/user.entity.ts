@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserRole } from './user-role.entity';
+import { UserRoleEntity } from './user-role.entity';
 
 import { DocumentEntity } from './document.entity';
 import { Gender } from '../../common/enums/gender.enum';
@@ -13,14 +13,16 @@ import { ApiProperty } from "@nestjs/swagger";
 
 @Entity('user')
 export class UserEntity {
+  @ApiProperty({ type:String, format: 'uuid'})
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
+  @ApiProperty({ type:String})
   @Column({ length: 11 })
   mobileNumber: string;
-
+  @ApiProperty({ type:String})
   @Column({ nullable: true })
   firstname?: string;
+  @ApiProperty({ type:String})
   @Column({ nullable: true })
   lastname?: string;
 
@@ -29,15 +31,17 @@ export class UserEntity {
     eager: true,
     cascade: true,
   })
+  @ApiProperty({ type:String})
   @JoinColumn({ name: 'avatar_id' })
   avatar: DocumentEntity;
-
+  @ApiProperty({ enum: Gender })
   @Column('enum', { enum: Gender, default: Gender.male, nullable: true })
   gender: Gender;
-
+  @ApiProperty({ type: String })
   @Column({ nullable: true })
   otp?: string;
 
+  @ApiProperty({ type: Boolean })
   @Column({ default: false })
   isRegistered: boolean;
 
@@ -45,12 +49,15 @@ export class UserEntity {
   @Column()
   lastLogin: Date;
 
-  @ManyToOne(() => UserRole, (userRole) => userRole.users, {
+
+  @ApiProperty({ type: String })
+
+  @ManyToOne(() => UserRoleEntity, (userRole) => userRole.users, {
     nullable: false,
     eager: true,
   })
   @JoinColumn({ name: 'role_id' })
-  role: UserRole;
+  role: UserRoleEntity;
 
 
 }

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../data/entities/user.entity';
-import { UserRole } from '../data/entities/user-role.entity';
+import { UserRoleEntity } from '../data/entities/user-role.entity';
 import { UserService } from '../services/user.service';
 import { RoleService } from '../services/role.service';
 import { DocumentService } from '../services/document.service';
@@ -16,7 +16,7 @@ import { JwtStrategy } from "../common/guards/jwt.strategy";
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      UserRole,
+      UserRoleEntity,
       CustomerEntity,
       UserEntity,
       DocumentEntity,

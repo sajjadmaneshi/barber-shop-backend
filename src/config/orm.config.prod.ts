@@ -1,7 +1,7 @@
 import { UserEntity } from '../data/entities/user.entity';
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { UserRole } from '../data/entities/user-role.entity';
+import { UserRoleEntity } from '../data/entities/user-role.entity';
 
 import { DocumentEntity } from '../data/entities/document.entity';
 import { CityEntity } from '../data/entities/city.entity';
@@ -28,7 +28,7 @@ export default registerAs(
 
     entities: [
       UserEntity,
-      UserRole,
+      UserRoleEntity,
       DocumentEntity,
       CityEntity,
       ProvinceEntity,

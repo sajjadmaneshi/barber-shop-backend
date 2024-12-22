@@ -15,7 +15,7 @@ export class ProfileResponseViewModel {
   @ApiProperty({ enum: Gender })
   gender: Gender;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String,format:'uuid' })
   avatarId?: string | null;
   @ApiProperty({ type: String })
   mobileNumber: string;

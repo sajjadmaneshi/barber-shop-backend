@@ -1,21 +1,21 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRole } from '../data/entities/user-role.entity';
+import { UserRoleEntity } from '../data/entities/user-role.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class RoleService {
   private readonly logger = new Logger(RoleService.name);
   constructor(
-    @InjectRepository(UserRole)
-    private readonly _repository: Repository<UserRole>,
+    @InjectRepository(UserRoleEntity)
+    private readonly _repository: Repository<UserRoleEntity>,
   ) {}
 
   public getUserRolesBaseQuery() {
     return this._repository.createQueryBuilder('e').orderBy('e.id', 'DESC');
   }
 
-  public async getRole(name: string): Promise<UserRole | null> {
+  public async getRole(name: string): Promise<UserRoleEntity | null> {
     const role = this.getUserRolesBaseQuery()
       .andWhere('e.name = :name', {
         name,

@@ -28,12 +28,10 @@ import { RoleGuard } from '../common/guards/role.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';
 import { UpdateBarberBaseInfoDto } from '../data/DTO/barber/update-barber-base-info.dto';
-
 import { CalendarEntity } from '../data/entities/calendar.entity';
 import { CalendarService } from '../services/calendar.service';
 import { AddressEntity } from '../data/entities/address.entity';
 import { UpdateProfileDto } from '../data/DTO/profile/update-profile.dto';
-import { query } from 'express';
 import { BarberViewModel } from '../data/models/barber/barber.view-model';
 import { PaginationResult } from '../common/pagination/paginator';
 import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';

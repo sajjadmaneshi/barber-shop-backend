@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BarberEntity } from '../data/entities/barber.entity';
 import { BarberService } from '../services/barber.service';
 import { UserEntity } from '../data/entities/user.entity';
-import { UserRole } from '../data/entities/user-role.entity';
+import { UserRoleEntity } from '../data/entities/user-role.entity';
 import { RoleService } from '../services/role.service';
 import { GeolocationService } from '../services/geolocation.service';
 import { CityEntity } from '../data/entities/city.entity';
@@ -23,7 +23,7 @@ import { BarberServiceEntity } from '../data/entities/barber-service.entity';
   imports: [
     TypeOrmModule.forFeature([
       UserEntity,
-      UserRole,
+      UserRoleEntity,
       CityEntity,
       AddressEntity,
       ProvinceEntity,

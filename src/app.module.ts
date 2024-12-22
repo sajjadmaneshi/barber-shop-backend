@@ -6,7 +6,7 @@ import ormConfig from './config/orm.config';
 
 import ormConfigProd from './config/orm.config.prod';
 import { InitializeService } from './common/services/initial-app.service';
-import { UserRole } from './data/entities/user-role.entity';
+import { UserRoleEntity } from './data/entities/user-role.entity';
 import { DocumentModule } from './modules/document.module';
 import { GeoLocationModule } from './modules/geo-location.module';
 import { BarberModule } from './modules/barber.module';
@@ -32,7 +32,7 @@ import { AccountModule } from './modules/account.module';
       useFactory:
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     } as TypeOrmModuleAsyncOptions),
-    TypeOrmModule.forFeature([UserRole]),
+    TypeOrmModule.forFeature([UserRoleEntity]),
     AccountModule,
     DocumentModule,
     GeoLocationModule,

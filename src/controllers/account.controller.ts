@@ -32,6 +32,8 @@ import { SendOtpDto } from '../data/DTO/user/send-otp.dto';
 import { VerifyOtpDto } from '../data/DTO/user/verify-otp.dto';
 import { AuthService } from '../services/auth.service';
 import { RoleService } from '../services/role.service';
+import { VerifyOtpResponseModel } from "../data/models/auth/verify-otp-response.model";
+import { UserRoleEntity } from "../data/entities/user-role.entity";
 
 @ApiTags(Account)
 @Controller(Account)
@@ -45,25 +47,28 @@ export class AccountController {
     private readonly _authService: AuthService,
   ) {}
 
-  @ApiCreatedResponse()
+
   @ApiBody({ type: SendOtpDto })
+  @ApiCreatedResponse({ description: 'OTP sent successfully.', type: String })
   @Post('sendOtp')
   async sendOtp(@Body() sendOtpInput: SendOtpDto) {
     return await this._authService.registerUser(sendOtpInput.mobileNumber);
   }
 
   @Post('verifyOtp')
+  @ApiOkResponse({ description: 'OTP verified successfully.', type: VerifyOtpResponseModel })
   async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
     const user = await this._authService.validateOtp(verifyOtpDto);
-    return {
-      token: this._authService.getTokenForUser(user),
-      isRegistered: user.isRegistered,
+    return new VerifyOtpResponseModel(
+       this._authService.getTokenForUser(user),
+        user.isRegistered)
     };
-  }
+
 
   @Get()
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({ description: 'List of all users.', type: [UserEntity] })
   async findAll() {
     this.logger.log('hit the find All route');
     const users = await this._userService.getUsers();
@@ -74,6 +79,7 @@ export class AccountController {
   @Get('roles')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({ description: 'List of all roles.', type: [UserRoleEntity] })
   async findAllRoles() {
     const roles = await this._roleService.getRoles();
     this.logger.debug(`found ${roles.length}`);
@@ -92,6 +98,9 @@ export class AccountController {
   }
 
   @Get(':id')
+  @ApiOkResponse({
+    type: UserEntity,
+  })
   async findOne(@Param('id') id: string) {
     return await this._userService.getUser(id);
   }
