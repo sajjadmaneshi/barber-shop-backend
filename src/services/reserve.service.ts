@@ -12,6 +12,9 @@ import { CustomerReserveViewModel } from '../data/models/reserve/customer-reserv
 import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
 import { ReserveStatusEnum } from '../common/enums/reserve-status.enum';
 import { UnitOfWork } from '../common/services/unit-of-work.service';
+import { FilterPaginationService } from "./pagination-filter.service";
+import { QueryFilterDto } from "../common/queryFilter";
+import { PaginationResult } from "../common/pagination/paginator";
 
 @Injectable()
 export class ReserveService {
@@ -27,37 +30,18 @@ export class ReserveService {
     @InjectRepository(CustomerEntity)
     private readonly _customerRepository: Repository<CustomerEntity>,
     private readonly _unitOfWork: UnitOfWork,
+    private readonly _filterService: FilterPaginationService,
   ) {
     _unitOfWork.repository = _repository;
   }
 
-  private getReserveBaseQuery() {
-    return this._repository
-      .createQueryBuilder('reserve')
-      .orderBy('reserve.id', 'DESC');
+  public async getAll(queryFilterDto: QueryFilterDto<ReserveEntity>) {
+    return await this._filterService.applyFiltersAndPagination(this._repository,
+      queryFilterDto,
+      ['customer','user','barber'])
   }
 
-  public async getAll() {
-    return await this.getReserveBaseQuery()
-      .leftJoinAndSelect('reserve.customer', 'customer')
-      .leftJoinAndSelect('customer.user', 'user')
-      .leftJoinAndSelect('reserve.barber', 'barber')
-      .leftJoinAndSelect('barber.user', 'user')
-      .getMany();
-  }
 
-  private _getBarberBaseReserve(userId: string) {
-    return this.getReserveBaseQuery()
-      .leftJoin('barber.user', 'bUser')
-      .where('bUser.id=:userId', { userId })
-      .leftJoinAndSelect('reserve.barberService', 'barberService')
-      .leftJoinAndSelect('barberService.barber', 'barber')
-      .leftJoinAndSelect('barberService.service', 'service')
-      .leftJoinAndSelect('reserve.timeSlot', 'timeSlot')
-      .leftJoinAndSelect('reserve.customer', 'customer')
-      .leftJoinAndSelect('customer.user', 'cUser')
-      .leftJoinAndSelect('cUser.avatar', 'avatar');
-  }
 
   private _mapBarberReserveModel(reserve: ReserveEntity) {
     return {
@@ -72,12 +56,27 @@ export class ReserveService {
 
   public async getBarberReserves(
     userId: string,
-  ): Promise<BarberReserveViewModel[]> {
-    const reserves = (await this._getBarberBaseReserve(
-      userId,
-    ).getMany()) as ReserveEntity[];
-    this.logger.log(reserves);
-    return reserves.map((reserve) => this._mapBarberReserveModel(reserve));
+    queryFilterDto: QueryFilterDto<ReserveEntity>
+  ): Promise<PaginationResult<BarberReserveViewModel>> {
+
+    const result=await this._filterService.applyFiltersAndPagination(
+      this._repository,
+      queryFilterDto,
+      [
+        'barber',
+        'user',
+        'barberService',
+        'service',
+        'timeSlot',
+        'customer',
+        'document'],
+      {barberService:{barber:{user:{id:userId}}}})
+
+    this.logger.log(result);
+    return new PaginationResult<BarberReserveViewModel>({
+      meta:result.meta,
+      results:result.results.map((reserve) => this._mapBarberReserveModel(reserve))
+    })
   }
 
   private _mapCustomerReserveModel(reserve: ReserveEntity) {
@@ -91,36 +90,53 @@ export class ReserveService {
     } as CustomerReserveViewModel;
   }
 
-  private _getCustomerBaseReserve(userId: string) {
-    return this.getReserveBaseQuery()
-      .leftJoin('reserve.customer', 'customer')
-      .leftJoin('customer.user', 'cUser')
-      .where('cUser.id=:userId', { userId })
-      .leftJoinAndSelect('reserve.barberService', 'barberService')
-      .leftJoinAndSelect('barberService.barber', 'barber')
-      .leftJoinAndSelect('barber.addresses', 'address')
-      .leftJoinAndSelect('barber.user', 'bUser')
-      .leftJoinAndSelect('bUser.avatar', 'avatar')
-      .leftJoinAndSelect('barberService.service', 'service')
-      .leftJoinAndSelect('reserve.timeSlot', 'timeSlot')
 
-  }
 
   public async getCustomerReserves(
     userId: string,
-  ): Promise<CustomerReserveViewModel[]> {
-    const reserves = await this._getCustomerBaseReserve(userId).getMany();
-    this.logger.log(reserves);
-    return reserves.map((reserve) => this._mapCustomerReserveModel(reserve));
+    queryFilterDto: QueryFilterDto<ReserveEntity>
+  ): Promise<PaginationResult<CustomerReserveViewModel>> {
+    const result =
+
+      await this._filterService.applyFiltersAndPagination(this._repository,
+        queryFilterDto,[
+          'customer',
+          'user',
+          'barberService',
+          'barber',
+          'address',
+          'service',
+          'document',
+          'timeSlot'
+        ],
+        {customer:{user:{id:userId}}})
+    this.logger.log(result);
+    return new PaginationResult<CustomerReserveViewModel>({
+      meta:result.meta,
+      results:result.results.map((reserve) => this._mapCustomerReserveModel(reserve))
+    })
   }
 
   public async getBarberSpecificReserve(
     userId: string,
     id: string,
   ): Promise<BarberReserveViewModel> {
-    const reserve = await this._getBarberBaseReserve(userId)
-      .where('reserve.id=:id', { id })
-      .getOne();
+    const reserve = await
+      this._repository
+        .findOne({
+          where:{id,
+            barberService:{barber:{user:{id:userId}}}},
+        relations:[
+          'barberService',
+          'barber',
+          'service',
+          'timeSlot',
+          'customer',
+          'user',
+          'document'
+        ]})
+
+
     if (!reserve)
       throw new BadRequestException('reserve with this id not found');
     return this._mapBarberReserveModel(reserve);
@@ -130,9 +146,19 @@ export class ReserveService {
     userId: string,
     id: string,
   ): Promise<CustomerReserveViewModel> {
-    const reserve = await this._getCustomerBaseReserve(userId)
-      .where('reserve.id=:id', { id })
-      .getOne();
+    const reserve = await this._repository.findOne({
+      where:{id,customer:{user:{id:userId}}},
+      relations:[
+        'customer',
+        'user',
+        'barberService',
+        'service',
+        'barber',
+        'address',
+        'document',
+        'timeSlot']}
+      )
+
     if (!reserve)
       throw new BadRequestException('reserve with this id not found');
     return this._mapCustomerReserveModel(reserve);
@@ -142,10 +168,10 @@ export class ReserveService {
     userId: string,
     createReserveDto: CreateReserveDto,
   ): Promise<Date> {
-    const timeSlot = await this._getTimeSlotById(createReserveDto.timeSlot_id);
+    const timeSlot = await this._getTimeSlotById(createReserveDto.timeSlotId);
     const customer = await this._getCustomerById(userId);
     const barberService = await this._getBarberServiceById(
-      createReserveDto.service_id,
+      createReserveDto.serviceId,
     );
     await this._unitOfWork.begin();
     try {
@@ -170,9 +196,8 @@ export class ReserveService {
 
   public async cancelCustomerReserve(reserveId: string, userId: string) {
     const customer = await this._getCustomerById(userId);
-    const existingReserve = await this._repository.findOne({
-      where: { id: reserveId, customer },
-    });
+    const existingReserve = await this._repository.findOneBy({
+      id: reserveId, customer });
     if (!existingReserve)
       throw new BadRequestException('reserve with this id not found');
     await this._unitOfWork.begin();
@@ -190,9 +215,9 @@ export class ReserveService {
   }
 
   private async _getTimeSlotById(timeSlotId: string): Promise<TimeSlotEntity> {
-    const timeSlot = await this._timeSlotRepository.findOne({
-      where: { id: timeSlotId },
-    });
+    const timeSlot = await this._timeSlotRepository.findOneBy(
+       { id: timeSlotId }
+    );
     if (!timeSlot) throw new BadRequestException('time slot not found');
     if (timeSlot.isReserved)
       throw new BadRequestException('this time reserved before');
@@ -210,9 +235,9 @@ export class ReserveService {
   }
 
   private async _getBarberServiceById(barberServiceId: string) {
-    const barberService = await this._barberServiceRepository.findOne({
-      where: { id: barberServiceId },
-    });
+    const barberService = await this._barberServiceRepository.findOneBy(
+       { id: barberServiceId }
+    );
     if (!barberService)
       throw new BadRequestException('barber Service not found');
     return barberService;

@@ -23,7 +23,7 @@ export class BarberEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   @ApiProperty({ type: () => UserEntity })
   user: UserEntity;
 

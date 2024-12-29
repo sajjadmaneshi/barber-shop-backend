@@ -36,6 +36,9 @@ import { BarberViewModel } from '../data/models/barber/barber.view-model';
 import { PaginationResult } from '../common/pagination/paginator';
 import { BarberServiceViewModel } from '../data/models/barber/barber-service.view-model';
 import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
+import { QueryFilterDto } from "../common/queryFilter";
+import { BarberServiceEntity } from "../data/entities/barber-service.entity";
+import { ReserveEntity } from "../data/entities/reserve.entity";
 
 @Controller(Barber)
 @ApiTags(Barber)
@@ -49,44 +52,29 @@ export class BarberController {
   @Get()
   @ApiOkResponse({ type: [PaginationResult<BarberViewModel>] })
   async getAll(
-    @Query('page') page?: number,
-    @Query('city') city?: number,
-    @Query('q') search?: string,
+    @Query() queryFilterDto?: QueryFilterDto<BarberEntity>
   ) {
     return await this._barberService.getAllBarbers(
-      page
-        ? {
-            currentPage: page,
-            limit: 10,
-          }
-        : null,
-      search,
-      city,
+      queryFilterDto
     );
   }
 
-  @Get(':barberId/reserves')
+  @Get('reserves')
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiOkResponse({ type: [PaginationResult<BarberReserveViewModel>] })
   async getAllReserves(
-    @Param('barberId') barberId: string,
-    @Query('page') page?: number,
+    @Query() queryFilterDto?: QueryFilterDto<ReserveEntity>
   ) {
     return await this._barberService.getAllBarberReserves(
-      barberId,
-      page
-        ? {
-            currentPage: page,
-            limit: 10,
-          }
-        : null,
+
+      queryFilterDto
     );
   }
-  @Get(':barberId/services')
+  @Get('services')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER, RoleEnum.CUSTOMER)
   @ApiOkResponse({ type: BarberServiceViewModel })
-  async findBarberServices(@Param('barberId') barberId: string) {
-    return await this._barberService.getBarberServices(barberId);
+  async findBarberServices(@Query() queryFilterDto?: QueryFilterDto<BarberServiceEntity>) {
+    return await this._barberService.getBarberServices(queryFilterDto);
   }
 
   @Get('address')
@@ -99,8 +87,8 @@ export class BarberController {
   @Get('calendars')
   @UseGuards(AuthGuardJwt)
   @ApiOkResponse({ type: [CalendarEntity] })
-  async getBarberCalendars(@CurrentUser() user: UserEntity) {
-    return await this._calendarService.getBarberCalendars(user.id);
+  async getBarberCalendars(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<BarberEntity>) {
+    return await this._calendarService.getBarberCalendars(user.id,queryFilterDto);
   }
 
   @Get('bio')

@@ -6,9 +6,9 @@ import {
   HttpCode,
   Param,
   Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+  Post, Query,
+  UseGuards
+} from "@nestjs/common";
 import { Service } from '../common/controller-names';
 import { ServiceEntity } from '../data/entities/service.entity';
 import {
@@ -27,6 +27,7 @@ import { PaginationResult } from '../common/pagination/paginator';
 import { AddServiceDto } from '../data/DTO/provided-service/add-service.dto';
 import { UpdateServiceDto } from '../data/DTO/provided-service/update-service.dto';
 import { ServiceViewModel } from '../data/models/service.view-model';
+import { QueryFilterDto } from "../common/queryFilter";
 
 @ApiTags(Service)
 @Controller(Service)
@@ -38,8 +39,8 @@ export class ServiceController {
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER, RoleEnum.CUSTOMER)
   @ApiOkResponse({ type: PaginationResult<ServiceEntity> })
-  async findAll() {
-    return await this._barberServiceService.getServices();
+  async findAll(    @Query() queryFilterDto?: QueryFilterDto<ServiceEntity>) {
+    return await this._barberServiceService.getServices(queryFilterDto);
   }
 
   @Get(':id')

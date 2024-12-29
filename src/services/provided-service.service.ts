@@ -4,20 +4,18 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DeleteResult, Repository } from 'typeorm';
+import {  Repository } from 'typeorm';
 import { ServiceEntity } from '../data/entities/service.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
 import { AddServiceDto } from '../data/DTO/provided-service/add-service.dto';
-import { DocumentEntity } from '../data/entities/document.entity';
-import { DocumentService } from './document.service';
 import { UpdateServiceDto } from '../data/DTO/provided-service/update-service.dto';
 import {
-  paginate,
-  PaginateOptions,
   PaginationResult,
 } from '../common/pagination/paginator';
 import { ServiceViewModel } from '../data/models/service.view-model';
+import { QueryFilterDto } from "../common/queryFilter";
+import { FilterPaginationService } from "./pagination-filter.service";
+
 
 @Injectable()
 export class ProvidedServiceService {
@@ -26,26 +24,25 @@ export class ProvidedServiceService {
   constructor(
     @InjectRepository(ServiceEntity)
     private readonly _repository: Repository<ServiceEntity>,
-    private readonly _documentService: DocumentService,
+    private readonly _filterService: FilterPaginationService,
   ) {}
-  private getServicesBaseQuery() {
-    return this._repository
-      .createQueryBuilder('service')
-      .orderBy('service.id', 'DESC');
-  }
+
 
   public async getServices(
-    paginateOptions?: PaginateOptions,
+    queryFilterDto: QueryFilterDto<ServiceEntity>
   ): Promise<PaginationResult<ServiceViewModel>> {
-    const result = await paginate<ServiceEntity>(
-      this.getServicesBaseQuery().leftJoinAndSelect('service.image', 'image'),
-      paginateOptions,
-    );
-    this.logger.log(`returned ${result.total} services`);
 
-    return {
-      total: result.total,
-      data: result.data.map((x) => ({
+    const result=await this._filterService.applyFiltersAndPagination(this._repository,
+      queryFilterDto,
+      ['document'])
+
+
+
+
+
+    return new PaginationResult<ServiceViewModel>({
+      meta: result.meta,
+      results:result.results.map((x) => ({
         id: x.id,
         title: x.title,
         gender: x.gender,
@@ -54,15 +51,16 @@ export class ProvidedServiceService {
         description: x.description,
         iconName: x.iconName,
         imageId: x.image?.id,
-      })),
-    };
+      }))
+    })
+
   }
 
   public async getService(id: string): Promise<ServiceViewModel | undefined> {
-    const service = await this.getServicesBaseQuery()
-      .andWhere('service.id = :id', { id })
-      .leftJoinAndSelect('service.image', 'image')
-      .getOne();
+    const service =await this._repository.findOne(
+      {where:{id},relations:['document']}
+    )
+
     if (!service) throw new NotFoundException('service with this id not found');
     this.logger.debug(`service ${service.id}`);
     const { image, ...serviceData } = service;
@@ -70,20 +68,7 @@ export class ProvidedServiceService {
   }
 
   public async createService(dto: AddServiceDto): Promise<string> {
-    const service = new ServiceEntity();
-    service.title = dto.title;
-    service.price = dto.price;
-    service.feeDiscount = dto.feeDiscount;
-    service.description = dto.description;
-    service.gender = dto.gender;
-    service.iconName = dto.iconName;
-    let document: DocumentEntity | null = null;
-
-    if (dto.imageId) {
-      document = await this._documentService.findOne(dto.imageId);
-      if (!document) throw new BadRequestException('avatar not found');
-    }
-    service.image = document;
+    const service = this._repository.create(dto);
     const result = await this._repository.save(service);
     this.logger.log(`service with id ${result.id} create`);
     return result.id;
@@ -93,33 +78,19 @@ export class ProvidedServiceService {
     id: string,
     dto: UpdateServiceDto,
   ): Promise<string> {
-    const { imageId, ...updateData } = dto;
-    let document: DocumentEntity | null = null;
 
-    if (imageId) {
-      document = await this._documentService.findOne(imageId);
-      if (!document) throw new BadRequestException('avatar not found');
-    }
-    const result = await this._repository.update(id, {
-      ...updateData,
-      image: document,
-    } as ServiceEntity);
+    const result = await this._repository.update(id, dto);
     if (result.affected === 0) {
       throw new NotFoundException(`Service with ID ${id} not found`);
     }
-    this.logger.log(`service with id ${id} updated`);
+    this.logger.log(`Service with ID ${id} updated successfully`);
     return id;
   }
 
-  public async removeService(id: string): Promise<DeleteResult> {
-    const deleteResult = await this._repository
-      .createQueryBuilder('service')
-      .delete()
-      .where('id = :id', { id })
-      .execute();
+  public async removeService(id: string): Promise<void> {
+    const deleteResult = await this._repository.delete(id)
     this.logger.log(deleteResult);
-    if (deleteResult.affected < 1)
+    if (deleteResult.affected ===0)
       throw new BadRequestException('cannot remove item');
-    return;
   }
 }

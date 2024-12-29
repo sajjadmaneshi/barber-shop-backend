@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { Reserve } from '../common/controller-names';
 import {
   ApiBearerAuth,
@@ -16,6 +16,8 @@ import { ReserveService } from '../services/reserve.service';
 import { CreateReserveDto } from '../data/DTO/reserve/create-reserve.dto';
 import { CustomerReserveViewModel } from '../data/models/reserve/customer-reserve.view-model';
 import { BarberReserveViewModel } from '../data/models/reserve/barber-reserve.view-model';
+import { QueryFilterDto } from "../common/queryFilter";
+import { ReserveEntity } from "../data/entities/reserve.entity";
 
 @Controller(Reserve)
 @ApiTags(Reserve)
@@ -48,17 +50,17 @@ export class ReserveController {
   @Roles(RoleEnum.CUSTOMER, RoleEnum.SUPER_ADMIN)
   @Get('customer')
   @ApiOkResponse({ type: CustomerReserveViewModel })
-  async getCustomerReserves(@CurrentUser() user: UserEntity) {
+  async getCustomerReserves(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<ReserveEntity>) {
     const userId = user.id;
-    return await this._reserveService.getCustomerReserves(userId);
+    return await this._reserveService.getCustomerReserves(userId,queryFilterDto);
   }
 
   @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @Get('barber')
   @ApiOkResponse({ type: BarberReserveViewModel })
-  async getBarberReserves(@CurrentUser() user: UserEntity) {
+  async getBarberReserves(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<ReserveEntity>) {
     const userId = user.id;
-    return await this._reserveService.getBarberReserves(userId);
+    return await this._reserveService.getBarberReserves(userId,queryFilterDto);
   }
   @Roles(RoleEnum.BARBER, RoleEnum.SUPER_ADMIN)
   @Get(':id/barber')

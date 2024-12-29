@@ -1,39 +1,24 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Logger,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
-import { UserEntity } from '../data/entities/user.entity';
-import { UserService } from '../services/user.service';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { UpdateUserInfoDto } from '../data/DTO/profile/update-user-info.dto';
-import { Account } from '../common/controller-names';
-import { ProfileResponseViewModel } from '../data/models/profile-response.view-model';
-import { RoleGuard } from '../common/guards/role.guard';
-import { Roles } from '../common/decorators/role.decorator';
-import { RoleEnum } from '../common/enums/role.enum';
-import { ChangeRoleDto } from '../data/DTO/user/change-role.dto';
-import { SendOtpDto } from '../data/DTO/user/send-otp.dto';
-import { VerifyOtpDto } from '../data/DTO/user/verify-otp.dto';
-import { AuthService } from '../services/auth.service';
-import { RoleService } from '../services/role.service';
+import { Body, Controller, Delete, Get, HttpCode, Logger, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { UserEntity } from "../data/entities/user.entity";
+import { UserService } from "../services/user.service";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { AuthGuardJwt } from "../common/guards/auth-guard.jwt";
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { UpdateUserInfoDto } from "../data/DTO/profile/update-user-info.dto";
+import { Account } from "../common/controller-names";
+import { ProfileResponseViewModel } from "../data/models/profile-response.view-model";
+import { RoleGuard } from "../common/guards/role.guard";
+import { Roles } from "../common/decorators/role.decorator";
+import { RoleEnum } from "../common/enums/role.enum";
+import { ChangeRoleDto } from "../data/DTO/user/change-role.dto";
+import { SendOtpDto } from "../data/DTO/user/send-otp.dto";
+import { VerifyOtpDto } from "../data/DTO/user/verify-otp.dto";
+import { AuthService } from "../services/auth.service";
+import { RoleService } from "../services/role.service";
 import { VerifyOtpResponseModel } from "../data/models/auth/verify-otp-response.model";
 import { UserRoleEntity } from "../data/entities/user-role.entity";
+import { QueryFilterDto } from "../common/queryFilter";
+
 
 @ApiTags(Account)
 @Controller(Account)
@@ -69,11 +54,9 @@ export class AccountController {
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiOkResponse({ description: 'List of all users.', type: [UserEntity] })
-  async findAll() {
+  async findAll(@Query() queryFilterDto?: QueryFilterDto<UserEntity>) {
     this.logger.log('hit the find All route');
-    const users = await this._userService.getUsers();
-    this.logger.debug(`found ${users.length}`);
-    return users;
+    return await this._userService.getUsers(queryFilterDto);
   }
 
   @Get('roles')

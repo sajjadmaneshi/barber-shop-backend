@@ -5,14 +5,14 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateReserveDto {
   @IsNotEmpty()
   @ApiProperty({ type: String })
-  timeSlot_id: string;
+  timeSlotId: string;
 
   @IsNotEmpty()
   @ApiProperty({ type: String })
-  service_id: string;
+  serviceId: string;
 
 
   @IsNotEmpty()
   @ApiProperty({ type: String })
-  barber_id: string;
+  barberId: string;
 }

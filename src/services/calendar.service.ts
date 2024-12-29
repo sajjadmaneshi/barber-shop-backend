@@ -1,27 +1,17 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CalendarEntity } from '../data/entities/calendar.entity';
-import { QueryRunner, Repository } from 'typeorm';
-import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
-import { BarberEntity } from '../data/entities/barber.entity';
-import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
-import { CalendarViewModel } from '../data/models/calendar/calendar.view-model';
-import { TimeSlotEntity } from '../data/entities/time-slot.entity';
-import {
-  isAfter,
-  parse,
-  format,
-  addMinutes,
-  isEqual,
-  isBefore,
-  addDays,
-} from 'date-fns';
-import { DateTimeService } from '../common/services/date-time.service';
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CalendarEntity } from "../data/entities/calendar.entity";
+import { LessThanOrEqual, MoreThanOrEqual, QueryRunner, Repository } from "typeorm";
+import { AddCalendarDto } from "../data/DTO/calendar/add-calendar.dto";
+import { BarberEntity } from "../data/entities/barber.entity";
+import { UpdateCalendarDto } from "../data/DTO/calendar/update-calendar.dto";
+import { CalendarViewModel } from "../data/models/calendar/calendar.view-model";
+import { TimeSlotEntity } from "../data/entities/time-slot.entity";
+import { addDays, addMinutes, format, isAfter, isBefore, isEqual, parse } from "date-fns";
+import { DateTimeService } from "../common/services/date-time.service";
+import { QueryFilterDto } from "../common/queryFilter";
+import { PaginationResult } from "../common/pagination/paginator";
+import { FilterPaginationService } from "./pagination-filter.service";
 
 @Injectable()
 export class CalendarService {
@@ -33,55 +23,50 @@ export class CalendarService {
     @InjectRepository(BarberEntity)
     private readonly _barberRepository: Repository<BarberEntity>,
     private readonly _dateTimeService: DateTimeService,
+    private readonly _filterService: FilterPaginationService,
   ) {}
 
-  private getCalendarsBaseQuery() {
-    return this._repository
-      .createQueryBuilder('calendar')
-      .orderBy('calendar.id', 'DESC');
+
+  public async getAll(queryFilterDto: QueryFilterDto<CalendarEntity>) {
+
+    const result= await this._filterService.applyFiltersAndPagination(this._repository,
+      queryFilterDto,
+      ['barber','user'])
+
+
+
+
+    return new PaginationResult<CalendarViewModel>({
+      meta:result.meta,
+      results: result.results.map(calendar => ({
+        id: calendar.id,
+        startDate: calendar.startDate,
+        endDate: calendar.endDate,
+        endTime: calendar.endTime,
+        startTime: calendar.startTime,
+        daysOfWork: calendar.daysOfWork,
+        startRestTime: calendar.startRestTime,
+        endRestTime: calendar.endRestTime,
+        barber: {
+          id: calendar.barber.id,
+          firstName: calendar.barber.user.firstname,
+          lastName: calendar.barber.user.lastname,
+        },
+        period: calendar.period,
+      })),
+    });
+
   }
 
-  public async getAll() {
-    const calendars = await this.getCalendarsBaseQuery()
-      .leftJoinAndSelect('calendar.barber', 'barber')
-      .leftJoinAndSelect('barber.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .getMany();
-    return calendars.map(
-      (calendar) =>
-        ({
-          id: calendar.id,
-          startDate: calendar.startDate,
-          endDate: calendar.endDate,
-          endTime: calendar.endTime,
-          startTime: calendar.startTime,
-          daysOfWork: calendar.daysOfWork,
-          startRestTime: calendar.startRestTime,
-          endRestTime: calendar.endRestTime,
-          barber: {
-            id: calendar.barber.id,
-            firstName: calendar.barber.user.firstname,
-            lastName: calendar.barber.user.lastname,
-          },
-          period: calendar.period,
-        }) as CalendarViewModel,
-    );
-  }
+  public async getBarberCalendars(userId: string,queryFilterDto: QueryFilterDto<CalendarEntity>): Promise<PaginationResult<CalendarEntity>>{
 
-  public async getBarberCalendars(userId: string): Promise<CalendarEntity[]> {
-    const calendars = (await this.getCalendarsBaseQuery()
-      .leftJoin('calendar.barber', 'barber')
-      .leftJoin('barber.user', 'user')
-      .where('user.id=:userId', { userId })
-      .getMany()) as CalendarEntity[];
-    this.logger.log(calendars);
-    return calendars;
+    return await  this._filterService.applyFiltersAndPagination(this._repository,queryFilterDto,['barber','user'],
+      {barber:{user:{id:userId}}});
+
   }
 
   public async getSpecificCalendar(id: string): Promise<CalendarEntity> {
-    const calendar = await this.getCalendarsBaseQuery()
-      .where('calendar.id=:id', { id })
-      .getOne();
+    const calendar = await this._repository.findOneBy({id})
     if (!calendar)
       throw new BadRequestException('calendar with this id not found');
     return calendar;
@@ -113,15 +98,11 @@ export class CalendarService {
   }
 
   private async getBarberByUserId(userId: string): Promise<BarberEntity> {
-    const barber = await this._barberRepository
-      .createQueryBuilder('b')
-      .leftJoin('b.user', 'user')
-      .where('user.id = :userId', { userId })
-      .getOne();
 
-    if (!barber) {
+    const barber = await this._barberRepository
+      .findOne({where:{user:{id:userId}},relations:['user']})
+    if (!barber)
       throw new BadRequestException('user with this id not found');
-    }
 
     return barber;
   }
@@ -224,19 +205,16 @@ export class CalendarService {
   }
 
   private async isCalendarInThisPeriod(startDate: Date, endDate: Date) {
-    return await this.getCalendarsBaseQuery()
-      .where('calendar.startDate >= :startDate', { startDate })
-      .andWhere('calendar.endDate <= :endDate', { endDate })
-      .getOne();
+    return await this._repository
+      .findOneBy({
+        startDate:MoreThanOrEqual(startDate),
+        endDate:LessThanOrEqual(endDate)
+      })
   }
 
   public async removeCalendar(id: string) {
-    const deleteResult = await this.getCalendarsBaseQuery()
-      .delete()
-      .where('id = :id', { id })
-      .execute();
-
-    if (deleteResult.affected < 1)
+    const deleteResult = await this._repository.delete(id);
+    if (deleteResult.affected ===0)
       throw new BadRequestException('cannot remove item');
     return;
   }

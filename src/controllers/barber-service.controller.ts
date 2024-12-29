@@ -5,9 +5,9 @@ import {
   Get,
   Param,
   Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+  Post, Query,
+  UseGuards
+} from "@nestjs/common";
 import { BarberServiceService } from '../services/barber-service.service';
 import { BarberService } from '../common/controller-names';
 import {
@@ -25,6 +25,8 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';
 import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-service.dto';
 import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
+import { QueryFilterDto } from "../common/queryFilter";
+import { BarberServiceEntity } from "../data/entities/barber-service.entity";
 
 @Controller(BarberService)
 @ApiTags(BarberService)
@@ -36,8 +38,8 @@ export class BarberServiceController {
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: BarberServiceViewModel })
-  async findAll(@CurrentUser() user: UserEntity) {
-    return await this._barberServiceService.getServices(user.id);
+  async findAll(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<BarberServiceEntity>) {
+    return await this._barberServiceService.getServices(user.id,queryFilterDto);
   }
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)

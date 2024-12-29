@@ -5,7 +5,7 @@ import { SortOrder } from "./enums/sord-order.enum";
 import {
   And,
   Between,
-  Equal,
+  Equal, FindOptionsOrder,
   FindOptionsWhere,
   ILike,
   In, IsNull,
@@ -68,8 +68,6 @@ export class QueryFilterDto<TData> {
   @ApiPropertyOptional({
     required: false,
     maxLength: 50,
-    description: 'field name to be sort by (deprecated: use sort)',
-    deprecated: true,
   })
   @IsOptional()
   @MaxLength(50)
@@ -80,8 +78,6 @@ export class QueryFilterDto<TData> {
     required: false,
     default: SortOrder.ASC,
     enum: SortOrder,
-    description: 'sorting order (deprecated: use sort)',
-    deprecated: true,
   })
   @IsOptional()
   @Transform(({ value }) => (value ? SortOrder[value?.toLowerCase()] || value : SortOrder.ASC))
@@ -102,15 +98,14 @@ export class QueryFilterDto<TData> {
   }
 
   @ApiHideProperty()
-  get orderBy() {
+  get orderBy():FindOptionsOrder<TData> {
     //if we  have sort by sort order return them else return this.order
-    return  this.sortBy ? { [this.sortBy]: this.sortorder } : null;
+    return  this.sortBy ?  { [this.sortBy]: this.sortorder } as FindOptionsOrder<TData> : null;
   }
 
 
 
-  constructor();
-  constructor(queryFilterDto: Partial<QueryFilterDto<TData>>);
+
   constructor(queryFilterDto?: Partial<QueryFilterDto<TData>>) {
     this.filter = queryFilterDto?.filter;
     this.sortBy = queryFilterDto?.sortBy;

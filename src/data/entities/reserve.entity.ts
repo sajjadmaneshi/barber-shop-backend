@@ -12,7 +12,7 @@ import { CustomerEntity } from './customer.entity';
 import { TimeSlotEntity } from './time-slot.entity';
 
 import { BarberServiceEntity } from './barber-service.entity';
-import { BarberEntity } from './barber.entity';
+
 import { ReserveStatusEnum } from "../../common/enums/reserve-status.enum";
 
 @Entity({ name: 'reserve' })
@@ -30,7 +30,7 @@ export class ReserveEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'timeSlot_id' })
+  @JoinColumn({ name: 'timeSlotId' })
   @ApiProperty({ type: () => TimeSlotEntity })
   timeSlot: TimeSlotEntity;
 
@@ -41,7 +41,7 @@ export class ReserveEntity {
       eager: true,
     },
   )
-  @JoinColumn({ name: 'barber_service_id' })
+  @JoinColumn({ name: 'barberServiceId' })
   barberService: BarberServiceEntity;
 
 
@@ -49,7 +49,7 @@ export class ReserveEntity {
   @ManyToOne(() => CustomerEntity, (customer) => customer.reserves, {
     eager: true,
   })
-  @JoinColumn({ name: 'customer_id' })
+  @JoinColumn({ name: 'customerId' })
   customer: CustomerEntity;
 
   @ApiProperty({ enum: ReserveStatusEnum })

@@ -15,7 +15,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Geolocation } from '../common/controller-names';
@@ -27,6 +26,9 @@ import { RoleEnum } from '../common/enums/role.enum';
 import { AddCityDto } from '../data/DTO/geo-location/add-city.dto';
 import { UpdateProvinceDto } from '../data/DTO/geo-location/update-province.dto';
 import { UpdateCityDto } from '../data/DTO/geo-location/update-city.dto';
+import { QueryFilterDto } from "../common/queryFilter";
+import { ProvinceEntity } from "../data/entities/province.entity";
+import { CityEntity } from "../data/entities/city.entity";
 
 @Controller(Geolocation)
 @ApiTags(Geolocation)
@@ -35,18 +37,14 @@ export class GeoLocationController {
   constructor(private readonly _geoLocationService: GeolocationService) {}
 
   @Get('provinces')
-  public async getAll() {
-    return await this._geoLocationService.getAllProvinces();
+  public async getAll(@Query() queryFilterDto?: QueryFilterDto<ProvinceEntity>) {
+    return await this._geoLocationService.getAllProvinces(queryFilterDto);
   }
 
   @Get('cities')
-  @ApiQuery({
-    name: 'provinceId',
-    type: String,
-    required: false,
-  })
-  public async getAllCityOfProvince(@Query('provinceId') provinceId?: string) {
-    return await this._geoLocationService.getAllCity(provinceId);
+
+  public async getAllCityOfProvince(@Query() queryFilterDto?: QueryFilterDto<CityEntity>) {
+    return await this._geoLocationService.getAllCities(queryFilterDto);
   }
 
   @Post('provinces')

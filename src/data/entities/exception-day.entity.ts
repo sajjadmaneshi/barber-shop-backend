@@ -76,6 +76,6 @@ export class ExceptionDayEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'calendar_id' })
+  @JoinColumn({ name: 'calendarId' })
   calendar: CalendarEntity;
 }

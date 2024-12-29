@@ -15,6 +15,11 @@ import { ServiceEntity } from '../data/entities/service.entity';
 
 import { BarberEntity } from '../data/entities/barber.entity';
 import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
+import { QueryFilterDto } from "../common/queryFilter";
+import { BarberViewModel } from "../data/models/barber/barber.view-model";
+import { PaginationResult } from "../common/pagination/paginator";
+import { FilterPaginationService } from "./pagination-filter.service";
+import { BarberService } from "./barber.service";
 
 @Injectable()
 export class BarberServiceService {
@@ -29,71 +34,47 @@ export class BarberServiceService {
 
     @InjectRepository(BarberEntity)
     private readonly _barberRepository: Repository<BarberEntity>,
+
+    private readonly _filterService: FilterPaginationService
   ) {}
-  private getServicesBaseQuery() {
-    return this._repository
-      .createQueryBuilder('barberService')
-      .orderBy('barberService.id', 'DESC');
+
+
+  public async getServices(
+          userId:string,
+                           queryFilterDto: QueryFilterDto<BarberServiceEntity>):
+    Promise<PaginationResult<BarberServiceViewModel>> {
+
+    const result = await this._filterService.applyFiltersAndPagination(this._repository,queryFilterDto,
+      ['barber','user','service','avatar'],
+      {barber:{user:{id:userId}}})
+
+    return new PaginationResult<BarberServiceViewModel>({
+      meta: result.meta,
+      results:result.results.map(
+        (barberService) =>
+          ({
+            id: barberService.id,
+            barberDescription: barberService.description,
+            service: {
+              id: barberService.service.id,
+              gender: barberService.service.gender,
+              serviceDescription: barberService.service.description,
+              imageId: barberService.service.image?.id,
+              iconName: barberService.service.iconName,
+              title: barberService.service.title,
+            },
+          }))
+    })
+
+
   }
 
-  public async getServices(userId: string): Promise<BarberServiceViewModel[]> {
-    const barberServices = await this.getServicesBaseQuery()
-      .leftJoinAndSelect('barberService.barber', 'barber')
-      .leftJoinAndSelect('barber.user', 'user')
-      .leftJoinAndSelect('barberService.service', 'service')
-      .leftJoinAndSelect('service.image', 'image')
-      .where('barber.user.id = :userId', { userId })
-      .getMany();
-    return barberServices.map(
-      (service) =>
-        ({
-          id: service.id,
-          barberDescription: service.description,
-          service: {
-            id: service.service.id,
-            gender: service.service.gender,
-            serviceDescription: service.service.description,
-            imageId: service.service.image?.id,
-            iconName: service.service.iconName,
-            title: service.service.title,
-          },
-        }) as BarberServiceViewModel,
-    );
-  }
-  public async getBarberServices(
-    barberId: string,
-  ): Promise<BarberServiceViewModel[]> {
-    const barberServices = await this.getServicesBaseQuery()
-      .leftJoinAndSelect('barberService.barber', 'barber')
-      .leftJoinAndSelect('barberService.service', 'service')
-      .leftJoinAndSelect('service.image', 'image')
-      .where('barber.id = :barberId', { barberId })
-      .getMany();
-    return barberServices.map(
-      (service) =>
-        ({
-          id: service.id,
-          barberDescription: service.description,
-          service: {
-            id: service.service.id,
-            gender: service.service.gender,
-            serviceDescription: service.service.description,
-            imageId: service.service.image?.id,
-            iconName: service.service.iconName,
-            title: service.service.title,
-          },
-        }) as BarberServiceViewModel,
-    );
-  }
 
   public async getService(id: string): Promise<BarberServiceViewModel> {
-    const barberService = await this.getServicesBaseQuery()
-      .leftJoinAndSelect('barberService.barber', 'barber')
-      .leftJoin('barber.user', 'user')
-      .leftJoinAndSelect('barberService.service', 'service')
-      .leftJoinAndSelect('service.image', 'image')
-      .where('barberService.id = :id', { id })
-      .getOne();
+
+  const barberService=await  this._repository.findOne({where:{id},relations:['barber','user','service','document']})
+
+
 
     if (!barberService)
       throw new NotFoundException('service with this id not found');
@@ -121,17 +102,15 @@ export class BarberServiceService {
     await queryRunner.startTransaction();
 
     try {
-      const barber = await this._barberRepository
-        .createQueryBuilder('b')
-        .leftJoinAndSelect('b.user', 'user')
-        .where('user.id = :userId', { userId })
-        .getOne();
 
+
+      const barber = await this._barberRepository
+        .findOne({where:{user:{id:userId}},relations:['user']})
       if (!barber) {
         throw new NotFoundException('Barber not found');
       }
-      if (dto.add.length) await this._addServices(dto.add, barber);
-      if (dto.delete.length) await this._removeServices(dto.delete, barber);
+      if (dto.add.length>0) await this._addServices(dto.add, barber);
+      if (dto.delete.length>0) await this._removeServices(dto.delete, barber);
 
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -166,13 +145,15 @@ export class BarberServiceService {
     addIds: string[],
     barber: BarberEntity,
   ): Promise<string[]> {
+
+
+
     const existingBarberServices = await this._repository
-      .createQueryBuilder('bs')
-      .leftJoin('bs.barber', 'barber')
-      .leftJoinAndSelect('bs.service', 'service')
-      .where('barber.id = :barberId', { barberId: barber.id })
-      .andWhere('service.id IN (:...addIds)', { addIds })
-      .getMany();
+      .find({where:{
+        barber:{id:barber.id},
+        service:{id:In(addIds)}},
+      relations:['barber','service']})
+
 
     return addIds.filter(
       (serviceId) =>
@@ -183,11 +164,11 @@ export class BarberServiceService {
   }
   private async _removeServices(deleteIds: string[], barber: BarberEntity) {
     const servicesToDelete = await this._repository
-      .createQueryBuilder('bs')
-      .leftJoin('bs.service', 'service')
-      .where('barber.id = :barberId', { barberId: barber.id })
-      .where('service.id IN (:...deleteIds)', { deleteIds })
-      .getMany();
+      .find({where:{
+          barber:{id:barber.id},
+          service:{id:In(deleteIds)}
+      }
+      ,relations:['service']})
 
     if (!servicesToDelete.length) {
       throw new NotFoundException('Service not found');

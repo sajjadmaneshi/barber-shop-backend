@@ -47,7 +47,7 @@ export class ServiceEntity {
     cascade: true,
   })
   @ApiProperty({ type: () => DocumentEntity })
-  @JoinColumn({ name: 'image_id' })
+  @JoinColumn({ name: 'imageId' })
   image?: DocumentEntity;
 
   @OneToMany(

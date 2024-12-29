@@ -20,7 +20,7 @@ export class AddressEntity {
   shopAddress: string;
 
   @ManyToOne(() => CityEntity, (city) => city.addresses, { eager: true })
-  @JoinColumn({ name: 'city_id' })
+  @JoinColumn({ name: 'cityId' })
   @ApiProperty({ type: () => Number })
   city: CityEntity;
 
@@ -37,7 +37,7 @@ export class AddressEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'barber_id' })
+  @JoinColumn({ name: 'barberId' })
   @ApiProperty({ type: () => BarberEntity })
   barber:BarberEntity;
 }

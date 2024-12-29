@@ -5,9 +5,9 @@ import {
   Get,
   Param,
   Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+  Post, Query,
+  UseGuards
+} from "@nestjs/common";
 import { Calendar } from '../common/controller-names';
 import {
   ApiBearerAuth,
@@ -26,6 +26,8 @@ import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
 import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
+import { QueryFilterDto } from "../common/queryFilter";
+import { BarberServiceEntity } from "../data/entities/barber-service.entity";
 
 @Controller(Calendar)
 @ApiTags(Calendar)
@@ -37,15 +39,16 @@ export class CalendarController {
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiOkResponse({ type: CalendarEntity })
-  async findAll() {
-    return await this._calendarService.getAll();
+  async findAll(@Query() queryFilterDto?: QueryFilterDto<CalendarEntity>) {
+
+    return await this._calendarService.getAll(queryFilterDto);
   }
 
   @Get('barberCalendars')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: CalendarEntity })
-  async findAllBarberCalendars(@CurrentUser() user: UserEntity) {
-    return await this._calendarService.getBarberCalendars(user.id);
+  async findAllBarberCalendars(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<CalendarEntity>) {
+    return await this._calendarService.getBarberCalendars(user.id,queryFilterDto);
   }
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)

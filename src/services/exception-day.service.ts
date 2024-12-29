@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExceptionDayEntity } from '../data/entities/exception-day.entity';
 import { Repository } from 'typeorm';
@@ -7,37 +7,29 @@ import { CalendarEntity } from '../data/entities/calendar.entity';
 import { DateTimeService } from '../common/services/date-time.service';
 import { UpdateExceptionDayDto } from '../data/DTO/exception-day/update-exception-day.dto';
 import { ChangeExceptionDayClosedDto } from '../data/DTO/exception-day/change-exception-day-closed.dto';
+import { QueryFilterDto } from "../common/queryFilter";
+import { FilterPaginationService } from "./pagination-filter.service";
 
 @Injectable()
 export class ExceptionDayService {
-  private readonly logger = new Logger(ExceptionDayService.name);
   constructor(
     @InjectRepository(ExceptionDayEntity)
     private readonly _repository: Repository<ExceptionDayEntity>,
     @InjectRepository(CalendarEntity)
     private readonly _calendarRepository: Repository<CalendarEntity>,
     private readonly _dateTimeService: DateTimeService,
+    private readonly _filterService: FilterPaginationService,
   ) {}
 
-  private getExceptionDaysBaseQuery() {
-    return this._repository
-      .createQueryBuilder('eDay')
-      .orderBy('eDay.id', 'DESC');
-  }
 
-  public async getExceptionDaysOfSpecificCalendar(calendarId: string) {
-    const exceptionDays = await this.getExceptionDaysBaseQuery()
-      .leftJoin('eDay.calendar', 'calendar')
-      .where('calendar.id=:calendarId', { calendarId })
-      .getMany();
-    this.logger.log(exceptionDays);
-    return exceptionDays;
+  public async getExceptionDaysOfSpecificCalendar(calendarId: string,
+                                                  queryFilterDto: QueryFilterDto<ExceptionDayEntity>) {
+    return await this._filterService.applyFiltersAndPagination(this._repository, queryFilterDto,
+      ['calendar'], { calendar: { id: calendarId } })
   }
 
   public async findOne(id: string) {
-    return await this.getExceptionDaysBaseQuery()
-      .where('eDay.id=:id', { id })
-      .getOne();
+   return await this._repository.findOneBy({id})
   }
 
   public async createNewExceptionDay(
@@ -45,16 +37,16 @@ export class ExceptionDayService {
     dto: Partial<AddExceptionDayDto>,
   ) {
     const { date } = dto;
-    const existingExceptionDay = await this.getExceptionDaysBaseQuery()
-      .where('eDay.date=:date', { date })
-      .getOne();
+
+    const existingExceptionDay = await this._repository
+      .findOneBy({date})
+
     if (existingExceptionDay)
       throw new BadRequestException(
         'exception day with this date exist before',
       );
-    const calendar = await this._calendarRepository.findOne({
-      where: { id: calendarId },
-    });
+    const calendar = await this._calendarRepository.findOneBy(
+      { id: calendarId });
     if (!calendar)
       throw new BadRequestException('calendar with this id NotFound');
     this._checkDateValid(dto, calendar.startDate, calendar.endDate);
@@ -65,10 +57,8 @@ export class ExceptionDayService {
   }
 
   public async updateExceptionDay(id: string, dto: UpdateExceptionDayDto) {
-    const existingExceptionDay = await this.getExceptionDaysBaseQuery()
-      .leftJoinAndSelect('eDay.calendar', 'calendar')
-      .where('eDay.id=:id', { id })
-      .getOne();
+    const existingExceptionDay = await this._repository
+      .findOne({where:{id},relations:['calendar']})
     if (!existingExceptionDay)
       throw new BadRequestException('exception day with this id not found');
     const { date } = dto;
@@ -88,9 +78,9 @@ export class ExceptionDayService {
   public async changeIsClosed(
     dto: ChangeExceptionDayClosedDto,
   ): Promise<string> {
-    const calendar = await this._calendarRepository.findOne({
-      where: { id: dto.calendarId },
-    });
+    const calendar = await this._calendarRepository.findOneBy(
+      {id: dto.calendarId }
+   );
     if (!calendar)
       throw new BadRequestException('calendar with this id NotFound');
     if (
@@ -110,12 +100,10 @@ export class ExceptionDayService {
   }
 
   public async removeCalendar(id: string) {
-    const deleteResult = await this.getExceptionDaysBaseQuery()
-      .delete()
-      .where('id = :id', { id })
-      .execute();
+    const deleteResult = await this._repository.delete(id)
 
-    if (deleteResult.affected < 1)
+
+    if (deleteResult.affected ===0)
       throw new BadRequestException('cannot remove item');
     return;
   }

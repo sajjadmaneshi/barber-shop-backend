@@ -32,7 +32,7 @@ export class UserEntity {
     cascade: true,
   })
   @ApiProperty({ type:String})
-  @JoinColumn({ name: 'avatar_id' })
+  @JoinColumn({ name: 'avatarId' })
   avatar: DocumentEntity;
   @ApiProperty({ enum: Gender })
   @Column('enum', { enum: Gender, default: Gender.male, nullable: true })
@@ -56,7 +56,7 @@ export class UserEntity {
     nullable: false,
     eager: true,
   })
-  @JoinColumn({ name: 'role_id' })
+  @JoinColumn({ name: 'roleId' })
   role: UserRoleEntity;
 
 
