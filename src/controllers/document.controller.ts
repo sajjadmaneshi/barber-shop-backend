@@ -2,7 +2,7 @@ import {
   BadRequestException,
   Controller,
   Delete,
-  Get,
+  Get, HttpCode,
   HttpException,
   InternalServerErrorException,
   NotFoundException,
@@ -11,8 +11,8 @@ import {
   Res,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { Document } from '../common/controller-names';
 import {
   ApiBearerAuth,
@@ -70,6 +70,7 @@ export class DocumentController {
   @Delete(':id')
   @ApiCreatedResponse()
   @UseGuards(AuthGuardJwt)
+  @HttpCode(204)
   async delete(@Param('id') id: string): Promise<void> {
     const result = await this.documentService.removeOne(id);
     if (result.affected == 0) throw new BadRequestException('no item removed');

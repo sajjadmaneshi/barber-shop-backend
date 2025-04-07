@@ -31,7 +31,7 @@ export class CalendarService {
 
     const result= await this._filterService.applyFiltersAndPagination(this._repository,
       queryFilterDto,
-      ['barber','user'])
+      ['barber','barber.user'])
 
 
 
@@ -49,8 +49,8 @@ export class CalendarService {
         endRestTime: calendar.endRestTime,
         barber: {
           id: calendar.barber.id,
-          firstName: calendar.barber.user.firstname,
-          lastName: calendar.barber.user.lastname,
+          firstname: calendar.barber.user.firstname,
+          lastname: calendar.barber.user.lastname,
         },
         period: calendar.period,
       })),
@@ -60,7 +60,8 @@ export class CalendarService {
 
   public async getBarberCalendars(userId: string,queryFilterDto: QueryFilterDto<CalendarEntity>): Promise<PaginationResult<CalendarEntity>>{
 
-    return await  this._filterService.applyFiltersAndPagination(this._repository,queryFilterDto,['barber','user'],
+    return await  this._filterService.applyFiltersAndPagination(this._repository,queryFilterDto,
+      ['barber','barber.user'],
       {barber:{user:{id:userId}}});
 
   }
@@ -262,7 +263,7 @@ export class CalendarService {
       const isReserved = withinRestTime  || false;
 
       timeSlots.push({
-        dateTime: date,
+        date: date,
         startTime: format(slotStartTime, 'HH:mm:ss'),
         endTime: format(slotEndTime, 'HH:mm:ss'),
         isReserved,

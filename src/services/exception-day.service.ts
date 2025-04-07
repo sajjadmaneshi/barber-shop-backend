@@ -37,9 +37,12 @@ export class ExceptionDayService {
     dto: Partial<AddExceptionDayDto>,
   ) {
     const { date } = dto;
+    let existingExceptionDay:ExceptionDayEntity;
+    if(date){
+      existingExceptionDay = await this._repository
+        .findOneBy({date})
+    }
 
-    const existingExceptionDay = await this._repository
-      .findOneBy({date})
 
     if (existingExceptionDay)
       throw new BadRequestException(
@@ -95,6 +98,8 @@ export class ExceptionDayService {
       );
     const addExceptionDayDto ={
       isClosed: dto.isClosed,
+      date:dto.date,
+
     } as Partial<AddExceptionDayDto>
     return await this.createNewExceptionDay(dto.calendarId, addExceptionDayDto);
   }

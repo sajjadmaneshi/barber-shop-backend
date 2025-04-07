@@ -63,13 +63,13 @@ export class ReserveService {
       this._repository,
       queryFilterDto,
       [
-        'barber',
-        'user',
         'barberService',
-        'service',
+        'barberService.barber',
+        'barberService.barber.user',
+        'barberService.service',
         'timeSlot',
         'customer',
-        'document'],
+     ],
       {barberService:{barber:{user:{id:userId}}}})
 
     this.logger.log(result);
@@ -101,19 +101,18 @@ export class ReserveService {
       await this._filterService.applyFiltersAndPagination(this._repository,
         queryFilterDto,[
           'customer',
-          'user',
+          'customer.user',
           'barberService',
-          'barber',
-          'address',
-          'service',
-          'document',
+          'barberService.barber',
+          'barberService.service',
           'timeSlot'
         ],
         {customer:{user:{id:userId}}})
     this.logger.log(result);
     return new PaginationResult<CustomerReserveViewModel>({
       meta:result.meta,
-      results:result.results.map((reserve) => this._mapCustomerReserveModel(reserve))
+      results:result.results.map((reserve) =>
+        this._mapCustomerReserveModel(reserve))
     })
   }
 
@@ -128,12 +127,11 @@ export class ReserveService {
             barberService:{barber:{user:{id:userId}}}},
         relations:[
           'barberService',
-          'barber',
-          'service',
+          'barberService.barber',
+          'barberService.service',
           'timeSlot',
           'customer',
-          'user',
-          'document'
+          'customer.user',
         ]})
 
 
@@ -167,7 +165,7 @@ export class ReserveService {
   public async reserveForCustomer(
     userId: string,
     createReserveDto: CreateReserveDto,
-  ): Promise<Date> {
+  ): Promise<string> {
     const timeSlot = await this._getTimeSlotById(createReserveDto.timeSlotId);
     const customer = await this._getCustomerById(userId);
     const barberService = await this._getBarberServiceById(
@@ -182,12 +180,13 @@ export class ReserveService {
         barberService,
         status: ReserveStatusEnum.AWAITING_PAYMENT,
       });
-      await this._repository.save(reserve);
+     const result=await this._repository.save(reserve);
 
-      await this._timeSlotRepository.update(timeSlot.id, { isReserved: true });
+      await this._timeSlotRepository.update(timeSlot.id,
+        { isReserved: true });
 
       await this._unitOfWork.commit();
-      return new Date();
+      return result.id;
     } catch (error) {
       await this._unitOfWork.rollback();
       throw new BadRequestException(error.message);

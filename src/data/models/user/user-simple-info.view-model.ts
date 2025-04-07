@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserSimpleInfoViewModel {
   @ApiProperty({ type: String })
-  firstName?: string;
+  firstname?: string;
   @ApiProperty({ type: String })
-  lastName?: string;
+  lastname?: string;
   @ApiProperty({ type: String })
   avatarId?: string;
   @ApiProperty({ type: String })

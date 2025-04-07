@@ -38,7 +38,7 @@ export class ReserveController {
   }
 
   @Roles(RoleEnum.CUSTOMER, RoleEnum.SUPER_ADMIN)
-  @Patch(':id/cancel-customer-reserve')
+  @Patch(':id/cancel')
   async cancelCustomerReserve(
     @CurrentUser() user: UserEntity,
     @Param('id') id: string,

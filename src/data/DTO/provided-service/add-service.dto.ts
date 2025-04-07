@@ -45,8 +45,4 @@ export class AddServiceDto {
   @ApiProperty({ type: String })
   description: string;
 
-  @IsOptional()
-  @IsString()
-  @ApiProperty({ type: String })
-  imageId: string;
 }

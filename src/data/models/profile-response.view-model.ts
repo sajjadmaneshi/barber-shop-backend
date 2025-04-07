@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '../../common/enums/gender.enum';
+import { Transform } from "class-transformer";
 
 export class ProfileResponseViewModel {
   constructor(partial?: Partial<ProfileResponseViewModel>) {
@@ -7,15 +8,18 @@ export class ProfileResponseViewModel {
   }
 
   @ApiProperty({ type: String })
-  firstname: string;
+  @Transform(({ value }) => (value ? value : undefined))
+  firstname?: string;
 
   @ApiProperty({ type: String })
-  lastname: string;
+  @Transform(({ value }) => (value ? value : undefined))
+  lastname?: string;
 
   @ApiProperty({ enum: Gender })
   gender: Gender;
 
   @ApiProperty({ type: String,format:'uuid' })
+  @Transform(({ value }) => (value ? value : undefined))
   avatarId?: string | null;
   @ApiProperty({ type: String })
   mobileNumber: string;

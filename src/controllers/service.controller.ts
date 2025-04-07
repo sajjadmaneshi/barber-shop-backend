@@ -63,15 +63,17 @@ export class ServiceController {
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiBody({ type: UpdateServiceDto })
   @ApiOkResponse({ type: String })
+  @HttpCode(204)
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateServiceDto,
-  ): Promise<string> {
-    return await this._barberServiceService.updateService(id, dto);
+  ): Promise<void> {
+     await this._barberServiceService.updateService(id, dto);
   }
 
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN)
+  @HttpCode(204)
   async delete(@Param('id') id: string) {
     return await this._barberServiceService.removeService(id);
   }

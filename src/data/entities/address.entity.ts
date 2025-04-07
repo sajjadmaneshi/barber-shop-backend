@@ -8,6 +8,7 @@ import {
 import { CityEntity } from './city.entity';
 import { BarberEntity } from './barber.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from "class-transformer";
 
 @Entity({ name: 'address' })
 export class AddressEntity {
@@ -39,5 +40,6 @@ export class AddressEntity {
   })
   @JoinColumn({ name: 'barberId' })
   @ApiProperty({ type: () => BarberEntity })
+  @Exclude()
   barber:BarberEntity;
 }

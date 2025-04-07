@@ -26,7 +26,6 @@ export class ReserveEntity {
   id: string;
 
   @OneToOne(() => TimeSlotEntity, {
-    eager: true,
     cascade: true,
     onDelete: 'CASCADE',
   })
@@ -37,18 +36,13 @@ export class ReserveEntity {
   @ManyToOne(
     () => BarberServiceEntity,
     (barberService) => barberService.reserves,
-    {
-      eager: true,
-    },
   )
   @JoinColumn({ name: 'barberServiceId' })
   barberService: BarberServiceEntity;
 
 
 
-  @ManyToOne(() => CustomerEntity, (customer) => customer.reserves, {
-    eager: true,
-  })
+  @ManyToOne(() => CustomerEntity, (customer) => customer.reserves)
   @JoinColumn({ name: 'customerId' })
   customer: CustomerEntity;
 

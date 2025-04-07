@@ -41,14 +41,7 @@ export class ServiceEntity {
   @Column({ nullable: true })
   description: string;
 
-  @ManyToOne(() => DocumentEntity, (image) => image.services, {
-    nullable: true,
-    eager: true,
-    cascade: true,
-  })
-  @ApiProperty({ type: () => DocumentEntity })
-  @JoinColumn({ name: 'imageId' })
-  image?: DocumentEntity;
+
 
   @OneToMany(
     () => BarberServiceEntity,

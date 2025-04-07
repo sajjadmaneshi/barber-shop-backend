@@ -33,8 +33,7 @@ export class ProvidedServiceService {
   ): Promise<PaginationResult<ServiceViewModel>> {
 
     const result=await this._filterService.applyFiltersAndPagination(this._repository,
-      queryFilterDto,
-      ['document'])
+      queryFilterDto)
 
 
 
@@ -50,7 +49,6 @@ export class ProvidedServiceService {
         feeDiscount: x.feeDiscount,
         description: x.description,
         iconName: x.iconName,
-        imageId: x.image?.id,
       }))
     })
 
@@ -58,20 +56,20 @@ export class ProvidedServiceService {
 
   public async getService(id: string): Promise<ServiceViewModel | undefined> {
     const service =await this._repository.findOne(
-      {where:{id},relations:['document']}
+      {where:{id}}
     )
 
     if (!service) throw new NotFoundException('service with this id not found');
     this.logger.debug(`service ${service.id}`);
-    const { image, ...serviceData } = service;
-    return { ...serviceData, imageId: image.id } as ServiceViewModel;
+
+    return service;
   }
 
-  public async createService(dto: AddServiceDto): Promise<string> {
+  public async createService(dto: AddServiceDto): Promise<ServiceEntity> {
     const service = this._repository.create(dto);
     const result = await this._repository.save(service);
     this.logger.log(`service with id ${result.id} create`);
-    return result.id;
+    return result;
   }
 
   public async updateService(

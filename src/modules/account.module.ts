@@ -12,10 +12,16 @@ import { CustomerService } from '../services/customer.service';
 import { AuthService } from '../services/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from "../common/guards/jwt.strategy";
+import { BarberModule } from "./barber.module";
+import { BarberEntity } from "../data/entities/barber.entity";
+
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
+
+      TypeOrmModule.forFeature([
+      BarberEntity,
       UserRoleEntity,
       CustomerEntity,
       UserEntity,
@@ -29,6 +35,7 @@ import { JwtStrategy } from "../common/guards/jwt.strategy";
         },
       }),
     }),
+    BarberModule,
   ],
   providers: [
     RoleService,

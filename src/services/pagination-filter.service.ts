@@ -12,12 +12,21 @@ export class FilterPaginationService {
     repository: Repository<T>,
     queryFilterDto: QueryFilterDto<T>,
     relations: string[] = [],
-    extraConditions: FindOptionsWhere<T> = {},
+    extraConditions?: FindOptionsWhere<T>,
   ): Promise<PaginationResult<T>> {
-    const { skip, limit, where, page, orderBy } = queryFilterDto;
 
-    const [items, totalItems] = await repository.findAndCount({
-    where: {...where,...extraConditions},
+    const { skip, limit, where=[], page, orderBy } = queryFilterDto;
+
+
+    const combinedWhere = extraConditions
+      ? { ...where,...extraConditions}  // Merge into a single object
+      : where;
+    console.log(extraConditions)
+const test={...extraConditions }
+    console.log(test)
+
+const [items, totalItems] = await repository.findAndCount({
+    where:combinedWhere,
       relations,
       skip,
       take: limit,

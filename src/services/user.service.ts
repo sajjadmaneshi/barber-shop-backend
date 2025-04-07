@@ -7,17 +7,18 @@ import { UpdateUserDto } from "../data/DTO/user/update-user.dto";
 import { RoleService } from "./role.service";
 import { ChangeRoleDto } from "../data/DTO/user/change-role.dto";
 import { UserViewModel } from "../data/models/user/user.view-model";
-
 import { CustomerEntity } from "../data/entities/customer.entity";
 import { CustomerService } from "./customer.service";
 import { ProfileResponseViewModel } from "../data/models/profile-response.view-model";
-
 import { UpdateUserInfoDto } from "../data/DTO/profile/update-user-info.dto";
 import { DocumentEntity } from "../data/entities/document.entity";
 import { DocumentService } from "./document.service";
 import { FilterPaginationService } from "./pagination-filter.service";
 import { QueryFilterDto } from "../common/queryFilter";
 import { PaginationResult } from "../common/pagination/paginator";
+import { BarberService } from "./barber.service";
+import { RegisterBarberDto } from "../data/DTO/profile/register-barber.dto";
+import { BarberEntity } from "../data/entities/barber.entity";
 
 @Injectable()
 export class UserService {
@@ -26,12 +27,14 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly _userRepository: Repository<UserEntity>,
+    @InjectRepository(BarberEntity)
+    private readonly _barberRepository: Repository<BarberEntity>,
     private readonly _roleService: RoleService,
+    private readonly _barberService: BarberService,
     private readonly _customerService: CustomerService,
     private readonly _documentService: DocumentService,
     private readonly _filterService: FilterPaginationService
-  ) {
-  }
+  ) {}
 
 
   public async getUsers(queryFilterDto: QueryFilterDto<UserEntity>): Promise<PaginationResult<UserViewModel>> {
@@ -42,17 +45,17 @@ export class UserService {
       meta: result.meta,
       results: result.results.map(
         (user) =>
-          ({
+         new UserViewModel({
             id: user.id,
-            firstName: user.firstname,
-            lastName: user?.lastname,
+            firstname: user.firstname,
+            lastname: user?.lastname,
             gender: user?.gender,
             role: user.role.name,
             mobileNumber: user.mobileNumber,
             avatarId: user?.avatar?.id,
             isRegistered: user.isRegistered,
             lastLogin: user.lastLogin
-          }) as UserViewModel
+          })
       )
     });
   }
@@ -93,15 +96,44 @@ export class UserService {
   }
 
   async changeRole(changeRoleDto: ChangeRoleDto): Promise<boolean> {
-    const id = changeRoleDto.userId;
-    const result = await this._userRepository
-      .update(id, { role: await this._roleService.getRole(changeRoleDto.role) });
-    return result.affected > 0;
+    const queryRunner = this._userRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const id = changeRoleDto.userId;
+      const user=await this.getUser(id);
+      if(user){
+        const userRoleName=user.role.name
+        if(userRoleName!=='BARBER'&&changeRoleDto.role==='BARBER'){
+          const barber = new BarberEntity();
+          barber.user = user;
+          await this._barberRepository.save(barber)
+        }else if(userRoleName==='BARBER'&&changeRoleDto.role!=='BARBER'){
+          const barber=await this._barberService.getBarberByUserId(id);
+          if(barber){
+            await this._barberService.deleteBarber(barber.id);
+          }
+        }
+      }
+      const result = await this._userRepository
+        .update(id, { role: await this._roleService.getRole(changeRoleDto.role) });
+     await queryRunner.commitTransaction();
+      return result.affected > 0;
+    }catch (e){
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(e.message);
+    }finally {
+      await queryRunner.release();
+    }
+
+
   }
 
   async updateUser(id: string, input: UpdateUserDto): Promise<UpdateResult> {
     return await this._userRepository
-      .update(id, { otp: input.otp });
+      .update(id, { otp: input.otp,
+        lastLogin:input.lastLogin });
 
   }
 
@@ -127,16 +159,18 @@ export class UserService {
 
   public async completeInfo(
     userId: string,
-    completeInfoDto: UpdateUserInfoDto
+    completeInfoDto: Partial< UpdateUserInfoDto>
   ) {
     const existingUser = await this.getUser(userId);
     existingUser.gender = completeInfoDto.gender;
     existingUser.firstname = completeInfoDto.firstname;
     existingUser.lastname = completeInfoDto.lastname;
     let document: DocumentEntity | null = null;
-    if (completeInfoDto.avatarId)
+    if (completeInfoDto.avatarId){
       document = await this._documentService.findOne(completeInfoDto.avatarId);
-    existingUser.avatar = document;
+      existingUser.avatar = document;
+    }
+
     existingUser.isRegistered = true;
     return this._userRepository.save(existingUser);
   }
@@ -149,7 +183,7 @@ export class UserService {
     const user = await this._userRepository
       .findOne({
         where: { mobileNumber },
-        relations: ["role"]
+        relations: ["role","avatar"]
       });
 
     this.logger.debug(user);

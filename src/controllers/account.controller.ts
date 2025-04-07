@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, Logger, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards
+} from "@nestjs/common";
 import { UserEntity } from "../data/entities/user.entity";
 import { UserService } from "../services/user.service";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -88,21 +101,22 @@ export class AccountController {
     return await this._userService.getUser(id);
   }
 
-  @Put('completeInfo')
+  @Patch('completeInfo')
   @UseGuards(AuthGuardJwt)
   @ApiBody({ type: UpdateUserInfoDto })
-  @HttpCode(201)
+  @HttpCode(204)
   async completeInfo(
     @CurrentUser() user: UserEntity,
-    @Body() dto: UpdateUserInfoDto,
+    @Body() dto: Partial<UpdateUserInfoDto>,
   ) {
     const userId = user.id;
-    return await this._userService.completeInfo(userId, dto);
+    await this._userService.completeInfo(userId, dto);
   }
 
   @Put('changeRole')
   @UseGuards(AuthGuardJwt, RoleGuard)
   @Roles(RoleEnum.SUPER_ADMIN)
+  @HttpCode(204)
   @ApiBody({ type: ChangeRoleDto })
   async changeRole(@Body() dto: ChangeRoleDto) {
     await this._userService.changeRole(dto);

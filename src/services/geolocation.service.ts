@@ -6,16 +6,14 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ProvinceEntity } from "../data/entities/province.entity";
-import { DeleteResult, FindOptionsOrder, Repository, UpdateResult } from "typeorm";
+import {  Repository, } from "typeorm";
 import { CityEntity } from "../data/entities/city.entity";
 import { AddProvinceDto } from "../data/DTO/geo-location/add-province.dto";
 import { UpdateProvinceDto } from "../data/DTO/geo-location/update-province.dto";
 import { AddCityDto } from "../data/DTO/geo-location/add-city.dto";
 import { UpdateCityDto } from "../data/DTO/geo-location/update-city.dto";
 import { QueryFilterDto } from "../common/queryFilter";
-import { ExceptionDayEntity } from "../data/entities/exception-day.entity";
 import { PaginationResult } from "../common/pagination/paginator";
-import { SortOrder } from "../common/enums/sord-order.enum";
 import { FilterPaginationService } from "./pagination-filter.service";
 
 @Injectable()

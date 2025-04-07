@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, HttpCode,
   Param,
   Patch,
   Post, Query,
@@ -27,6 +27,7 @@ import { AddBarberServiceDto } from '../data/DTO/barber-service/add-barber-servi
 import { UpdateBarberServiceDescriptionDto } from '../data/DTO/barber-service/update-barber-service-description.dto';
 import { QueryFilterDto } from "../common/queryFilter";
 import { BarberServiceEntity } from "../data/entities/barber-service.entity";
+import { PaginationResult } from "../common/pagination/paginator";
 
 @Controller(BarberService)
 @ApiTags(BarberService)
@@ -37,10 +38,11 @@ export class BarberServiceController {
 
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
-  @ApiOkResponse({ type: BarberServiceViewModel })
-  async findAll(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<BarberServiceEntity>) {
-    return await this._barberServiceService.getServices(user.id,queryFilterDto);
+  @ApiOkResponse({ type: PaginationResult<BarberServiceViewModel> })
+  async findAll(@Query() queryFilterDto?: QueryFilterDto<BarberServiceEntity>) {
+    return await this._barberServiceService.getServices(queryFilterDto);
   }
+
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: BarberServiceViewModel })
@@ -58,9 +60,11 @@ export class BarberServiceController {
   ) {
     return await this._barberServiceService.addService(dto, user.id);
   }
+
   @Patch(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: String })
+  @HttpCode(204)
   @ApiBody({ type: UpdateBarberServiceDescriptionDto })
   async updateService(
     @Param('id') id: string,
@@ -68,9 +72,13 @@ export class BarberServiceController {
   ) {
     return await this._barberServiceService.updateService(id, dto);
   }
+
+
+
   @Delete(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
+  @HttpCode(204)
   async removeService(@Param('id') id: string) {
-    return await this._barberServiceService.removeService(id);
+     await this._barberServiceService.removeService(id);
   }
 }

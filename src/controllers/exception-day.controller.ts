@@ -37,7 +37,8 @@ export class ExceptionDayController {
   @Get('calendar/:id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: [ExceptionDayEntity] })
-  async getSpecificCalendarExceptionDays(@Param('id') id: string,@Query() queryFilterDto?: QueryFilterDto<ExceptionDayEntity>) {
+  async getSpecificCalendarExceptionDays(@Param('id') id: string,
+                                         @Query() queryFilterDto?: QueryFilterDto<ExceptionDayEntity>) {
     return await this._exceptionDayService.getExceptionDaysOfSpecificCalendar(
       id,
       queryFilterDto
@@ -67,6 +68,7 @@ export class ExceptionDayController {
   async update(@Param('id') id: string, @Body() dto: UpdateExceptionDayDto) {
     return await this._exceptionDayService.updateExceptionDay(id, dto);
   }
+
   @Put()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: String })

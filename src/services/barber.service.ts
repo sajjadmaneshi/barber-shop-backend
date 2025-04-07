@@ -53,23 +53,24 @@ export class BarberService {
 
 
   public async getAllBarbers(
-    queryFilterDto: QueryFilterDto<BarberEntity>
+    queryFilterDto: QueryFilterDto<BarberViewModel>
   ): Promise<PaginationResult<BarberViewModel>> {
 
-    const result=await this._filterService.applyFiltersAndPagination(this._repository,queryFilterDto,['user','city','document','province'])
-
+    const result=await this._filterService.applyFiltersAndPagination(this._repository,
+      queryFilterDto,
+      ['user','user.avatar'])
 
     const barbersResolved= await
       Promise.all(result.results.map(async (barber) => ({
+
         id: barber.id,
         avatarId: barber.user?.avatar?.id,
         mobileNumber: barber.user.mobileNumber,
-        firstName: barber.user?.firstname,
-        lastName: barber.user?.lastname,
+        firstname: barber.user?.firstname,
+        lastname: barber.user?.lastname,
         bio: barber.bio,
         barberShopName: barber.shopName,
-        gender: barber.user?.gender,
-        address: await this.getBarberAddress(barber.user?.id)
+        gender: barber.user?.gender
       }) as BarberViewModel)
     );
 
@@ -81,11 +82,22 @@ export class BarberService {
   }
 
   public async getAllBarberReserves(
+    userId: string,
     queryFilterDto: QueryFilterDto<ReserveEntity>
   ): Promise<PaginationResult<BarberReserveViewModel>> {
+
+
     const result =
       await this._filterService.applyFiltersAndPagination(this._reserveRepository,queryFilterDto,
-        ['barber','barberService','service','timeSlot','customer','user','document']);
+        [
+          'barberService',
+          'barberService.barber',
+          'barberService.service',
+          'barberService.barber.user',
+          'timeSlot',
+          'customer',
+          'customer.user'
+        ],{barberService:{barber:{user:{id:userId}}}});
     return new PaginationResult<BarberReserveViewModel>({
       meta:result.meta,
       results:result.results.map((reserve) => this._mapBarberReserveModel(reserve))
@@ -93,6 +105,8 @@ export class BarberService {
 
 
   }
+
+
 
   async completeBarberInfo(
     user: UserEntity,
@@ -148,9 +162,10 @@ export class BarberService {
   }
 
   async updateBarberProfile(barberId: string, dto: UpdateProfileDto) {
-    const existingBarber = await this._repository.findOneBy(
-       { id: barberId }
-    );
+    const existingBarber = await this._repository.findOne(
+       {where:{ id: barberId },      relations:['user']},
+
+  );
     if (!existingBarber)
       throw new BadRequestException("barber with this id not found");
     const result = await this._userRepository.update(
@@ -172,8 +187,8 @@ export class BarberService {
     await queryRunner.startTransaction();
     try {
       const existingBarber = barberId
-        ? await this._repository.findOneBy( { id: barberId  })
-        : await this._repository.findOneBy({ user });
+        ? await this._repository.findOne( {where:{ id: barberId} ,relations:['user']  })
+        : await this._repository.findOne({where:{ user },relations:['user']});
       if (!existingBarber) throw new NotFoundException("barber not found");
       const barberUser = existingBarber.user;
       if (dto.avatarId) {
@@ -213,7 +228,7 @@ export class BarberService {
 
       await this._repository.update(existingBarber.id, {
         bio: dto.bio ?? existingBarber.bio,
-        shopName: dto.barberShopName ?? existingBarber.shopName
+        shopName: dto.shopName ?? existingBarber.shopName
       });
 
       await queryRunner.commitTransaction();
@@ -246,31 +261,24 @@ export class BarberService {
   }
 
   public async getBarber(id: string) {
-
-    const barber=await this._repository.findOne({where:{id},relations:['user','address']})
-
+    const barber=await this._repository.findOne({where:{id},relations:['user']})
     if (!barber) throw new BadRequestException("barber with this id not Found");
+    return barber;
+  }
+
+  async getBarberByUserId(userId:string){
+  const barber= await this._repository.findOne({where:{user:{id:userId}},relations:['user']});
+    if (!barber) throw new BadRequestException("barber with this userId not Found");
     return barber;
   }
 
 
 
-  public async getBarberBio(userId: string) {
-
-
-    const barberBio = await this._repository.findOne({where:{user:{id: userId}},
-      relations: ["user"],select:['bio']});
-
-    if (!barberBio)
-      throw new NotFoundException("barber with this id not Found");
-    return barberBio;
-  }
-
   public async getBarberAddress(userId: string): Promise<AddressEntity> {
 
     const barberAddress=await this._addressRepository.findOne(
       {where:{barber:{user:{id: userId}}},
-    relations: ['barber','user','city','province']});
+    relations: ['city'],});
 
     if (!barberAddress) {
       throw new BadRequestException("barber has not any address");
@@ -284,7 +292,7 @@ export class BarberService {
 
    const result =
      await this._filterService.applyFiltersAndPagination(this._barberServiceRepository,
-       queryFilterDto,['barber','service','document'])
+       queryFilterDto)
 
 
     return new PaginationResult<BarberServiceViewModel>({
@@ -298,7 +306,6 @@ export class BarberService {
               id: service.service.id,
               gender: service.service.gender,
               serviceDescription: service.service.description,
-              imageId: service.service.image?.id,
               iconName: service.service.iconName,
               title: service.service.title
             }
@@ -342,7 +349,6 @@ export class BarberService {
 
   public async deleteBarber(id: string): Promise<DeleteResult> {
     const deleteResult = await this._repository.delete(id);
-
     if (deleteResult.affected === 0) {
       throw new BadRequestException("cannot remove item");
     }

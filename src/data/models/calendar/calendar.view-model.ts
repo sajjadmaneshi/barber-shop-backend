@@ -26,5 +26,5 @@ export class CalendarViewModel {
   endRestTime: string;
 
   @ApiProperty()
-  barber:Pick<BarberViewModel,"id"|"firstName"|"lastName">;
+  barber:Pick<BarberViewModel,"id"|"firstname"|"lastname">;
 }
