@@ -19,13 +19,13 @@ export class BarberServiceEntity {
   @ManyToOne(() => BarberEntity, (barber) => barber.barberServices, {
     eager: true,
   })
-  @JoinColumn({ name: 'barber_id' })
+  @JoinColumn({ name: 'barberId' })
   barber: BarberEntity;
 
   @ManyToOne(() => ServiceEntity, (service) => service.barberServices, {
     eager: true,
   })
-  @JoinColumn({ name: 'service_id' })
+  @JoinColumn({ name: 'serviceId' })
   service: ServiceEntity;
 
   @OneToMany(() => ReserveEntity, (reserve) => reserve.barberService)

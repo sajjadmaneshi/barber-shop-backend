@@ -5,16 +5,16 @@ import {
   Get,
   Param,
   Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+  Post, Query,
+  UseGuards
+} from "@nestjs/common";
 import { Calendar } from '../common/controller-names';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+  ApiOkResponse, ApiOperation,
+  ApiTags
+} from "@nestjs/swagger";
 import { CalendarService } from '../services/calendar.service';
 import { Roles } from '../common/decorators/role.decorator';
 import { RoleEnum } from '../common/enums/role.enum';
@@ -22,10 +22,12 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserEntity } from '../data/entities/user.entity';
 import { CalendarEntity } from '../data/entities/calendar.entity';
 
-import { AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
+import {AddCalendarDto } from '../data/DTO/calendar/add-calendar.dto';
 import { AuthGuardJwt } from '../common/guards/auth-guard.jwt';
 import { RoleGuard } from '../common/guards/role.guard';
 import { UpdateCalendarDto } from '../data/DTO/calendar/update-calendar.dto';
+import { QueryFilterDto } from "../common/queryFilter";
+
 
 @Controller(Calendar)
 @ApiTags(Calendar)
@@ -37,16 +39,19 @@ export class CalendarController {
   @Get()
   @Roles(RoleEnum.SUPER_ADMIN)
   @ApiOkResponse({ type: CalendarEntity })
-  async findAll() {
-    return await this._calendarService.getAll();
+  async findAll(@Query() queryFilterDto?: QueryFilterDto<CalendarEntity>) {
+
+    return await this._calendarService.getAll(queryFilterDto);
   }
 
   @Get('barberCalendars')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: CalendarEntity })
-  async findAllBarberCalendars(@CurrentUser() user: UserEntity) {
-    return await this._calendarService.getBarberCalendars(user.id);
+  @ApiOperation({deprecated: true})
+  async findAllBarberCalendars(@CurrentUser() user: UserEntity,@Query() queryFilterDto?: QueryFilterDto<CalendarEntity>) {
+    return await this._calendarService.getBarberCalendars(user.id,queryFilterDto);
   }
+
   @Get(':id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: CalendarEntity })

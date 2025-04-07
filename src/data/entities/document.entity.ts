@@ -21,6 +21,4 @@ export class DocumentEntity {
 
   @OneToMany(() => UserEntity, (user) => user.avatar)
   users: UserEntity[];
-  @OneToMany(() => ServiceEntity, (service) => service.image)
-  services: ServiceEntity[];
 }

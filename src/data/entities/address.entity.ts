@@ -8,6 +8,7 @@ import {
 import { CityEntity } from './city.entity';
 import { BarberEntity } from './barber.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from "class-transformer";
 
 @Entity({ name: 'address' })
 export class AddressEntity {
@@ -20,7 +21,7 @@ export class AddressEntity {
   shopAddress: string;
 
   @ManyToOne(() => CityEntity, (city) => city.addresses, { eager: true })
-  @JoinColumn({ name: 'city_id' })
+  @JoinColumn({ name: 'cityId' })
   @ApiProperty({ type: () => Number })
   city: CityEntity;
 
@@ -37,7 +38,8 @@ export class AddressEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'barber_id' })
+  @JoinColumn({ name: 'barberId' })
   @ApiProperty({ type: () => BarberEntity })
+  @Exclude()
   barber:BarberEntity;
 }

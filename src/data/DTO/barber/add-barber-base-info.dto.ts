@@ -13,7 +13,7 @@ export class AddBarberBaseInfoDto {
   @IsOptional()
   @IsString()
   @ApiProperty({ type: String })
-  barberShopName: string;
+  shopName: string;
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })

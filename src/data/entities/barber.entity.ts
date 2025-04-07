@@ -18,12 +18,9 @@ export class BarberEntity {
   @ApiProperty({ type: String })
   id: string;
 
-  @OneToOne(() => UserEntity, {
-    eager: true,
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'user_id' })
+  @OneToOne(() => UserEntity,
+      user=>user.barber,{ onDelete: 'CASCADE' })
+  @JoinColumn({name: 'userId'})
   @ApiProperty({ type: () => UserEntity })
   user: UserEntity;
 
@@ -43,4 +40,5 @@ export class BarberEntity {
 
   @OneToMany(() => BarberServiceEntity, (barberService) => barberService.barber)
   barberServices: BarberServiceEntity[];
+
 }

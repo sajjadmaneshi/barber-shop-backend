@@ -2,14 +2,16 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+  ManyToOne, OneToOne,
+  PrimaryGeneratedColumn
+} from "typeorm";
 import { UserRoleEntity } from './user-role.entity';
 
 import { DocumentEntity } from './document.entity';
 import { Gender } from '../../common/enums/gender.enum';
 import { ApiProperty } from "@nestjs/swagger";
+import { BarberEntity } from "./barber.entity";
+import {  Transform } from "class-transformer";
 
 @Entity('user')
 export class UserEntity {
@@ -21,18 +23,20 @@ export class UserEntity {
   mobileNumber: string;
   @ApiProperty({ type:String})
   @Column({ nullable: true })
+  @Transform(({ value }) => (value ? value : undefined))
   firstname?: string;
   @ApiProperty({ type:String})
   @Column({ nullable: true })
+  @Transform(({ value }) => (value ? value : undefined))
   lastname?: string;
 
   @ManyToOne(() => DocumentEntity, (avatar) => avatar.users, {
     nullable: true,
-    eager: true,
     cascade: true,
   })
+  @Transform(({ value }) => (value ? value : undefined))
   @ApiProperty({ type:String})
-  @JoinColumn({ name: 'avatar_id' })
+  @JoinColumn({ name: 'avatarId' })
   avatar: DocumentEntity;
   @ApiProperty({ enum: Gender })
   @Column('enum', { enum: Gender, default: Gender.male, nullable: true })
@@ -54,10 +58,13 @@ export class UserEntity {
 
   @ManyToOne(() => UserRoleEntity, (userRole) => userRole.users, {
     nullable: false,
-    eager: true,
   })
-  @JoinColumn({ name: 'role_id' })
+  @JoinColumn({ name: 'roleId' })
   role: UserRoleEntity;
 
+  @OneToOne(() => BarberEntity, barber=>barber.user,
+    {onDelete: 'CASCADE' })
+  @ApiProperty({ type: () => UserEntity })
 
+  barber: BarberEntity;
 }

@@ -15,6 +15,4 @@ export class ServiceViewModel {
   feeDiscount: number;
   @ApiProperty({ type: String })
   description: string;
-  @ApiProperty({ type: String })
-  imageId: string;
 }

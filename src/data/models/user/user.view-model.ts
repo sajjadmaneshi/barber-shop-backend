@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '../../../common/enums/gender.enum';
+import { Expose, Transform } from "class-transformer";
 
 export class UserViewModel {
   @ApiProperty()
@@ -7,12 +8,18 @@ export class UserViewModel {
   @ApiProperty()
   mobileNumber: string;
   @ApiProperty()
-  firstName?: string;
+  @Transform(({ value }) => (value ? value : undefined))
+  firstname?: string;
   @ApiProperty()
-  lastName?: string;
+  @Expose()
+  @Transform(({ value }) => (value ? value : undefined))
+  lastname?: string;
+
   @ApiProperty()
   gender?: Gender;
   @ApiProperty()
+  @Expose()
+  @Transform(({ value }) => (value ? value : undefined))
   avatarId?: string;
   @ApiProperty()
   isRegistered: boolean;
@@ -20,4 +27,8 @@ export class UserViewModel {
   role: string;
   @ApiProperty()
   lastLogin: Date;
+
+  constructor(partial?: Partial<UserViewModel>) {
+    Object.assign(this as UserViewModel, partial)
+  }
 }

@@ -6,9 +6,9 @@ import {
   Param,
   Patch,
   Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+  Put, Query,
+  UseGuards
+} from "@nestjs/common";
 import { ExceptionDayService } from '../services/exception-day.service';
 import { ExceptionDay } from '../common/controller-names';
 import {
@@ -25,6 +25,7 @@ import { ExceptionDayEntity } from '../data/entities/exception-day.entity';
 import { AddExceptionDayDto } from '../data/DTO/exception-day/add-exception-day.dto';
 import { UpdateExceptionDayDto } from '../data/DTO/exception-day/update-exception-day.dto';
 import { ChangeExceptionDayClosedDto } from '../data/DTO/exception-day/change-exception-day-closed.dto';
+import { QueryFilterDto } from "../common/queryFilter";
 
 @Controller(ExceptionDay)
 @ApiTags(ExceptionDay)
@@ -36,9 +37,11 @@ export class ExceptionDayController {
   @Get('calendar/:id')
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: [ExceptionDayEntity] })
-  async getSpecificCalendarExceptionDays(@Param('id') id: string) {
+  async getSpecificCalendarExceptionDays(@Param('id') id: string,
+                                         @Query() queryFilterDto?: QueryFilterDto<ExceptionDayEntity>) {
     return await this._exceptionDayService.getExceptionDaysOfSpecificCalendar(
       id,
+      queryFilterDto
     );
   }
 
@@ -65,6 +68,7 @@ export class ExceptionDayController {
   async update(@Param('id') id: string, @Body() dto: UpdateExceptionDayDto) {
     return await this._exceptionDayService.updateExceptionDay(id, dto);
   }
+
   @Put()
   @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.BARBER)
   @ApiOkResponse({ type: String })

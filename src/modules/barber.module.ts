@@ -45,5 +45,6 @@ import { BarberServiceEntity } from '../data/entities/barber-service.entity';
     CalendarService,
     BarberService,
   ],
+  exports:[BarberService]
 })
 export class BarberModule {}

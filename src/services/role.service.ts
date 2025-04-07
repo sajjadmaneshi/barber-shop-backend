@@ -11,30 +11,15 @@ export class RoleService {
     private readonly _repository: Repository<UserRoleEntity>,
   ) {}
 
-  public getUserRolesBaseQuery() {
-    return this._repository.createQueryBuilder('e').orderBy('e.id', 'DESC');
-  }
 
   public async getRole(name: string): Promise<UserRoleEntity | null> {
-    const role = this.getUserRolesBaseQuery()
-      .andWhere('e.name = :name', {
-        name,
-      })
-      .getOne();
-
+    const role = this._repository.findOneBy({name})
     if (!role) throw new BadRequestException(`role ${name} not found`);
     return role;
   }
 
   public async getRoles() {
-    return await this.getUserRolesBaseQuery().getMany();
+    return await this._repository.find();
   }
 
-  checkIfExist(name: string): void {
-    const role = this.getRole(name.trim().trimEnd().trimStart().toUpperCase());
-    if (role) {
-      console.debug(`role ${name} createdBefore`);
-      throw new BadRequestException(`role ${name} createdBefore`);
-    }
-  }
 }

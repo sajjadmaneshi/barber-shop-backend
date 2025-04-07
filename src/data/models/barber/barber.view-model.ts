@@ -8,15 +8,13 @@ export class BarberViewModel {
   @ApiProperty()
   mobileNumber: string;
   @ApiProperty()
-  firstName: string;
+  firstname: string;
   @ApiProperty()
-  lastName: string;
+  lastname: string;
   @ApiProperty()
   barberShopName: string;
   @ApiProperty()
   bio?: string;
-  @ApiProperty()
-  address: AddressEntity;
   @ApiProperty()
   gender: Gender;
 }

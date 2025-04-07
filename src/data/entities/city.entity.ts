@@ -21,7 +21,7 @@ export class CityEntity {
     eager: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'province_id' })
+  @JoinColumn({ name: 'provinceId' })
   province: ProvinceEntity;
 
   @OneToMany(() => AddressEntity, (address) => address.city)

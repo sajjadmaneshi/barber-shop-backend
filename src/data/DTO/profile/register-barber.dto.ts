@@ -16,11 +16,11 @@ export class RegisterBarberDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })
-  firstName: string;
+  firstname: string;
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String })
-  lastName: string;
+  lastname: string;
   @IsNotEmpty()
   @IsEnum(Gender)
   @ApiProperty({ enum: Gender })
